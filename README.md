@@ -26,6 +26,6 @@ Voilá! A szerver mostantól a 1104 vagy a PORT környezeti változóban megadot
 
 ## Készítők
 
-- Bandi1234 - Frontend
-- hentesoposszum - Backend
-- Kris030 - Backend (kisebb segítségek)
+- [Bandi1234](https://github.com/Bandi1234 "Bandi1234 GitHub Profilja") - Frontend
+- [hentesoposszum](https://github.com/hentesoposszum/ "hentesoposszum GitHub Profilja") - Backend
+- [Kris030](https://github.com/Kris030 "Kris030 GitHub Profilja") - Backend (kisebb segítségek)
