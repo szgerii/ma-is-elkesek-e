@@ -1,0 +1,43 @@
+<!Doctype html>
+<html>
+    <head>    
+        <title>elkések-e-ma-is?</title>
+
+        <link rel="stylesheet" type="text/css" href="assets/styles.css" />
+        <link rel="icon" type="image/png" href="assets/images/icon.png" />
+
+        <meta charset="UTF-8" />
+    </head>
+    <body>
+        <center>
+            <div id="top">
+            
+                <p class="title-text" id="mainTitle">
+                    <img src="assets/images/icon.png" class="icon-in-text" />
+                    <b>Elkések-e ma is?</b>
+                    <img src="assets/images/icon.png" class="icon-in-text" />
+                </p>
+            
+            </div>
+        </center>
+
+
+        <center>
+            <div id="content">
+                <div id="content-line">
+                    <input class="pick-line-input" type="text" placeholder="járat" maxlength="5" id="pick-line-text"/> 
+                    <input class="pick-line-input" type="button" value="járat választása" onclick="loadLine()" id="pick-line-btn"/>
+                </div>
+                <div id="content-info">
+                    <div class="info-box">Járat neve: <span class="info-info" id="info-name"></span> </div>
+                    <div class="info-box">Járat kódja: <span class="info-info" id="info-code"></span> </div>
+                    <div class="info-box">Végállomás1: <span class="info-info" id="info-end1"></span> </div>
+                    <div class="info-box">Végállomás2: <span class="info-info" id="info-end2"></span> </div>
+                </div>
+            </div>
+        </center>
+    
+        <script type="text/javascript" src="assets/Jquery.js"></script>
+        <script type="text/javascript" src="assets/script.js"></script>
+    </body>
+</html>

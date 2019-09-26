@@ -1,0 +1,74 @@
+:root {
+    --fontSize-big:60pt;
+    --fontSize-main:30pt;
+    --fontSize-small:20pt;
+
+    --color-text:white;
+    --color-box:rgb(168, 32, 55);
+
+    --borderRadius-perfect:12px;
+    --borderRadius-semiPerfect:6px;
+
+}
+
+body {
+
+    background:url("images/background.png");
+    background-size:cover;
+    background-attachment: fixed;
+
+}
+
+#top {
+    background-color:var(--color-box);
+    max-width:80%;
+    margin-bottom:40pt;
+    border-radius:var(--borderRadius-perfect);
+}
+
+#content {
+    width:80%;
+}
+
+#content-line {
+    margin-bottom: 40pt;
+}
+
+#content-info {
+    margin-bottom:40pt;
+    background-color:var(--color-box);
+    border-radius:var(--borderRadius-perfect);
+    min-width:50%;
+    max-width:100%;
+}
+
+.icon-in-text {
+    height:var(--fontSize-big);
+    position:inherit;
+}
+
+.title-text {
+    font-size:var(--fontSize-big);
+    color:var(--color-text);
+    text-shadow: 2px 2px black;
+    margin:8px;
+
+}
+
+.pick-line-input {
+    font-size: var(--fontSize-main);
+    text-align:center;
+    min-width: 30%;
+    max-width: 80%;
+    line-break: strict;
+    border-radius: var(--borderRadius-perfect);
+    margin:6px;
+}
+
+.info-box {
+    font-size:30pt;
+    color:var(--color-text);
+    text-shadow: 2px 2px black;
+    overflow:hidden;
+
+}
