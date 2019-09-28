@@ -38,6 +38,14 @@ body {
 
 }
 
+#content-stop {
+    border-radius: var(--borderRadius-perfect);
+    background-color: var(--color-box);
+    width: 25%;
+    margin-bottom:20px;
+
+}
+
 .icon-in-text {
     height:var(--fontSize-big);
     position:inherit;
@@ -60,4 +68,15 @@ body {
     border-radius: var(--borderRadius-perfect);
     font-family: var(--fontFamily-beautiful);
 
+}
+
+.pick-stop-input {
+    font-size: var(--fontSize-main);
+    text-align:center;
+    width:90%;
+    margin:6px;
+    padding:0px;
+    line-break: strict;
+    border-radius: var(--borderRadius-perfect);
+    font-family: var(--fontFamily-beautiful);
 }

@@ -2,6 +2,10 @@
 const bkk="https://futar.bkk.hu/api/query/v1/ws/otp/api/where/";
 
 let line = 0;
+let stops = 0;
+
+let stop1 = 0;
+let stop2  = 0;
 
 window.onload = function () {
     
@@ -13,6 +17,51 @@ window.onload = function () {
         }
     });
 
+
+}
+
+async function loadStops() {
+
+    await $.ajax({
+        method:"GET",
+        url:bkk+"route-details.json",
+        dataType:"jsonp",
+        data:{
+            routeId:line.id,
+        },
+        success:function (r) {
+
+            if (r.status=="OK") {
+                stops = r.data.references.stops;
+            } else {
+                alert("Nem sikerült betölteni a megállókat");
+                stops=0;
+                return;
+            }
+
+            let dd1 = document.getElementById("dropdown-stop1");
+            let dd2 = document.getElementById("dropdown-stop2");
+
+            for (let prop in stops) {
+
+                let option1 = document.createElement("option");
+                let option2 = document.createElement("option");
+
+                option1.value=stops[prop].code;
+                option2.value=stops[prop].code;
+
+                option1.innerHTML=stops[prop].name;
+                option2.innerHTML=stops[prop].name;
+
+                dd1.appendChild(option1);
+                dd2.appendChild(option2);
+
+
+            }
+            
+        }
+
+    });
 
 }
 
@@ -30,7 +79,7 @@ async function loadLine() {
 
     await $.ajax({
         method:"GET",
-        url:"https://futar.bkk.hu/api/query/v1/ws/otp/api/where/search.json",
+        url:bkk+"search.json",
         dataType:"jsonp",
         data:{
             query:input,
@@ -56,10 +105,14 @@ async function loadLine() {
             if (!line.id) {
                 alert("Nem találtunk járatot");
                 line=0;
+                
                 return;
+            } else {
+                loadStops();
             }
 
-            
+            stop1=0;
+            stop2=0;
             
         },
         error:function (xhr, ajaxOptions, thrownError) {
