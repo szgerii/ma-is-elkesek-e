@@ -1,7 +1,7 @@
 
 const bkk="https://futar.bkk.hu/api/query/v1/ws/otp/api/where/";
 
-let line = {};
+let line = 0;
 
 window.onload = function () {
     
@@ -16,7 +16,7 @@ window.onload = function () {
 
 }
 
-function loadLine() {
+async function loadLine() {
 
     let input = document.getElementById("pick-line-text").value;
     
@@ -28,7 +28,7 @@ function loadLine() {
         return;
     }
 
-    $.ajax({
+    await $.ajax({
         method:"GET",
         url:"https://futar.bkk.hu/api/query/v1/ws/otp/api/where/search.json",
         dataType:"jsonp",
@@ -55,12 +55,10 @@ function loadLine() {
 
             if (!line.id) {
                 alert("Nem találtunk járatot");
-                line={};
+                line=0;
                 return;
             }
 
-            //load stop choosing
-            loadBusLineInfo();
             
             
         },
@@ -71,16 +69,13 @@ function loadLine() {
         
     });
 
-    document.getElementById("pick-line-text").value="";
+    if (line==0) {
+        document.getElementById("pick-line-text").value="";
+    } else {
+        document.getElementById("pick-line-text").value=line.shortName;
+    }
+    
+    
 
-
-}
-
-function loadBusLineInfo() {
-
-    document.querySelector("#info-name").innerHTML=line.shortName;
-    document.querySelector("#info-code").innerHTML=line.id;
-    document.querySelector("#info-end1").innerHTML=line.description.split(" | ")[0];
-    document.querySelector("#info-end2").innerHTML=line.description.split(" | ")[1];
 
 }

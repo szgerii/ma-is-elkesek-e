@@ -4,10 +4,12 @@
     --fontSize-small:20pt;
 
     --color-text:white;
-    --color-box:rgb(168, 32, 55);
+    --color-box:rgb(0, 120, 180);
 
     --borderRadius-perfect:12px;
     --borderRadius-semiPerfect:6px;
+
+    --fontFamily-beautiful: Calibri;
 
 }
 
@@ -17,29 +19,23 @@ body {
     background-size:cover;
     background-attachment: fixed;
 
+    font-family: var(--fontFamily-beautiful),
+
 }
 
 #top {
     background-color:var(--color-box);
-    max-width:80%;
+    max-width:60%;
     margin-bottom:40pt;
     border-radius:var(--borderRadius-perfect);
-}
-
-#content {
-    width:80%;
 }
 
 #content-line {
-    margin-bottom: 40pt;
-}
+    border-radius: var(--borderRadius-perfect);
+    background-color: var(--color-box);
+    width: 25%;
+    margin-bottom:20px;
 
-#content-info {
-    margin-bottom:40pt;
-    background-color:var(--color-box);
-    border-radius:var(--borderRadius-perfect);
-    min-width:50%;
-    max-width:100%;
 }
 
 .icon-in-text {
@@ -50,7 +46,6 @@ body {
 .title-text {
     font-size:var(--fontSize-big);
     color:var(--color-text);
-    text-shadow: 2px 2px black;
     margin:8px;
 
 }
@@ -58,17 +53,11 @@ body {
 .pick-line-input {
     font-size: var(--fontSize-main);
     text-align:center;
-    min-width: 30%;
-    max-width: 80%;
+    width:90%;
+    margin:6px;
+    padding:0px;
     line-break: strict;
     border-radius: var(--borderRadius-perfect);
-    margin:6px;
-}
-
-.info-box {
-    font-size:30pt;
-    color:var(--color-text);
-    text-shadow: 2px 2px black;
-    overflow:hidden;
+    font-family: var(--fontFamily-beautiful);
 
 }
