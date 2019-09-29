@@ -4,6 +4,10 @@ const bkk="https://futar.bkk.hu/api/query/v1/ws/otp/api/where/";
 let line = 0;
 let stops = 0;
 
+let variant1 = 0;
+let variant2 = 0;
+let currentVariant = variant1;
+
 let stop1 = 0;
 let stop2  = 0;
 
@@ -20,75 +24,150 @@ window.onload = function () {
 
 }
 
+function fillStops() {
+
+    clearStops();
+
+    let dd1 = document.getElementById("dropdown-stop1");
+    let dd2 = document.getElementById("dropdown-stop2");
+
+    let stops = currentVariant.stops;
+
+    for (let prop in stops) {
+
+        let option1 = document.createElement("option");
+        let option2 = document.createElement("option");
+
+        option1.value=stops[prop].code;
+        option2.value=stops[prop].code;
+
+        option1.innerHTML=stops[prop].name;
+        option2.innerHTML=stops[prop].name;
+
+        dd1.appendChild(option1);
+        dd2.appendChild(option2);
+    
+    }
+
+    updateStops();
+}
+
+class routeDirection {
+
+    constructor(name, stops) {
+
+        this.name = name;
+        this.stops = stops;
+
+        this.loadRealStops();
+
+    }
+
+    loadRealStops() {
+
+        let s = this.stops;
+        let result = [];
+
+        for (let i=0; i<s.length; i++) {
+            let currentSId = s[i];
+            for (let prop in stops) {
+                if (stops[prop].id == currentSId) {
+                    result.push(stops[prop]);
+                    break;
+                }
+            }
+        }
+
+        this.stops = result;
+
+    }
+
+}
+
+function updateStops() {
+
+    let dd1 = document.getElementById("dropdown-stop1");
+    let dd2 = document.getElementById("dropdown-stop2");
+
+    
+
+    let name1 = dd1.options[dd1.selectedIndex].text;
+    let name2 = dd2.options[dd2.selectedIndex].text;
+
+    let stops = currentVariant.stops;
+
+    for (let i=0; i<stops.length; i++) {
+        if (stops[i].name==name1) {
+            stop1=stops[i];
+            break;
+        }
+    }
+
+    for (let i=0; i<stops.length; i++) {
+        if (stops[i].name==name2) {
+            stop2=stops[i];
+            break;
+        }
+    }
+
+}
+
+function updateVariant() {
+    let dropdown = document.getElementById("dropdown-heading");
+    let selectedText = dropdown.options[dropdown.selectedIndex].text;
+    if (selectedText==variant1.name) {
+        currentVariant = variant1;
+    } else {
+        currentVariant = variant2;
+    }
+
+    fillStops();
+}
+
+function fillVariants() {
+
+    variant1 = new routeDirection(variants[0].headsign, variants[0].stopIds);
+    variant2 = new routeDirection(variants[1].headsign, variants[1].stopIds);
+
+    let dropdown = document.getElementById("dropdown-heading");
+
+    let o1 = document.createElement("option");
+    o1.innerHTML = variant1.name;
+    o1.value = variant1;
+    dropdown.appendChild(o1);
+
+    let o2 = document.createElement("option");
+    o2.innerHTML = variant2.name;
+    o2.value = variant2;
+    dropdown.appendChild(o2);
+
+    updateVariant();
+
+    
+
+}
+
 function resetStops() {
+
     stops=0;
-    stop1=0;
-    stop2=0;
+    currentVariant=0;
+    variant1=0;
+    variant2=0;
+    
+    let dropdown = document.getElementById("dropdown-heading");
+    dropdown.innerHTML="";
+
+    clearStops();
+
+}
+
+function clearStops() {
     let dd1 = document.getElementById("dropdown-stop1");
     let dd2 = document.getElementById("dropdown-stop2");
     dd1.innerHTML="";
     dd2.innerHTML="";
-}
-
-function checkStops() {
-
-    class MegállóPár {
-
-        constructor(név, lat, lon) {
-            this.név = név;
-            this.lat = lat;
-            this.lon = lon;
-            this.oda = 0;
-            this.vissza = 0;
-        }
-
-    }
-
-    let megállóPárLista = [];
-
-    for (let prop in stops) {
-        
-        let megállóPár = 0;
-
-        for (let i=0; i<megállóPárLista.length; i++) {
-            if (stops[prop].name==megállóPárLista[i].név) {
-                megállóPár = megállóPárLista[i];
-                break;
-            }
-        }
-
-        if (megállóPár==0) {
-            megállóPár = new MegállóPár(stops[prop].name, stops[prop].lat, stops[prop].lon);
-            megállóPárLista.push(megállóPár);
-        } 
-
-        if (megállóPár.oda==0) {
-            megállóPár.oda=stops[prop];
-        } else {
-            megállóPár.vissza=stops[prop];
-        }
-
-    }
-
-    let unpairedStops = [];
-    let brokenStopPairs = [];
-
-    for (let i=0; i<megállóPárLista.length; i++) {
-        if (megállóPárLista[i].vissza==0) {
-            brokenStopPairs.push(megállóPárLista[i]);
-            unpairedStops.push(megállóPárLista[i].oda);
-        }
-    }
-
-    
-
-    for (let i=0; i<unpairedStops.length; i++) {
-
-    }
-
-    for (let i=0; i<megállóPárLista.length; i++) {
-        console.log(megállóPárLista[i].oda.name+"  +++  "+megállóPárLista[i].vissza.name);
-    }
+    stop1=0;
+    stop2=0;
 }
 
 async function loadStops() {
@@ -104,35 +183,17 @@ async function loadStops() {
 
             if (r.status=="OK") {
                 stops = r.data.references.stops;
+                variants = r.data.entry.variants;
             } else {
                 alert("Nem sikerült betölteni a megállókat");
                 resetStops();
                 return;
             }
 
-            let dd1 = document.getElementById("dropdown-stop1");
-            let dd2 = document.getElementById("dropdown-stop2");
-
-            for (let prop in stops) {
-
-                let option1 = document.createElement("option");
-                let option2 = document.createElement("option");
-
-                option1.value=stops[prop].code;
-                option2.value=stops[prop].code;
-
-                option1.innerHTML=stops[prop].name;
-                option2.innerHTML=stops[prop].name;
-
-                dd1.appendChild(option1);
-                dd2.appendChild(option2);
-
-
-            }
-
-            //checkStops();
+            fillVariants();
             
-        }
+            
+        } 
 
     });
 
