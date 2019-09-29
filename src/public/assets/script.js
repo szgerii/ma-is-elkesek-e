@@ -1,5 +1,5 @@
 
-const bkk="https://futar.bkk.hu/api/query/v1/ws/otp/api/where/";
+const bkk = "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/";
 
 let line = 0;
 let stops = 0;
@@ -11,16 +11,14 @@ let currentVariant = variant1;
 let stop1 = 0;
 let stop2  = 0;
 
-window.onload = function () {
+window.onload = function() {
     
     let pickLineText = document.getElementById("pick-line-text");
 
-    pickLineText.addEventListener("keyup",(event) => {
-        if (event.keyCode==13) {
+    pickLineText.addEventListener("keyup", (event) => {
+        if (event.keyCode == 13)
             loadLine();
-        }
     });
-
 
 }
 
@@ -46,10 +44,11 @@ function fillStops() {
 
         dd1.appendChild(option1);
         dd2.appendChild(option2);
-    
+    	
     }
 
     updateStops();
+
 }
 
 class routeDirection {
@@ -89,37 +88,32 @@ function updateStops() {
     let dd1 = document.getElementById("dropdown-stop1");
     let dd2 = document.getElementById("dropdown-stop2");
 
-    
-
     let name1 = dd1.options[dd1.selectedIndex].text;
     let name2 = dd2.options[dd2.selectedIndex].text;
 
     let stops = currentVariant.stops;
 
-    for (let i=0; i<stops.length; i++) {
+    for (let i = 0; i < stops.length; i++)
         if (stops[i].name==name1) {
             stop1=stops[i];
             break;
         }
-    }
 
-    for (let i=0; i<stops.length; i++) {
+    for (let i = 0; i < stops.length; i++)
         if (stops[i].name==name2) {
-            stop2=stops[i];
+            stop2 = stops[i];
             break;
         }
-    }
 
 }
 
 function updateVariant() {
     let dropdown = document.getElementById("dropdown-heading");
     let selectedText = dropdown.options[dropdown.selectedIndex].text;
-    if (selectedText==variant1.name) {
+    if (selectedText==variant1.name)
         currentVariant = variant1;
-    } else {
+    else
         currentVariant = variant2;
-    }
 
     fillStops();
 }
@@ -143,45 +137,47 @@ function fillVariants() {
 
     updateVariant();
 
-    
-
 }
 
 function resetStops() {
 
-    stops=0;
-    currentVariant=0;
-    variant1=0;
-    variant2=0;
+    stops = 0;
+    currentVariant = 0;
+    variant1 = 0;
+    variant2 = 0;
     
     let dropdown = document.getElementById("dropdown-heading");
-    dropdown.innerHTML="";
+    dropdown.innerHTML = "";
 
     clearStops();
 
 }
 
 function clearStops() {
+
     let dd1 = document.getElementById("dropdown-stop1");
     let dd2 = document.getElementById("dropdown-stop2");
-    dd1.innerHTML="";
-    dd2.innerHTML="";
-    stop1=0;
-    stop2=0;
+
+    dd1.innerHTML = "";
+    dd2.innerHTML = "";
+
+    stop1 = 0;
+    stop2 = 0;
+
 }
 
 async function loadStops() {
 
     await $.ajax({
-        method:"GET",
-        url:bkk+"route-details.json",
-        dataType:"jsonp",
-        data:{
+        method: "GET",
+        url:bkk + "route-details.json",
+        dataType: "jsonp",
+        data: {
             routeId:line.id,
         },
         success:function (r) {
 
-            if (r.status=="OK") {
+            if (r.status == "OK") {
                 stops = r.data.references.stops;
                 variants = r.data.entry.variants;
             } else {
@@ -191,7 +187,6 @@ async function loadStops() {
             }
 
             fillVariants();
-            
             
         } 
 
@@ -205,7 +200,7 @@ async function loadLine() {
     
     let isInputCorrect = true;
     
-    if (input=="") {
+    if (input == "") {
         isInputCorrect=false;
         alert("Kérjük válasszon járatot")
         return;
@@ -238,16 +233,13 @@ async function loadLine() {
                 }
             }
 
-            if (!line.id||line.id=="BKK_9999") {
+            if (!line.id || line.id == "BKK_9999") {
                 alert("Nem találtunk járatot");
-                line=0;
+                line = 0;
                 return;
-            } else {
+            } else
                 loadStops();
-            }
 
-            
-            
         },
         error:function (xhr, ajaxOptions, thrownError) {
             alert("error");
@@ -256,13 +248,9 @@ async function loadLine() {
         
     });
 
-    if (line==0) {
-        document.getElementById("pick-line-text").value="";
-    } else {
-        document.getElementById("pick-line-text").value=line.shortName;
-    }
+    if (line == 0)
+        document.getElementById("pick-line-text").value = "";
+    else
+        document.getElementById("pick-line-text").value = line.shortName;
     
-    
-
-
 }
