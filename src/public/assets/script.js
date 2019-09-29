@@ -20,6 +20,77 @@ window.onload = function () {
 
 }
 
+function resetStops() {
+    stops=0;
+    stop1=0;
+    stop2=0;
+    let dd1 = document.getElementById("dropdown-stop1");
+    let dd2 = document.getElementById("dropdown-stop2");
+    dd1.innerHTML="";
+    dd2.innerHTML="";
+}
+
+function checkStops() {
+
+    class MegállóPár {
+
+        constructor(név, lat, lon) {
+            this.név = név;
+            this.lat = lat;
+            this.lon = lon;
+            this.oda = 0;
+            this.vissza = 0;
+        }
+
+    }
+
+    let megállóPárLista = [];
+
+    for (let prop in stops) {
+        
+        let megállóPár = 0;
+
+        for (let i=0; i<megállóPárLista.length; i++) {
+            if (stops[prop].name==megállóPárLista[i].név) {
+                megállóPár = megállóPárLista[i];
+                break;
+            }
+        }
+
+        if (megállóPár==0) {
+            megállóPár = new MegállóPár(stops[prop].name, stops[prop].lat, stops[prop].lon);
+            megállóPárLista.push(megállóPár);
+        } 
+
+        if (megállóPár.oda==0) {
+            megállóPár.oda=stops[prop];
+        } else {
+            megállóPár.vissza=stops[prop];
+        }
+
+    }
+
+    let unpairedStops = [];
+    let brokenStopPairs = [];
+
+    for (let i=0; i<megállóPárLista.length; i++) {
+        if (megállóPárLista[i].vissza==0) {
+            brokenStopPairs.push(megállóPárLista[i]);
+            unpairedStops.push(megállóPárLista[i].oda);
+        }
+    }
+
+    
+
+    for (let i=0; i<unpairedStops.length; i++) {
+
+    }
+
+    for (let i=0; i<megállóPárLista.length; i++) {
+        console.log(megállóPárLista[i].oda.name+"  +++  "+megállóPárLista[i].vissza.name);
+    }
+}
+
 async function loadStops() {
 
     await $.ajax({
@@ -35,7 +106,7 @@ async function loadStops() {
                 stops = r.data.references.stops;
             } else {
                 alert("Nem sikerült betölteni a megállókat");
-                stops=0;
+                resetStops();
                 return;
             }
 
@@ -58,6 +129,8 @@ async function loadStops() {
 
 
             }
+
+            //checkStops();
             
         }
 
@@ -76,6 +149,8 @@ async function loadLine() {
         alert("Kérjük válasszon járatot")
         return;
     }
+
+    resetStops();
 
     await $.ajax({
         method:"GET",
@@ -102,17 +177,15 @@ async function loadLine() {
                 }
             }
 
-            if (!line.id) {
+            if (!line.id||line.id=="BKK_9999") {
                 alert("Nem találtunk járatot");
                 line=0;
-                
                 return;
             } else {
                 loadStops();
             }
 
-            stop1=0;
-            stop2=0;
+            
             
         },
         error:function (xhr, ajaxOptions, thrownError) {
