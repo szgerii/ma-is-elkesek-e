@@ -11,6 +11,8 @@ let currentVariant = variant1;
 let stop1 = 0;
 let stop2  = 0;
 
+let stopsUpdated = false;
+
 window.onload = function() {
     
     let pickLineText = document.getElementById("pick-line-text");
@@ -19,6 +21,76 @@ window.onload = function() {
         if (event.keyCode == 13)
             loadLine();
     });
+
+    setInterval(update,50);
+
+}
+
+function checkSegment() {
+
+    console.log("check");
+
+    if (stop1==0||stop2==0) {
+        document.getElementById("stop1").innerHTML = "Megálló A";
+        document.getElementById("stop2").innerHTML = "Megálló B";
+        document.getElementById("result").innerHTML = "Kérjük válasszon érvényes buszjáratot!";
+        return 0;
+    } else {
+        document.getElementById("stop1").innerHTML = stop1.name;
+        document.getElementById("stop2").innerHTML = stop2.name;
+    }
+
+    if (stop1.id==stop2.id) {
+        document.getElementById("result").innerHTML = "Kérjük különböző megállókat válasszon!";
+        return 0;
+    }
+
+    let stops = currentVariant.stops;
+    let correctOrder = false;
+    for (let i=0; i<stops.length; i++) {
+        
+        if (stops[i].id==stop1.id) {
+            correctOrder=true;
+            break;
+        }
+
+        if (stops[i].id==stop2.id) {
+            break;
+        }
+
+    }
+
+    
+
+    if (correctOrder==false) {
+        document.getElementById("result").innerHTML = "Kérjük megfelelő sorrendben válasszon megállókat, vagy váltson irányt!";
+        return 0;
+    } else {
+        document.getElementById("result").innerHTML = "? perc átlag lemaradás a szakaszon";
+        return 1;
+    }
+
+
+
+}
+
+function update() {
+
+
+    //download hot smokin'
+
+    if (!stopsUpdated) {
+        return;
+    }
+    
+    stopsUpdated = false;
+    if (checkSegment()==1) {
+
+        //send record for hot smokin'
+
+        //do stuff
+
+    }
 
 }
 
@@ -105,6 +177,8 @@ function updateStops() {
             break;
         }
 
+    stopsUpdated = true;
+
 }
 
 function updateVariant() {
@@ -163,6 +237,7 @@ function clearStops() {
 
     stop1 = 0;
     stop2 = 0;
+    stopsUpdated=true;
 
 }
 
@@ -236,6 +311,7 @@ async function loadLine() {
             if (!line.id || line.id == "BKK_9999") {
                 alert("Nem találtunk járatot");
                 line = 0;
+                stopsUpdated=true;
                 return;
             } else
                 loadStops();

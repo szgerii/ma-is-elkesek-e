@@ -1,15 +1,27 @@
 :root {
-    --fontSize-big:60pt;
-    --fontSize-main:30pt;
-    --fontSize-small:20pt;
 
-    --color-text:white;
-    --color-box:rgb(0, 120, 180);
+    --fontSize-big:60pt; /* font size for title and main content */
+    --fontSize-main:18pt; /* font size for input boxes */
 
-    --borderRadius-perfect:12px;
-    --borderRadius-semiPerfect:6px;
+    --color-text:white; /* color of main text */
+    --color-box:rgb(0, 120, 180); /* background color of boxes */
+    --color-box-transparent:rgba(0,120,180,0.4); /* background color for partly transparent box */
 
-    --fontFamily-beautiful: Calibri;
+    --borderRadius-perfect:12px; /* the one and only perfect border radius for boxes */
+
+    --fontFamily-beautiful: Calibri; /* Beautiful font family used EVERYWHERE */
+
+    --width-topBar: 60%; /* width of topBar in document */
+    --width-inputBox: 15%; /* width of input boxes in document */
+    --width-mainContent: 85%; /*width of main content box in document */
+    --width-inputElement: 90%; /* width of input elements in input boxes */
+
+    --margin-bigBreak: 40pt; /* margin for big breaks between boxes */
+    --margin-smallBreak: 20pt; /* margin for small breaks between boxes */
+    --margin-main: 6px; /* main margin used to position input elements */
+
+    --alignment-inInputField: center; /* alignment of text in input elements */
+
 
 }
 
@@ -18,65 +30,91 @@ body {
     background:url("images/background.png");
     background-size:cover;
     background-attachment: fixed;
-
-    font-family: var(--fontFamily-beautiful),
+    font-family: var(--fontFamily-beautiful);
+    
 
 }
 
 #top {
+
     background-color:var(--color-box);
-    max-width:60%;
-    margin-bottom:40pt;
+    width:var(--width-topBar);
+    margin-bottom:var(--margin-bigBreak);
     border-radius:var(--borderRadius-perfect);
+
 }
 
 #content-line {
-    border-radius: var(--borderRadius-perfect);
+
     background-color: var(--color-box);
-    width: 25%;
-    margin-bottom:20px;
+    width: 100%;
+    margin-bottom:var(--margin-smallBreak);
+    border-radius: var(--borderRadius-perfect);
 
 }
 
 #content-stop {
-    border-radius: var(--borderRadius-perfect);
+
     background-color: var(--color-box);
-    width: 25%;
-    margin-bottom:20px;
+    width: 100%;
+    margin-bottom:var(--margin-smallBreak);
+    border-radius: var(--borderRadius-perfect);
+
+}
+
+#left {
+    float:left;
+    width:var(--width-inputBox);
+}
+
+#content-main {
+
+    float:right;
+    width:var(--width-mainContent);
 
 }
 
 .icon-in-text {
+
     height:var(--fontSize-big);
-    position:inherit;
+    vertical-align: sub;
+
 }
 
 .title-text {
+
     font-size:var(--fontSize-big);
     color:var(--color-text);
-    margin:8px;
+    margin:var(--margin-main);
 
 }
 
 .pick-line-input {
+
+    text-align: var(--alignment-inInputField);
+    margin:var(--margin-main);
     font-size: var(--fontSize-main);
-    text-align:center;
-    width:90%;
-    margin:6px;
-    padding:0px;
-    line-break: strict;
+    width:var(--width-inputElement);
     border-radius: var(--borderRadius-perfect);
     font-family: var(--fontFamily-beautiful);
 
 }
 
 .pick-stop-input {
+
+    text-align: var(--alignment-inInputField);
+    margin:var(--margin-main);
     font-size: var(--fontSize-main);
-    text-align:center;
-    width:90%;
-    margin:6px;
-    padding:0px;
-    line-break: strict;
+    width:var(--width-inputElement);
     border-radius: var(--borderRadius-perfect);
     font-family: var(--fontFamily-beautiful);
+
+}
+
+.main-text {
+
+    font-size:var(--fontSize-big);
+    color:var(--color-text);
+    background-color:var(--color-box-transparent);
+
 }

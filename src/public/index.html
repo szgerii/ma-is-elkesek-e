@@ -21,12 +21,14 @@
             </div>
         </center>
 
+        <div id="left">
         <div id="content-line">
             <center>
                 <input class="pick-line-input" type="text" placeholder="járat" maxlength="5" id="pick-line-text"/> <br />
                 <input class="pick-line-input" type="button" value="járat választása" onclick="loadLine()" id="pick-line-btn"/>
             </center>
         </div>
+
 
         <div id="content-stop">
             <center>
@@ -36,6 +38,17 @@
                 </select>
                 <select class="pick-stop-input" id="dropdown-stop2" onchange="updateStops()">
                 </select>
+            </center>
+        </div>
+        </div>
+
+        <div id="content-main">
+            <center>
+                <span class="main-text" id="stop1">Megálló A</span> <br />
+                <span class="main-text">|</span> <br />
+                <span class="main-text" id="result">Kérjük válasszon érvényes buszjáratot!</span> <br />
+                <span class="main-text">|</span> <br />
+                <span class="main-text" id="stop2">Megálló B</span>
             </center>
         </div>
         
