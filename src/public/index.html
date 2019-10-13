@@ -9,48 +9,59 @@
         <meta charset="UTF-8" />
     </head>
     <body>
-        <center>
-            <div id="top">
-            
-                <p class="title-text" id="mainTitle">
-                    <img src="assets/images/icon.png" class="icon-in-text" />
-                    <b>Ma is elkések-e?</b>
-                    <img src="assets/images/icon.png" class="icon-in-text" />
-                </p>
-            
+        
+        <div class="vertical-content-wrapper">
+            <div id="left">
+                <div id="content-line">
+                    <center>
+                        <input class="pick-line-input" type="text" placeholder="járat" maxlength="5" id="pick-line-text"/> <br />
+                        <input class="pick-line-input" type="button" value="járat választása" onclick="loadLine()" id="pick-line-btn"/>
+                    </center>
+                </div>
+
+
+                <div id="content-stop">
+                    <center>
+                        <select class="pick-stop-input" id="dropdown-heading" onchange="updateVariant()">
+                        </select>
+                        <select class="pick-stop-input" id="dropdown-stop1" onchange="updateStops()">
+                        </select>
+                        <select class="pick-stop-input" id="dropdown-stop2" onchange="updateStops()">
+                        </select>
+                    </center>
+                </div>
             </div>
-        </center>
 
-        <div id="left">
-        <div id="content-line">
-            <center>
-                <input class="pick-line-input" type="text" placeholder="járat" maxlength="5" id="pick-line-text"/> <br />
-                <input class="pick-line-input" type="button" value="járat választása" onclick="loadLine()" id="pick-line-btn"/>
-            </center>
-        </div>
+            <div id="content-main">
+                <center>
+                    <div id="top">
+                            
+                        <p class="title-text" id="mainTitle">
+                            <!--<img src="assets/images/icon.png" class="icon-in-text" />-->
+                            <b>Ma is elkések-e?</b>
+                            <!--<img src="assets/images/icon.png" class="icon-in-text" />-->
+                        </p>
+                            
+                    </div>
+                </center>
+                <center>
+                    <span class="main-text" id="stop1">Megálló A</span> <br />
+                    <span class="main-text">|</span> <br />
+                    <span class="main-text" id="result">Kérjük válasszon érvényes buszjáratot!</span> <br />
+                    <span class="main-text">|</span> <br />
+                    <span class="main-text" id="stop2">Megálló B</span>
+                </center>
+            </div>
 
+        </div>
+        <div class="vertical-content-wrapper">
 
-        <div id="content-stop">
-            <center>
-                <select class="pick-stop-input" id="dropdown-heading" onchange="updateVariant()">
-                </select>
-                <select class="pick-stop-input" id="dropdown-stop1" onchange="updateStops()">
-                </select>
-                <select class="pick-stop-input" id="dropdown-stop2" onchange="updateStops()">
-                </select>
-            </center>
-        </div>
-        </div>
+            <div id="footer">
+                
+            </div>
 
-        <div id="content-main">
-            <center>
-                <span class="main-text" id="stop1">Megálló A</span> <br />
-                <span class="main-text">|</span> <br />
-                <span class="main-text" id="result">Kérjük válasszon érvényes buszjáratot!</span> <br />
-                <span class="main-text">|</span> <br />
-                <span class="main-text" id="stop2">Megálló B</span>
-            </center>
         </div>
+        
         
     
         <script type="text/javascript" src="assets/Jquery.js"></script>

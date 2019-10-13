@@ -1,11 +1,13 @@
 :root {
 
+    
+    --fontSize-title:70pt;
     --fontSize-big:60pt; /* font size for title and main content */
     --fontSize-main:18pt; /* font size for input boxes */
 
     --color-text:white; /* color of main text */
     --color-box:rgb(0, 120, 180); /* background color of boxes */
-    --color-box-transparent:rgba(0,120,180,0.4); /* background color for partly transparent box */
+    --color-box-transparent:rgba(0,120,180,0.0); /* background color for partly transparent box */
 
     --borderRadius-perfect:12px; /* the one and only perfect border radius for boxes */
 
@@ -27,7 +29,7 @@
 
 body {
 
-    background:url("images/background.png");
+    background:linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.8)), url("images/background.png");
     background-size:cover;
     background-attachment: fixed;
     font-family: var(--fontFamily-beautiful);
@@ -37,7 +39,7 @@ body {
 
 #top {
 
-    background-color:var(--color-box);
+    background-color:var(--color-box-transparent);
     width:var(--width-topBar);
     margin-bottom:var(--margin-bigBreak);
     border-radius:var(--borderRadius-perfect);
@@ -74,6 +76,10 @@ body {
 
 }
 
+#footer {
+    height:150px;
+}
+
 .icon-in-text {
 
     height:var(--fontSize-big);
@@ -83,7 +89,7 @@ body {
 
 .title-text {
 
-    font-size:var(--fontSize-big);
+    font-size:var(--fontSize-title);
     color:var(--color-text);
     margin:var(--margin-main);
 
@@ -117,4 +123,9 @@ body {
     color:var(--color-text);
     background-color:var(--color-box-transparent);
 
+}
+
+.vertical-content-wrapper {
+    width:100%;
+    display: inline-block;
 }
