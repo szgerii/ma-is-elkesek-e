@@ -8,8 +8,14 @@ let variant1 = 0;
 let variant2 = 0;
 let currentVariant = variant1;
 
+let isUpdatingHotSmoke = false;
+let isUpdatingSegment = false;
+
 let stop1 = 0;
 let stop2  = 0;
+
+let departures = 0;
+let trips = [];
 
 let stopsUpdated = false;
 
@@ -23,6 +29,7 @@ window.onload = function() {
     });
 
     setInterval(update,50);
+    setInterval(slowUpdate,10000);
 
 }
 
@@ -63,10 +70,10 @@ function checkSegment() {
     
 
     if (correctOrder==false) {
-        document.getElementById("result").innerHTML = "Kérjük megfelelő sorrendben válasszon megállókat, vagy váltson irányt!";
+        document.getElementById("result").innerHTML = "A megállók fordítva vannak!";
         return 0;
     } else {
-        document.getElementById("result").innerHTML = "? perc átlag lemaradás a szakaszon";
+        document.getElementById("result").innerHTML = "Számolás folyamatban...";
         return 1;
     }
 
@@ -74,10 +81,129 @@ function checkSegment() {
 
 }
 
+class CalculatedTrip {
+
+    time1 = 0;
+    time2 = 0;
+
+    constructor(time2) {
+
+        this.time2 = time2;
+    
+        this.time1 = 0;
+
+
+    }
+
+    setTime1(time1) {
+        this.time1 = time1;
+    }
+
+    getTravelTime() {
+        
+        let date1 = new Date(this.time1*1000);
+        let date2 = new Date(this.time2*1000);
+
+        return (date2.getTime()-date1.getTime()) /1000 /60
+
+    }
+
+}
+
+async function downloadSegment() {
+
+    //calculate avg time pass between stop1 and stop2
+    //get all arrivals in the last '30' minutes at stop2
+    trips=[];
+    await $.ajax({
+        method: "GET",
+        url: bkk + "arrivals-and-departures-for-stop.json",
+        dataType: "jsonp",
+        data: {
+            stopId:stop2.id,
+            minutesBefore:30,
+            minutesAfter:0,
+            includeReferences:false
+        },
+        success:function(r){
+
+            //we have some stopTimes, let's check when the associated trips visited stop1 
+            departures=r.data.entry.stopTimes;
+            
+
+        }
+    });
+
+    for (let i=0; i<departures.length; i++) {
+        let currentTrip = new CalculatedTrip(departures[i].predictedArrivalTime);
+        trips.push(currentTrip);
+        
+        await $.ajax({
+            method: "Get",
+            url: bkk + "trip-details.json",
+            dataType: "jsonp",
+            data: {
+                tripId:departures[i].tripId,
+                includeReferences:false
+            },
+            success:function(r) {
+                let stopTimes = r.data.entry.stopTimes;
+                for (let i=0; i<stopTimes.length; i++) {
+                    if (stopTimes[i].stopId==stop1.id) {
+                        currentTrip.setTime1(stopTimes[i].predictedDepartureTime);
+                        break;
+                    } 
+                }
+            }
+
+        });
+
+    }
+    
+
+
+
+}
+
+function updateSegment() {
+    let usefulTrips = [];
+    for (let i=0; i<trips.length; i++) {
+
+        if (trips[i].time1 != 0 && trips[i].time2 != 0) {
+
+            usefulTrips.push(trips[i])
+
+        }
+    }
+
+    let travelTimesTotal = 0;
+    for (let i=0; i<usefulTrips.length; i++) {
+
+        travelTimesTotal+=usefulTrips[i].getTravelTime();
+
+    }
+
+    let avg = Math.round(travelTimesTotal/usefulTrips.length);
+            
+    document.getElementById("result").innerHTML = avg + " perc átlag utazási idő a szakaszon";
+}
+
+async function slowUpdate() {
+
+    if (isUpdatingHotSmoke) {
+
+        //download hot smokin'
+
+    }
+
+    if (isUpdatingSegment) {
+        await downloadSegment();
+        updateSegment();
+    }
+
+}
+
 function update() {
-
-
-    //download hot smokin'
 
     if (!stopsUpdated) {
         return;
@@ -86,10 +212,14 @@ function update() {
     stopsUpdated = false;
     if (checkSegment()==1) {
 
-        //send record for hot smokin'
+        //upload for hot smokin'
 
-        //do stuff
+        downloadSegment();
 
+        isUpdatingSegment = true;
+
+    } else {
+        isUpdatingSegment = false;
     }
 
 }
