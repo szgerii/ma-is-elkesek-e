@@ -9,12 +9,21 @@
         <meta charset="UTF-8" />
     </head>
     <body>
-        
+        <!--Vertical content wrappers should work with fixed but flexible height-->
         <div class="vertical-content-wrapper">
             <div id="left">
                 <div id="content-line">
                     <center>
+                        <!--A dropdown for the line types, fixes most issues with line searching-->
                         <input class="pick-line-input" type="text" placeholder="járat" maxlength="5" id="pick-line-text"/> <br />
+                        <select class="pick-line-input" id="dropdown-vehicleType">
+                            <option value="BUS">Busz</option>
+                            <option value="TRAM">Villamos</option>
+                            <option value="SUBWAY">Metró</option>
+                            <option value="TROLLEYBUS">Trolibusz</option>
+                            <option value="RAIL">Hév</option>
+                            <option value="FERRY">Hajó</option>
+                        </select>
                         <input class="pick-line-input" type="button" value="járat választása" onclick="loadLine()" id="pick-line-btn"/>
                     </center>
                 </div>

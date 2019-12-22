@@ -13,9 +13,8 @@ let isUpdatingSegment = false;
 
 let stop1 = 0;
 let stop2  = 0;
-
-let departures = 0;
-let trips = [];
+let isFinalStop = false;
+let stop2ForFinalStop = 0;
 
 let stopsUpdated = false;
 
@@ -34,8 +33,6 @@ window.onload = function() {
 }
 
 function checkSegment() {
-
-    console.log("check");
 
     if (stop1==0||stop2==0) {
         document.getElementById("stop1").innerHTML = "Megálló A";
@@ -99,6 +96,10 @@ class CalculatedTrip {
         this.time1 = time1;
     }
 
+    setTime2(time2) {
+        this.time2 = time2;
+    }
+
     getTravelTime() {
         
         let date1 = new Date(this.time1*1000);
@@ -114,13 +115,21 @@ async function downloadSegment() {
 
     //calculate avg time pass between stop1 and stop2
     //get all arrivals in the last '30' minutes at stop2
-    trips=[];
+    let departures = 0;
+    let trips=[];
+    let id = 0;
+    if (isFinalStop) {
+        id = stop2ForFinalStop.id;
+    } else {
+        id = stop2.id;
+    }
+    
     await $.ajax({
         method: "GET",
         url: bkk + "arrivals-and-departures-for-stop.json",
         dataType: "jsonp",
         data: {
-            stopId:stop2.id,
+            stopId:id,
             minutesBefore:30,
             minutesAfter:0,
             includeReferences:false
@@ -129,13 +138,22 @@ async function downloadSegment() {
 
             //we have some stopTimes, let's check when the associated trips visited stop1 
             departures=r.data.entry.stopTimes;
-            
 
         }
     });
 
     for (let i=0; i<departures.length; i++) {
-        let currentTrip = new CalculatedTrip(departures[i].predictedArrivalTime);
+        let currentTrip = 0;
+        if (!isFinalStop) {
+            if (departures[i].predictedArrivalTime==undefined) {
+                currentTrip = new CalculatedTrip(departures[i].arrivalTime);
+            } else {
+                currentTrip = new CalculatedTrip(departures[i].predictedArrivalTime);
+            }
+        } else {
+            currentTrip = new CalculatedTrip(-1);
+        }
+
         trips.push(currentTrip);
         
         await $.ajax({
@@ -150,9 +168,27 @@ async function downloadSegment() {
                 let stopTimes = r.data.entry.stopTimes;
                 for (let i=0; i<stopTimes.length; i++) {
                     if (stopTimes[i].stopId==stop1.id) {
-                        currentTrip.setTime1(stopTimes[i].predictedDepartureTime);
+
+                        if (stopTimes[i].predictedDepartureTime==undefined) {
+                            //no difference between predicted and normal
+                            currentTrip.setTime1(stopTimes[i].departureTime);
+                        } else {
+                            //there is difference between predicted and normal
+                            currentTrip.setTime1(stopTimes[i].predictedDepartureTime);
+                        }
+
                         break;
                     } 
+                }
+                if (isFinalStop) {
+                    let arrival = stopTimes[stopTimes.length-1];
+                    if (arrival.predictedArrivalTime==undefined) {
+                        //no difference between predicted and normal
+                        currentTrip.setTime2(arrival.arrivalTime);
+                    } else {
+                        //there is difference between predicted and normal
+                        currentTrip.setTime2(arrival.predictedArrivalTime);
+                    }
                 }
             }
 
@@ -160,18 +196,18 @@ async function downloadSegment() {
 
     }
     
-
+    return trips;
 
 
 }
 
-function updateSegment() {
+function updateSegment(trips) {
     let usefulTrips = [];
     for (let i=0; i<trips.length; i++) {
 
         if (trips[i].time1 != 0 && trips[i].time2 != 0) {
 
-            usefulTrips.push(trips[i])
+            usefulTrips.push(trips[i]);
 
         }
     }
@@ -184,8 +220,13 @@ function updateSegment() {
     }
 
     let avg = Math.round(travelTimesTotal/usefulTrips.length);
-            
-    document.getElementById("result").innerHTML = avg + " perc átlag utazási idő a szakaszon";
+    if (isNaN(avg)) {
+        document.getElementById("result").innerHTML = "Hiba történt a számítás során";
+        console.log(trips);
+    } else {
+        document.getElementById("result").innerHTML = avg + " perc átlag utazási idő a szakaszon";
+    }     
+    
 }
 
 async function slowUpdate() {
@@ -197,13 +238,13 @@ async function slowUpdate() {
     }
 
     if (isUpdatingSegment) {
-        await downloadSegment();
-        updateSegment();
+        let trips = await downloadSegment();
+        updateSegment(trips);
     }
 
 }
 
-function update() {
+async function update() {
 
     if (!stopsUpdated) {
         return;
@@ -214,7 +255,8 @@ function update() {
 
         //upload for hot smokin'
 
-        downloadSegment();
+        let trips = await downloadSegment();
+        updateSegment(trips);
 
         isUpdatingSegment = true;
 
@@ -303,7 +345,16 @@ function updateStops() {
 
     for (let i = 0; i < stops.length; i++)
         if (stops[i].name==name2) {
+           
             stop2 = stops[i];
+            
+            isFinalStop=false;
+            stop2ForFinalStop = 0;
+            if (i==stops.length-1) {
+                isFinalStop = true;
+                stop2ForFinalStop = stops[i-1];
+            } 
+            
             break;
         }
 
@@ -404,6 +455,9 @@ async function loadLine() {
     let input = document.getElementById("pick-line-text").value;
     
     let isInputCorrect = true;
+
+    let dropdown = document.getElementById("dropdown-vehicleType");
+    let vehicleType = dropdown.options[dropdown.selectedIndex].value;
     
     if (input == "") {
         isInputCorrect=false;
@@ -422,19 +476,24 @@ async function loadLine() {
         },
         success:function (r) {
             line = r.data.references.routes;
+            console.log(line);
             let done=false;
             for (let prop in line) {
-                if (line[prop].shortName.toLowerCase()==input.toLowerCase()) {
-                    line = line[prop];
-                    done=true;
-                    break;
+                if (line[prop].shortName.toLowerCase()==input.toLowerCase()) { //same name
+                    if (line[prop].type.toLowerCase()==vehicleType.toLowerCase()) { //same type of vehicle
+                        line = line[prop];
+                        done=true;
+                        break;
+                    }
                 }
             }
             if (!done) {
                 for (let prop in line) {
-                    line = line[prop];
-                    done=true;
-                    break;
+                    if (line[prop].type.toLowerCase()==vehicleType.toLowerCase()) { //same type of vehicle
+                        line = line[prop];
+                        done=true;
+                        break;
+                    }
                 }
             }
 
