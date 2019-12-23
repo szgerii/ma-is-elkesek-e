@@ -1,5 +1,6 @@
 
 const bkk = "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/";
+const hotSmokinUrl = ""; //change me plz or i will kill myself
 
 let line = 0;
 let stops = 0;
@@ -27,9 +28,65 @@ window.onload = function() {
             loadLine();
     });
 
+    update();
     setInterval(update,50);
+    slowUpdate();
     setInterval(slowUpdate,10000);
 
+}
+
+function uploadHot() {
+
+    let data = {
+        name:"hotSmokinUp",
+        line:line,
+        stop1:stop1,
+        stop2:stop2,
+    };
+
+    $.ajax({
+        
+        method:"POST",
+        url:hotSmokinUrl,
+        dataType:"jsonp",
+        data:data,
+
+        success:function(r) {console.log("Sent data of request for hot smokin statistics")},
+        error:function(r) {console.log("An error occured in sending hot smokin statistics")},
+        
+
+    });
+
+}
+
+//change me plz
+async function downloadHot() {
+
+    let data = {
+        name:"hotSmokinDownload",
+    }
+
+    let response = 0;
+    let result = {hot1:"",hot2:"",hot3:""};
+
+    await $.ajax({
+
+        method:"POST",
+        url:hotSmokinUrl,
+        dataType:"jsonp",
+        data:data,
+
+        success:function(r) {
+            response=r;
+        }
+
+    });
+
+    //fill the object 'result' with the data in 'response'
+
+    return {hot1:"vonal:megálló1 - megálló2",hot2:"vonal:megálló1 - megálló2",hot3:"vonal:megálló1 - megálló2"}; //instead of that
+    //return result
+    
 }
 
 function checkSegment() {
@@ -233,7 +290,10 @@ async function slowUpdate() {
 
     if (isUpdatingHotSmoke) {
 
-        //download hot smokin'
+        let hot = downloadHot();
+        document.getElementById("hot-smoke-1").innerHTML=hot.hot1;
+        document.getElementById("hot-smoke-1").innerHTML=hot.hot2;
+        document.getElementById("hot-smoke-1").innerHTML=hot.hot3;
 
     }
 
@@ -254,6 +314,7 @@ async function update() {
     if (checkSegment()==1) {
 
         //upload for hot smokin'
+        uploadHot();
 
         let trips = await downloadSegment();
         updateSegment(trips);

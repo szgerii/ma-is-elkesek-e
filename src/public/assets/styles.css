@@ -1,8 +1,9 @@
 :root {
 
     
-    --fontSize-title:70pt;
-    --fontSize-big:60pt; /* font size for title and main content */
+    --fontSize-title:70pt; /* font size for the big title*/
+    --fontSize-big:60pt; /* font size for main content */
+    --fontSize-medium:26pt; /*font size for texts like hot smokin' */
     --fontSize-main:18pt; /* font size for input boxes */
 
     --color-text:white; /* color of main text */
@@ -15,8 +16,10 @@
 
     --width-topBar: 60%; /* width of topBar in document */
     --width-inputBox: 15%; /* width of input boxes in document */
-    --width-mainContent: 85%; /*width of main content box in document */
+    --width-mainContent: 100%; /*width of main content box in document */
     --width-inputElement: 90%; /* width of input elements in input boxes */
+
+    --hot-smoke-height: 200px; /*Height of hot smoke */
 
     --margin-bigBreak: 40pt; /* margin for big breaks between boxes */
     --margin-smallBreak: 20pt; /* margin for small breaks between boxes */
@@ -65,19 +68,28 @@ body {
 }
 
 #left {
-    float:left;
+    position:fixed;
     width:var(--width-inputBox);
 }
 
 #content-main {
 
-    float:right;
+    float:left;
     width:var(--width-mainContent);
 
 }
 
 #footer {
-    height:150px;
+
+    border-top: 2px solid var(--color-box);
+    max-height:var(--hot-smoke-height);
+
+}
+
+#hot-smoke-content {
+
+    width:100%;
+
 }
 
 .icon-in-text {
@@ -128,4 +140,22 @@ body {
 .vertical-content-wrapper {
     width:100%;
     display: inline-block;
+}
+
+.footer-title {
+    font-size:var(--fontSize-medium);
+    color:var(--color-text);
+}
+
+.hot-smoke-split {
+
+    width:33%;
+    display: inline-block;
+
+}
+.hot-smoke-box {
+    width:70%;
+    border: 1px solid var(--color-box);
+    font-size:var(--fontSize-medium);
+    color:var(--color-text);
 }
