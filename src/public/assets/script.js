@@ -143,23 +143,28 @@ function checkSegment() {
 class CalculatedTrip {
 
     time1 = 0;
+    normalTime1 = 0;
     time2 = 0;
-
-    constructor(time2) {
-
-        this.time2 = time2;
-    
-        this.time1 = 0;
-
-
-    }
+    normalTime2 = 0;
 
     setTime1(time1) {
         this.time1 = time1;
+        this.normalTime1 = time1;
+    }
+
+    setTime1(time1, normalTime1) {
+        this.time1 = time1;
+        this.normalTime1 = normalTime1;
     }
 
     setTime2(time2) {
         this.time2 = time2;
+        this.normalTime2 = time2;
+    }
+
+    setTime2(time2, normalTime2) {
+        this.time2 = time2;
+        this.normalTime2 = normalTime2;
     }
 
     getTravelTime() {
@@ -168,6 +173,17 @@ class CalculatedTrip {
         let date2 = new Date(this.time2*1000);
 
         return (date2.getTime()-date1.getTime()) /1000 /60
+
+    }
+
+    getLatency() {
+
+        let latency1 = this.time1-this.normalTime1;
+        let latency2 = this.time2-this.normalTime2;
+
+        let totalLatency = (latency1-latency2)/60;
+
+        return totalLatency;
 
     }
 
@@ -208,12 +224,16 @@ async function downloadSegment() {
         let currentTrip = 0;
         if (!isFinalStop) {
             if (departures[i].predictedArrivalTime==undefined) {
-                currentTrip = new CalculatedTrip(departures[i].arrivalTime);
+                //no difference between predicted and normal
+                currentTrip = new CalculatedTrip();
+                currentTrip.setTime2(departures[i].arrivalTime);
             } else {
-                currentTrip = new CalculatedTrip(departures[i].predictedArrivalTime);
+                //there is difference between predicted and normal
+                currentTrip = new CalculatedTrip();
+                currentTrip.setTime2(departures[i].predictedArrivalTime, departures[i].arrivalTime);
             }
         } else {
-            currentTrip = new CalculatedTrip(-1);
+            currentTrip = new CalculatedTrip();
         }
 
         trips.push(currentTrip);
@@ -236,7 +256,7 @@ async function downloadSegment() {
                             currentTrip.setTime1(stopTimes[i].departureTime);
                         } else {
                             //there is difference between predicted and normal
-                            currentTrip.setTime1(stopTimes[i].predictedDepartureTime);
+                            currentTrip.setTime1(stopTimes[i].predictedDepartureTime, stopTimes[i].departureTime);
                         }
 
                         break;
@@ -249,7 +269,7 @@ async function downloadSegment() {
                         currentTrip.setTime2(arrival.arrivalTime);
                     } else {
                         //there is difference between predicted and normal
-                        currentTrip.setTime2(arrival.predictedArrivalTime);
+                        currentTrip.setTime2(arrival.predictedArrivalTime, arrival.arrivalTime);
                     }
                 }
             }
@@ -275,18 +295,27 @@ function updateSegment(trips) {
     }
 
     let travelTimesTotal = 0;
+    let latencyTotal = 0;
     for (let i=0; i<usefulTrips.length; i++) {
 
         travelTimesTotal+=usefulTrips[i].getTravelTime();
+        latencyTotal+=usefulTrips[i].getLatency();
 
     }
 
-    let avg = Math.round(travelTimesTotal/usefulTrips.length);
-    if (isNaN(avg)) {
+    let avgTravelTime = Math.round(travelTimesTotal/usefulTrips.length);
+    let avgLatency = Math.round(latencyTotal/usefulTrips.length);
+
+    if (isNaN(avgTravelTime)||isNaN(avgLatency)) {
         document.getElementById("result").innerHTML = "Hiba történt a számítás során";
         console.log(trips);
     } else {
-        document.getElementById("result").innerHTML = avg + " perc átlag utazási idő a szakaszon";
+        document.getElementById("result").innerHTML = (
+            avgTravelTime + 
+            " perc átlag utazási idő a szakaszon <br />"+
+            avgLatency +
+            " perc átlag felszedett késés a szakaszon"
+        );
     }     
     
 }
