@@ -9,7 +9,7 @@ let variant1 = 0;
 let variant2 = 0;
 let currentVariant = variant1;
 
-let isUpdatingHotSmoke = false;
+let isUpdatingHotSmoke = true;
 let isUpdatingSegment = false;
 
 let stop1 = 0;
@@ -38,7 +38,7 @@ window.onload = function() {
 function uploadHot() {
 
     let data = {
-        name:"hotSmokinUp",
+        name:"hotSmokinUpload",
         line:line,
         stop1:stop1,
         stop2:stop2,
@@ -51,8 +51,8 @@ function uploadHot() {
         dataType:"jsonp",
         data:data,
 
-        success:function(r) {console.log("Sent data of request for hot smokin statistics")},
-        error:function(r) {console.log("An error occured in sending hot smokin statistics")},
+        success:function(r) {console.log("Sent data for hot smokin statistics")},
+        error:function(r) {console.log("An error while uploading hot smokin' data")},
         
 
     });
@@ -66,9 +66,6 @@ async function downloadHot() {
         name:"hotSmokinDownload",
     }
 
-    let response = 0;
-    let result = {hot1:"",hot2:"",hot3:""};
-
     await $.ajax({
 
         method:"POST",
@@ -77,15 +74,23 @@ async function downloadHot() {
         data:data,
 
         success:function(r) {
-            response=r;
+            document.getElementById("hot-smoke-1").innerHTML=r.hot1;
+            document.getElementById("hot-smoke-2").innerHTML=r.hot2;
+            document.getElementById("hot-smoke-3").innerHTML=r.hot3;
+        },
+
+        error:function() {
+            console.log("An error occured while downloading hot smokin' data")
+            document.getElementById("hot-smoke-1").innerHTML="Hot smokin' #1";
+            document.getElementById("hot-smoke-2").innerHTML="Hot smokin' #2";
+            document.getElementById("hot-smoke-3").innerHTML="Hot smokin' #3";
         }
 
     });
 
     //fill the object 'result' with the data in 'response'
 
-    return {hot1:"vonal:megálló1 - megálló2",hot2:"vonal:megálló1 - megálló2",hot3:"vonal:megálló1 - megálló2"}; //instead of that
-    //return result
+    
     
 }
 
@@ -290,10 +295,7 @@ async function slowUpdate() {
 
     if (isUpdatingHotSmoke) {
 
-        let hot = downloadHot();
-        document.getElementById("hot-smoke-1").innerHTML=hot.hot1;
-        document.getElementById("hot-smoke-1").innerHTML=hot.hot2;
-        document.getElementById("hot-smoke-1").innerHTML=hot.hot3;
+        downloadHot();
 
     }
 
