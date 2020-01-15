@@ -5,6 +5,8 @@ const hotSmokinUrl = ""; //change me plz or i will kill myself
 let line = 0;
 let stops = 0;
 
+let time = 10;
+
 let variant1 = 0;
 let variant2 = 0;
 let currentVariant = variant1;
@@ -32,6 +34,20 @@ window.onload = function() {
     setInterval(update,50);
     slowUpdate();
     setInterval(slowUpdate,10000);
+
+}
+
+function updateTime() {
+
+    let dd = document.querySelector("#dropdown-time");
+
+    time = Number(dd.options[dd.selectedIndex].value);
+
+    if (currentVariant!=0) {
+
+        updateStops();
+
+    }
 
 }
 
@@ -208,7 +224,7 @@ async function downloadSegment() {
         dataType: "jsonp",
         data: {
             stopId:id,
-            minutesBefore:30,
+            minutesBefore:time,
             minutesAfter:0,
             includeReferences:false
         },
@@ -303,8 +319,8 @@ function updateSegment(trips) {
 
     }
 
-    let avgTravelTime = Math.round(travelTimesTotal/usefulTrips.length);
-    let avgLatency = Math.round(latencyTotal/usefulTrips.length);
+    let avgTravelTime = Math.round(travelTimesTotal/usefulTrips.length *10) /10;
+    let avgLatency = Math.round(latencyTotal/usefulTrips.length *10) /10;
 
     if (isNaN(avgTravelTime)||isNaN(avgLatency)) {
         document.getElementById("result").innerHTML = "Hiba történt a számítás során";
