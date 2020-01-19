@@ -163,7 +163,7 @@ class CalculatedTrip {
     time2 = 0;
     normalTime2 = 0;
 
-    setTime1(time1) {
+    setOnlyTime1(time1) {
         this.time1 = time1;
         this.normalTime1 = time1;
     }
@@ -173,7 +173,7 @@ class CalculatedTrip {
         this.normalTime1 = normalTime1;
     }
 
-    setTime2(time2) {
+    setOnlyTime2(time2) {
         this.time2 = time2;
         this.normalTime2 = time2;
     }
@@ -194,10 +194,15 @@ class CalculatedTrip {
 
     getLatency() {
 
-        let latency1 = this.time1-this.normalTime1;
-        let latency2 = this.time2-this.normalTime2;
+        let date1 = new Date(this.time1*1000);
+        let normalDate1 = new Date(this.normalTime1*1000);
+        let date2 = new Date(this.time2*1000);
+        let normalDate2 = new Date(this.normalTime2*1000);
+        
+        let latency1 = date1.getTime()-normalDate1.getTime();
+        let latency2 = date2.getTime()-normalDate2.getTime();
 
-        let totalLatency = (latency1-latency2)/60;
+        let totalLatency = (latency1-latency2) /1000 /60;
 
         return totalLatency;
 
@@ -242,7 +247,7 @@ async function downloadSegment() {
             if (departures[i].predictedArrivalTime==undefined) {
                 //no difference between predicted and normal
                 currentTrip = new CalculatedTrip();
-                currentTrip.setTime2(departures[i].arrivalTime);
+                currentTrip.setOnlyTime2(departures[i].arrivalTime);
             } else {
                 //there is difference between predicted and normal
                 currentTrip = new CalculatedTrip();
@@ -269,7 +274,7 @@ async function downloadSegment() {
 
                         if (stopTimes[i].predictedDepartureTime==undefined) {
                             //no difference between predicted and normal
-                            currentTrip.setTime1(stopTimes[i].departureTime);
+                            currentTrip.setOnlyTime1(stopTimes[i].departureTime);
                         } else {
                             //there is difference between predicted and normal
                             currentTrip.setTime1(stopTimes[i].predictedDepartureTime, stopTimes[i].departureTime);
@@ -282,7 +287,7 @@ async function downloadSegment() {
                     let arrival = stopTimes[stopTimes.length-1];
                     if (arrival.predictedArrivalTime==undefined) {
                         //no difference between predicted and normal
-                        currentTrip.setTime2(arrival.arrivalTime);
+                        currentTrip.setOnlyTime2(arrival.arrivalTime);
                     } else {
                         //there is difference between predicted and normal
                         currentTrip.setTime2(arrival.predictedArrivalTime, arrival.arrivalTime);
