@@ -1,6 +1,6 @@
-
 const bkk = "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/";
-const hotSmokinUrl = ""; //change me plz or i will kill myself
+const hotSmokinUrlUpload = "/hotsmokin"; //change me plz or i will kill myself
+const hotSmokinUrlDownload = "/hotsmokin?raw=true"; //change me plz or i will kill myself
 
 let line = 0;
 let stops = 0;
@@ -43,10 +43,8 @@ function updateTime() {
 
     time = Number(dd.options[dd.selectedIndex].value);
 
-    if (currentVariant!=0) {
-
+    if (currentVariant !== 0) {
         updateStops();
-
     }
 
 }
@@ -55,20 +53,20 @@ function uploadHot() {
 
     let data = {
         name:"hotSmokinUpload",
-        line:line,
-        stop1:stop1,
-        stop2:stop2,
+        line:line.id,
+        stop1:stop1.id,
+        stop2:stop2.id
     };
 
     $.ajax({
         
         method:"POST",
-        url:hotSmokinUrl,
+        url:hotSmokinUrlUpload,
         dataType:"jsonp",
         data:data,
 
-        success:function(r) {console.log("Sent data for hot smokin statistics")},
-        error:function(r) {console.log("An error while uploading hot smokin' data")},
+        success: function(r) {console.log("Sent data for hot smokin statistics")},
+        error: function(r) {console.log("An error while uploading hot smokin' data")},
         
 
     });
@@ -77,29 +75,23 @@ function uploadHot() {
 
 //change me plz
 async function downloadHot() {
-
-    let data = {
-        name:"hotSmokinDownload",
-    }
-
     await $.ajax({
 
-        method:"POST",
-        url:hotSmokinUrl,
+        method:"GET",
+        url:hotSmokinUrlDownload,
         dataType:"jsonp",
-        data:data,
 
         success:function(r) {
-            document.getElementById("hot-smoke-1").innerHTML=r.hot1;
-            document.getElementById("hot-smoke-2").innerHTML=r.hot2;
-            document.getElementById("hot-smoke-3").innerHTML=r.hot3;
+            document.getElementById("hot-smoke-1").innerHTML = r.hot1;
+            document.getElementById("hot-smoke-2").innerHTML = r.hot2;
+            document.getElementById("hot-smoke-3").innerHTML = r.hot3;
         },
 
         error:function() {
             console.log("An error occured while downloading hot smokin' data")
-            document.getElementById("hot-smoke-1").innerHTML="Hot smokin' #1";
-            document.getElementById("hot-smoke-2").innerHTML="Hot smokin' #2";
-            document.getElementById("hot-smoke-3").innerHTML="Hot smokin' #3";
+            document.getElementById("hot-smoke-1").innerHTML = "Hot smokin' #1";
+            document.getElementById("hot-smoke-2").innerHTML = "Hot smokin' #2";
+            document.getElementById("hot-smoke-3").innerHTML = "Hot smokin' #3";
         }
 
     });

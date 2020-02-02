@@ -1,178 +1,156 @@
-const   http  = require('http'),
-        fs    = require('fs');
+let reqBody;
+const   http     = require('http'),
+		fs       = require('fs'),
+		mongoose = require('mongoose'),
+		section  = require('./models/section');
 
 // HTTP server stuff
 const PORT = 1104 || process.env.PORT;
-const server = http.createServer(ddosProtection);
+const DB_URL = "mongodb+srv://node-server:9ahtrXRyp5sRvm77@ma-is-elkesek-e-ejiov.mongodb.net/ma-is-elkesek-e?retryWrites=true&w=majority";
+const server = http.createServer(router);
 
 // Store the files in memory
-let files = [];
+const files = [];
 
-// DoS
-const DOS_BLOCK_TIMEOUT = 5 * 60000, DOS_PROTECTION_TIMEOUT = 0.5 * 60000, DOS_PLUS_TIMEOUT = 2 * 60000, DOS_MAX_REQUEST = 300;
-let dosProtection = {};
-
-// DDoS
-const DDOS_MAX_REQUEST_COUNT = 100;
-let requestCount = 0, ddosQueue = [];
+mongoose.connect(DB_URL, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true });
+mongoose.connection.on("connected", () => {
+	console.log(`Successfully connected to MongoDB on ${DB_URL}`);
+});
 
 start();
 
 // Loads files into memory and starts listening on PORT
 function start() {
+	files.push(fs.readFileSync(__dirname + "/public/index.html")); // 0
+	files.push(fs.readFileSync(__dirname + "/public/styles.css")); // 1
+	files.push(fs.readFileSync(__dirname + "/public/script.js")); // 2
+	files.push(fs.readFileSync(__dirname + "/public/lib/Jquery.js")); // 3
+	files.push(fs.readFileSync(__dirname + "/public/assets/images/background.png")); // 4
+	files.push(fs.readFileSync(__dirname + "/public/assets/images/icon.png")); // 5
 
-    files.push(fs.readFileSync(__dirname + "/public/index.html")); // 0
-    files.push(fs.readFileSync(__dirname + "/public/assets/styles.css")); // 1
-    files.push(fs.readFileSync(__dirname + "/public/assets/script.js")); // 2
-    files.push(fs.readFileSync(__dirname + "/public/assets/Jquery.js")); // 3
-    files.push(fs.readFileSync(__dirname + "/public/assets/images/background.png")); // 4
-    files.push(fs.readFileSync(__dirname + "/public/assets/images/icon.png")); // 5
-
-    server.listen(PORT);
-    console.log(`Server listening on port ${PORT}`);
-
+	server.listen(PORT);
+	console.log(`Server listening on port ${PORT}`);
 }
 
-// Queue the incoming request if the current request count has hit its limit
-function ddosProtection(req, res) {
-    
-    if (requestCount++ < DDOS_MAX_REQUEST_COUNT) {
-        router(req, res);
-    } else {
-        ddosQueue.push({req, res});
-    }
+async function router(req, res) {
+	await parseReq(req);
+	
+	// Check if the method is correct
+	if (req.method === "GET") {
+		// Send response to client
+		switch (req.baseUrl) {
+			case "/":
+				res.writeHead(200, {"Content-Type": "text/html"});
+				res.end(files[0]);
+				break;
+			
+			case "/styles.css":
+				res.writeHead(200, {"Content-Type": "text/css"});
+				res.end(files[1]);
+				break;
+			
+			case "/script.js":
+				res.writeHead(200, {"Content-Type": "text/javascript"});
+				res.end(files[2]);
+				break;
 
+			case "/Jquery.js":
+				res.writeHead(200, {"Content-Type": "text/javascript"});
+				res.end(files[3]);
+				break;
+
+			case "/assets/images/background.png":
+				res.writeHead(200, {"Content-Type": "image/png"});
+				res.end(files[4]);
+				break;
+
+			case "/assets/images/icon.png":
+				res.writeHead(200, {"Content-Type": "image/png"});
+				res.end(files[5]);
+				break;
+			
+			case "/hotsmokin":
+				if (req.query.raw) {
+					// send back RAW JSON
+				} else {
+					// send back HTML leaderboard page
+				}
+				break;
+
+			default:
+				res.writeHead(404, {"Content-Type": "text/html"});
+				res.end("404: Page Not Round");
+				break;
+		}
+	} else if (req.method === "POST") {
+		let data = [];
+		
+		req.on("data", chunk => {
+			data.push(chunk);
+		});
+	
+		req.on("end", async () => {
+			req.body = await queryParser(decodeURIComponent(data.concat().toString()));
+			
+			switch (req.baseUrl) {
+				case "/hotsmokin":
+					await updateHotSmokin(req.body.line, req.body.stop1, req.body.stop2);
+					break;
+			
+				default:
+					res.writeHead(404, {"Content-Type": "text/html"});
+					res.end("404: Page Not Round");
+					break;
+			}
+		});
+	} else {
+		res.writeHead(405, {"Content-Type": "text/html"});
+		res.end(`405: Érvénytelen HTTP metódus (${req.method})`);
+	}
 }
 
-function router(req, res) {
+function parseReq(req) {
+	const urlParts = req.url.split('?');
+	req.baseUrl = urlParts[0];
 
-    if (dosProtection[req.connection.remoteAddress] === undefined) {
-        dosProtection[req.connection.remoteAddress] = {
-            reqCount: 0,
-            blocked: false,
-            timeOfBlock: -1,
-            blockTimeout: 0,
-            numOfBlocks: 0};
-    }
+	if (!urlParts[1])
+		return;
 
-    // Increase the number of requests sent from this IP
-    const currentDosProtection = dosProtection[req.connection.remoteAddress];
-    currentDosProtection.reqCount = currentDosProtection.reqCount + 1 || 1;
-    
-    // Check if the client has reached the limit
-    if (currentDosProtection.reqCount > DOS_MAX_REQUEST) {
-        
-        if (currentDosProtection.blocked) {
-
-            // Clear DoS block if his timeout has expired, increase the timeout otherwise
-            if (Date.now() - currentDosProtection.timeOfBlock > currentDosProtection.blockTimeout) {
-                
-                currentDosProtection.blocked = false;
-                currentDosProtection.timeOfBlock = -1;
-                currentDosProtection.blockTimeout = 0;
-                currentDosProtection.reqCount = 0;
-
-            } else
-                currentDosProtection.blockTimeout += DOS_PLUS_TIMEOUT * currentDosProtection.numOfBlocks * (currentDosProtection.reqCount - DOS_MAX_REQUEST);
-            
-            if (currentDosProtection.blocked) {
-                handleNextRequest();
-                res.end(`DoS Védelem: Túl sok kérés jött erről az IP címről az utóbbi időben, úgyhogy tiltva lett ${currentDosProtection.blockTimeout / 60000} percre. Kérlek ne próbáld meg befrissíteni az oldalt, mert azzal csak plusz tiltási időt kapsz.`);
-            }
-
-        } else {
-
-            // Block the IP
-            currentDosProtection.blocked = true;
-            currentDosProtection.timeOfBlock = Date.now();
-            currentDosProtection.blockTimeout = DOS_BLOCK_TIMEOUT * ++currentDosProtection.numOfBlocks;
-       
-        }
-        
-        if (currentDosProtection.blocked)
-            return;
-
-    } else {
-
-        // Decrease the request count after a specified amount of time
-        setTimeout(() => {
-            if (!currentDosProtection.blocked)
-                currentDosProtection.reqCount--;
-        }, DOS_PROTECTION_TIMEOUT);
-    
-    }
-
-    // Check if the method is correct
-    if (req.method === "GET") {
-
-        // Send response to client
-        switch (getBaseUrl(req.url)) {
-
-            case "/":
-                res.writeHead(200, {"Content-Type": "text/html"});
-                res.end(files[0]);
-                break;
-            
-            case "/assets/styles.css":
-                res.writeHead(200, {"Content-Type": "text/css"});
-                res.end(files[1]);
-                break;
-            
-            case "/assets/script.js":
-                res.writeHead(200, {"Content-Type": "text/javascript"});
-                res.end(files[2]);
-                break;
-
-            case "/assets/Jquery.js":
-                res.writeHead(200, {"Content-Type": "text/javascript"});
-                res.end(files[3]);
-                break;
-
-            case "/assets/images/background.png":
-                res.writeHead(200, {"Content-Type": "image/png"});
-                res.end(files[4]);
-                break;
-
-            case "/assets/images/icon.png":
-                res.writeHead(200, {"Content-Type": "image/png"});
-                res.end(files[5]);
-                break;
-
-            default:
-                res.writeHead(404, {"Content-Type": "text/html"});
-                res.end("404: Page Not Round");
-                break;
-
-        }
-
-        handleNextRequest();
-
-    } else {
-
-        handleNextRequest();
-        res.writeHead(405, {"Content-Type": "text/html"});
-        res.end(`405: Nem megfelelő HTTP metódus (${req.method})`);
-
-    }
+	req.query = queryParser(urlParts[1]);
 }
 
-function handleNextRequest() {
-    
-    // Decrease the count of request handled at this moment (DDoS)
-    requestCount--;
-    
-    // Serve next request from queue if available
-    
-    if (ddosQueue.length === 0)
-        return;
+function queryParser(rawQuery) {
+	const query = {};
 
-    const nextReq = ddosQueue.shift();
-    router(nextReq.req, nextReq.res);
+	rawQuery.split('&').forEach(data => {
+		const splitData = data.split('=');
+		
+		if (splitData[1] === "true") {
+			query[splitData[0]] = true;
+		} else if (splitData[1] === "false") {
+			query[splitData[0]] = false;
+		} else if (!Number.isNaN(Number(splitData[1]))) {
+			query[splitData[0]] = Number(splitData[1]);
+		} else {
+			query[splitData[0]] = splitData[1];
+		}
+	});
 
+	return query;
 }
 
-function getBaseUrl(fullUrl) {
-
-    return fullUrl.split('?')[0];
-    
+async function updateHotSmokin(line, stop1, stop2) {
+	let sec = await section.findOne({ line: line, stop1: stop1, stop2: stop2 });
+	
+	if (sec) {
+		sec.count++;
+		await sec.save();
+	} else {
+		sec = new section();
+		sec.line = line;
+		sec.stop1 = stop1;
+		sec.stop2 = stop2;
+		sec.count = 1;
+		await sec.save();
+	}
 }
