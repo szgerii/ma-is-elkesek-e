@@ -19,9 +19,11 @@ Pistike: "Jajj de hülye voltam, hogy nem néztem rá  a *ma-is-elkesek-e.hu*-ra
 A szerver futtatásához szükséges a Node program. Indításhoz navigáljunk a projekt könyvtárán belül a *src* mappába egy parancssorban és írjuk be a következőt: 
 
 ```bash
+npm install
 node server.js
 ```
 
+Az első sor telepít mindent, amire a szervernek szüksége van, a második pedig elindítja azt.
 Voilá! A szerver mostantól a 1104 vagy a PORT környezeti változóban megadott porton fut.
 
 ## Készítők
