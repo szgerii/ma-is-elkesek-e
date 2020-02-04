@@ -1,15 +1,27 @@
 const mongoose = require("mongoose");
 
 const sectionSchema = new mongoose.Schema({
-	line: {
+	lineId: {
 		type: String,
 		required: true
 	},
-	stop1: {
+	stop1Id: {
 		type: String,
 		required: true
 	},
-	stop2: {
+	stop2Id: {
+		type: String,
+		required: true
+	},
+	lineName: {
+		type: String,
+		required: true
+	},
+	stop1Name: {
+		type: String,
+		required: true
+	},
+	stop2Name: {
 		type: String,
 		required: true
 	},

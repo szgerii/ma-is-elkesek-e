@@ -1,6 +1,5 @@
 const bkk = "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/";
-const hotSmokinUrlUpload = "/hotsmokin"; //change me plz or i will kill myself
-const hotSmokinUrlDownload = "/hotsmokin?raw=true"; //change me plz or i will kill myself
+const hotSmokinUrl = "/hotsmokin"; //change me plz or i will kill myself
 
 let line = 0;
 let stops = 0;
@@ -51,17 +50,23 @@ function updateTime() {
 
 function uploadHot() {
 
+    console.log(line);
+    console.log(stop1);
+
     let data = {
-        name:"hotSmokinUpload",
-        line:line.id,
-        stop1:stop1.id,
-        stop2:stop2.id
+        name: "hotSmokinUpload",
+        lineId: line.id,
+        stop1Id: stop1.id,
+        stop2Id: stop2.id,
+        lineName: line.shortName,
+        stop1Name: stop1.name,
+        stop2Name: stop2.name
     };
 
     $.ajax({
         
         method:"POST",
-        url:hotSmokinUrlUpload,
+        url:hotSmokinUrl,
         dataType:"jsonp",
         data:data,
 
@@ -78,17 +83,31 @@ async function downloadHot() {
     await $.ajax({
 
         method:"GET",
-        url:hotSmokinUrlDownload,
-        dataType:"jsonp",
+        url:hotSmokinUrl,
+        dataType:"json",
 
         success:function(r) {
-            document.getElementById("hot-smoke-1").innerHTML = r.hot1;
-            document.getElementById("hot-smoke-2").innerHTML = r.hot2;
-            document.getElementById("hot-smoke-3").innerHTML = r.hot3;
+            console.log(r.responseText);
+            if (r.hot1) {
+                document.getElementById("hot-smoke-1").innerHTML = `${r.hot1.line.name}: ${r.hot1.stop1.name} - ${r.hot1.stop2.name}`;
+            } else {
+                document.getElementById("hot-smoke-1").innerHTML = "Nincs elég adat az információ megjelenítéséhez";
+            }
+            if (r.hot2) {
+                document.getElementById("hot-smoke-2").innerHTML = `${r.hot2.line.name}: ${r.hot2.stop1.name} - ${r.hot2.stop2.name}`;
+            } else {
+                document.getElementById("hot-smoke-2").innerHTML = "Nincs elég adat az információ megjelenítéséhez";
+            }
+            if (r.hot3) {
+                document.getElementById("hot-smoke-3").innerHTML = `${r.hot3.line.name}: ${r.hot3.stop1.name} - ${r.hot3.stop2.name}`;
+            } else {
+                document.getElementById("hot-smoke-3").innerHTML = "Nincs elég adat az információ megjelenítéséhez";
+            }
         },
 
-        error:function() {
-            console.log("An error occured while downloading hot smokin' data")
+        error:function(r) {
+            console.log("An error occured while downloading hot smokin' data");
+            console.log(r.responseText);
             document.getElementById("hot-smoke-1").innerHTML = "Hot smokin' #1";
             document.getElementById("hot-smoke-2").innerHTML = "Hot smokin' #2";
             document.getElementById("hot-smoke-3").innerHTML = "Hot smokin' #3";
@@ -98,8 +117,6 @@ async function downloadHot() {
 
     //fill the object 'result' with the data in 'response'
 
-    
-    
 }
 
 function checkSegment() {
@@ -310,16 +327,14 @@ function updateSegment(trips) {
     let travelTimesTotal = 0;
     let latencyTotal = 0;
     for (let i=0; i<usefulTrips.length; i++) {
-
-        travelTimesTotal+=usefulTrips[i].getTravelTime();
-        latencyTotal+=usefulTrips[i].getLatency();
-
+        travelTimesTotal += usefulTrips[i].getTravelTime();
+        latencyTotal += usefulTrips[i].getLatency();
     }
 
-    let avgTravelTime = Math.round(travelTimesTotal/usefulTrips.length *10) /10;
-    let avgLatency = Math.round(latencyTotal/usefulTrips.length *10) /10;
+    let avgTravelTime = Math.round(travelTimesTotal/usefulTrips.length * 10) / 10;
+    let avgLatency = Math.round(latencyTotal/usefulTrips.length * 10) / 10;
 
-    if (isNaN(avgTravelTime)||isNaN(avgLatency)) {
+    if (isNaN(avgTravelTime) || isNaN(avgLatency)) {
         document.getElementById("result").innerHTML = "Hiba történt a számítás során";
         console.log(trips);
     } else {
@@ -336,9 +351,7 @@ function updateSegment(trips) {
 async function slowUpdate() {
 
     if (isUpdatingHotSmoke) {
-
         downloadHot();
-
     }
 
     if (isUpdatingSegment) {
@@ -549,7 +562,7 @@ async function loadStops() {
 
             fillVariants();
             
-        } 
+        }
 
     });
 
