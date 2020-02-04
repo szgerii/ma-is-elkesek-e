@@ -50,9 +50,6 @@ function updateTime() {
 
 function uploadHot() {
 
-    console.log(line);
-    console.log(stop1);
-
     let data = {
         name: "hotSmokinUpload",
         lineId: line.id,
@@ -87,7 +84,6 @@ async function downloadHot() {
         dataType:"json",
 
         success:function(r) {
-            console.log(r.responseText);
             if (r.hot1) {
                 document.getElementById("hot-smoke-1").innerHTML = `${r.hot1.line.name}: ${r.hot1.stop1.name} - ${r.hot1.stop2.name}`;
             } else {
@@ -107,7 +103,6 @@ async function downloadHot() {
 
         error:function(r) {
             console.log("An error occured while downloading hot smokin' data");
-            console.log(r.responseText);
             document.getElementById("hot-smoke-1").innerHTML = "Hot smokin' #1";
             document.getElementById("hot-smoke-2").innerHTML = "Hot smokin' #2";
             document.getElementById("hot-smoke-3").innerHTML = "Hot smokin' #3";

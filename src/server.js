@@ -72,9 +72,7 @@ async function router(req, res) {
 			
 			case "/hotsmokin":
 				res.writeHead(200, {"Content-Type": "application/json"});
-				const resp = await JSON.stringify(await getHotSmokin());
-				res.end(resp);
-				//res.end(JSON.stringify(await getHotSmokin()));
+				res.end(JSON.stringify(await getHotSmokin()));
 				break;
 
 			default:
