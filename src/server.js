@@ -6,11 +6,10 @@ const   http     = require('http'),
 const PORT = 1104 || process.env.PORT;
 const DB_URL = "mongodb+srv://node-server:9ahtrXRyp5sRvm77@ma-is-elkesek-e-ejiov.mongodb.net/ma-is-elkesek-e?retryWrites=true&w=majority";
 const server = http.createServer(router);
-
-// Store the files in memory
 const files = [];
+const top3 = {};
 
-let lastDBCheck, hot1, hot2, hot3;
+let lastDBCheck;
 
 mongoose.connect(DB_URL, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true });
 mongoose.connection.on("connected", () => {
@@ -71,8 +70,12 @@ async function router(req, res) {
 				break;
 			
 			case "/hotsmokin":
-				res.writeHead(200, {"Content-Type": "application/json"});
-				res.end(JSON.stringify(await getHotSmokin()));
+				getHotSmokin().then(top3 => {
+					res.writeHead(200, {"Content-Type": "application/json"});
+					res.end(JSON.stringify(top3));
+				}).catch(err => {
+					console.error(err);
+				});
 				break;
 
 			default:
@@ -93,7 +96,7 @@ async function router(req, res) {
 			switch (req.baseUrl) {
 				case "/hotsmokin":
 					const b = req.body;
-					await updateHotSmokin(b.lineId, b.lineName, b.stop1Id, b.stop1Name, b.stop2Id, b.stop2Name);
+					await updateSection(b.lineId, b.lineName, b.stop1Id, b.stop1Name, b.stop2Id, b.stop2Name);
 					break;
 			
 				default:
@@ -140,7 +143,7 @@ function queryParser(rawQuery, detectType) {
 	return query;
 }
 
-async function updateHotSmokin(lineId, lineName, stop1Id, stop1Name, stop2Id, stop2Name) {
+async function updateSection(lineId, lineName, stop1Id, stop1Name, stop2Id, stop2Name) {
 	let sec = await section.findOne({ lineId: lineId, stop1Id: stop1Id, stop2Id: stop2Id });
 	
 	if (sec) {
@@ -151,7 +154,6 @@ async function updateHotSmokin(lineId, lineName, stop1Id, stop1Name, stop2Id, st
 		sec.lineId = lineId;
 		sec.stop1Id = stop1Id;
 		sec.stop2Id = stop2Id;
-		console.log(lineName);
 		sec.lineName = lineName.replace(/\+/g, " ");
 		sec.stop1Name = stop1Name.replace(/\+/g, " ");
 		sec.stop2Name = stop2Name.replace(/\+/g, " ");
@@ -161,19 +163,34 @@ async function updateHotSmokin(lineId, lineName, stop1Id, stop1Name, stop2Id, st
 }
 
 function getHotSmokin() {
-	if (!lastDBCheck || Date.now() - lastDBCheck > 30000 || !hot1 || !hot2 || !hot3) {
-		hot1 = null;
-		hot2 = null;
-		hot3 = null;
+	return new Promise((resolve, reject) => {
+		if (!lastDBCheck || Date.now() - lastDBCheck > 5000 || !top3.hot1 || !top3.hot2 || !top3.hot3) {
+			updateHotSmokin().then(() => {
+				resolve(top3);
+			}).catch(err => {
+				reject(err);
+			});
+
+			lastDBCheck = Date.now();
+		} else {
+			resolve(top3);
+		}
+	});
+}
+
+function updateHotSmokin() {
+	return new Promise((resolve, reject) => {
+		top3.hot1 = null;
+		top3.hot2 = null;
+		top3.hot3 = null;
 		
 		section.find({}).sort("-count").limit(3).exec((err, secs) => {
 			if (err) {
-				console.log(err);
-				return;
+				reject(err);
 			}
 
 			if (secs.length >= 1) {
-				hot1 = {
+				top3.hot1 = {
 					line: {
 						id: secs[0].lineId,
 						name: secs[0].lineName
@@ -190,7 +207,7 @@ function getHotSmokin() {
 			}
 
 			if (secs.length >= 2) {
-				hot2 = {
+				top3.hot2 = {
 					line: {
 						id: secs[1].lineId,
 						name: secs[1].lineName
@@ -207,7 +224,7 @@ function getHotSmokin() {
 			}
 
 			if (secs.length >= 3) {
-				hot3 = {
+				top3.hot3 = {
 					line: {
 						id: secs[2].lineId,
 						name: secs[2].lineName
@@ -222,14 +239,8 @@ function getHotSmokin() {
 					}
 				};
 			}
+
+			resolve();
 		});
-
-		lastDBCheck = Date.now();
-	}
-
-	return {
-		hot1: hot1,
-		hot2: hot2,
-		hot3: hot3
-	};
+	});
 }

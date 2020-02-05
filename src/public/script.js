@@ -103,9 +103,9 @@ async function downloadHot() {
 
         error:function(r) {
             console.log("An error occured while downloading hot smokin' data");
-            document.getElementById("hot-smoke-1").innerHTML = "Hot smokin' #1";
-            document.getElementById("hot-smoke-2").innerHTML = "Hot smokin' #2";
-            document.getElementById("hot-smoke-3").innerHTML = "Hot smokin' #3";
+            document.getElementById("hot-smoke-1").innerHTML = "An error occured during the download of hot smokin' #1 from the server";
+            document.getElementById("hot-smoke-2").innerHTML = "An error occured during the download of hot smokin' #2 from the server";
+            document.getElementById("hot-smoke-3").innerHTML = "An error occured during the download of hot smokin' #3 from the server";
         }
 
     });
