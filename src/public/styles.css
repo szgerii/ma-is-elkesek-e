@@ -1,16 +1,15 @@
 :root {
-
     
-    --fontSize-title:12vh; /* font size for the big title*/             /* originally 70pt */
-    --fontSize-big:9vh; /* font size for main content */               /* originally 60pt */
-    --fontSize-medium:4vh; /*font size for texts like hot smokin' */       /* originally 26pt */
-    --fontSize-main:3vh; /* font size for input boxes */                   /* originally 18pt */
+    --fontSize-title: 12vh; /* font size for the big title*/             /* originally 70pt */
+    --fontSize-big: 9vh; /* font size for main content */               /* originally 60pt */
+    --fontSize-medium: 4vh; /*font size for texts like hot smokin' */       /* originally 26pt */
+    --fontSize-main: 3vh; /* font size for input boxes */                   /* originally 18pt */
 
-    --color-text:white; /* color of main text */
-    --color-box:rgb(0, 120, 180); /* background color of boxes */
-    --color-box-transparent:rgba(0,120,180,0.0); /* background color for partly transparent box */
+    --color-text: white; /* color of main text */
+    --color-box: rgb(0, 120, 180); /* background color of boxes */
+    --color-box-transparent: rgba(0,120,180,0.0); /* background color for partly transparent box */
 
-    --borderRadius-perfect:1.3vh; /* the one and only perfect border radius for boxes */ /* originally 12px */
+    --borderRadius-perfect: 1.3vh; /* the one and only perfect border radius for boxes */ /* originally 12px */
 
     --fontFamily-beautiful: Calibri; /* Beautiful font family used EVERYWHERE */
 
@@ -32,8 +31,8 @@
 
 body {
 
-    background:linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.8)), url("assets/images/background.png");
-    background-size:cover;
+    background: linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.8)), url("assets/images/background.png");
+    background-size: cover;
     background-attachment: fixed;
     font-family: var(--fontFamily-beautiful);
     
@@ -42,10 +41,10 @@ body {
 
 #top {
 
-    background-color:var(--color-box-transparent);
-    width:var(--width-topBar);
-    margin-bottom:var(--margin-bigBreak);
-    border-radius:var(--borderRadius-perfect);
+    background-color: var(--color-box-transparent);
+    width: var(--width-topBar);
+    margin-bottom: var(--margin-bigBreak);
+    border-radius: var(--borderRadius-perfect);
 
 }
 
@@ -62,33 +61,33 @@ body {
 
     background-color: var(--color-box);
     width: 100%;
-    margin-bottom:var(--margin-smallBreak);
+    margin-bottom: var(--margin-smallBreak);
     border-radius: var(--borderRadius-perfect);
 
 }
 
 #left {
-    position:fixed;
-    width:var(--width-inputBox);
+    position: fixed;
+    width: var(--width-inputBox);
 }
 
 #content-main {
 
-    float:left;
-    width:var(--width-mainContent);
+    float: left;
+    width: var(--width-mainContent);
 
 }
 
 #footer {
 
     border-top: 2px solid var(--color-box);
-    max-height:var(--hot-smoke-height);
+    max-height: var(--hot-smoke-height);
 
 }
 
 #hot-smoke-content {
 
-    width:100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
@@ -98,25 +97,25 @@ body {
 
 .icon-in-text {
 
-    height:var(--fontSize-big);
+    height: var(--fontSize-big);
     vertical-align: sub;
 
 }
 
 .title-text {
 
-    font-size:var(--fontSize-title);
-    color:var(--color-text);
-    margin:var(--margin-main);
+    font-size: var(--fontSize-title);
+    color: var(--color-text);
+    margin: var(--margin-main);
 
 }
 
 .pick-line-input {
 
     text-align: var(--alignment-inInputField);
-    margin:var(--margin-main);
+    margin: var(--margin-main);
     font-size: var(--fontSize-main);
-    width:var(--width-inputElement);
+    width: var(--width-inputElement);
     border-radius: var(--borderRadius-perfect);
     font-family: var(--fontFamily-beautiful);
 
@@ -125,9 +124,9 @@ body {
 .pick-stop-input {
 
     text-align: var(--alignment-inInputField);
-    margin:var(--margin-main);
+    margin: var(--margin-main);
     font-size: var(--fontSize-main);
-    width:var(--width-inputElement);
+    width: var(--width-inputElement);
     border-radius: var(--borderRadius-perfect);
     font-family: var(--fontFamily-beautiful);
 
@@ -135,20 +134,24 @@ body {
 
 .main-text {
 
-    font-size:var(--fontSize-big);
-    color:var(--color-text);
-    background-color:var(--color-box-transparent);
+    font-size: var(--fontSize-big);
+    color: var(--color-text);
+    background-color: var(--color-box-transparent);
 
 }
 
 .vertical-content-wrapper {
-    width:100%;
+
+    width: 100%;
     display: inline-block;
+
 }
 
 .footer-title {
-    font-size:var(--fontSize-medium);
-    color:var(--color-text);
+
+    font-size: var(--fontSize-medium);
+    color: var(--color-text);
+
 }
 
 .hot-smoke-split {
@@ -158,9 +161,11 @@ body {
     
 }
 .hot-smoke-box {
-    width:70%;
+
+    width: 70%;
     border: 1px solid var(--color-box);
-    font-size:var(--fontSize-medium);
-    color:var(--color-text);
+    font-size: var(--fontSize-medium);
+    color: var(--color-text);
     text-align: center;
+
 }

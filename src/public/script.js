@@ -1,25 +1,26 @@
 const bkk = "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/";
-const hotSmokinUrl = "/hotsmokin"; //change me plz or i will kill myself
+const hotSmokinUrl = "/hotsmokin";
 
-let line = 0;
-let stops = 0;
+let line = 0; //Global variable of the chosen line
+let stops = 0; //Global variable of the list of stops
 
-let time = 10;
+let time = 10; //Global variable of the number of minutes chosen
 
-let variant1 = 0;
-let variant2 = 0;
-let currentVariant = variant1;
+let variant1 = 0; //Global variable of the 1st variant of the chosen line
+let variant2 = 0; //Global variable of the 2nd variant of the chosen line
+let currentVariant = variant1; //Global variable of the chosen variant 
 
-let isUpdatingHotSmoke = true;
-let isUpdatingSegment = false;
+let isUpdatingHotSmoke = true; //Global variable determining whether hot smokin' is being updated or not
+let isUpdatingSegment = false; //Global variable determining whether the segment displayed is being updater or not 
 
-let stop1 = 0;
-let stop2  = 0;
-let isFinalStop = false;
-let stop2ForFinalStop = 0;
+let stop1 = 0; //Global variable of the 1st stop chosen
+let stop2  = 0; //Global variable of the 2nd stop chosen
+let isFinalStop = false; //Global variable determining whether the 2nd stop is the final stop of that variant(special case) or not
+let stop2ForFinalStop = 0; //Global variable of the stop that is used to get information about the real 2nd stop if it's the last stop
 
-let stopsUpdated = false;
+let stopsUpdated = false; //Global variable determinig whether the stops have been updated since the last update or not
 
+//Set up slow and quick update ticks and set eventListeners
 window.onload = function() {
     
     let pickLineText = document.getElementById("pick-line-text");
@@ -36,6 +37,7 @@ window.onload = function() {
 
 }
 
+//Function for updating the stops when the time-dropdown is changed
 function updateTime() {
 
     let dd = document.querySelector("#dropdown-time");
@@ -48,6 +50,7 @@ function updateTime() {
 
 }
 
+//Function for uploading data for hot smokin' statistics
 function uploadHot() {
 
     let data = {
@@ -75,7 +78,7 @@ function uploadHot() {
 
 }
 
-//change me plz
+//Function for downloading hot smokin' top 3 and showing them
 async function downloadHot() {
     await $.ajax({
 
@@ -110,10 +113,9 @@ async function downloadHot() {
 
     });
 
-    //fill the object 'result' with the data in 'response'
-
 }
 
+//Function for checking the selected stops
 function checkSegment() {
 
     if (stop1==0||stop2==0) {
@@ -160,6 +162,7 @@ function checkSegment() {
 
 }
 
+//One CalculatedTrip Object represents the times when a specific trip arrived/departed at/from a selected stop 
 class CalculatedTrip {
 
     time1 = 0;
@@ -167,26 +170,31 @@ class CalculatedTrip {
     time2 = 0;
     normalTime2 = 0;
 
+    //function for setting time1 (first stop departure) of the trip, when there was no predicted time(no latency)
     setOnlyTime1(time1) {
         this.time1 = time1;
         this.normalTime1 = time1;
     }
 
+    //Function for setting time1 (first stop departure) of the trip, when there was predicted time(the trip had latency)
     setTime1(time1, normalTime1) {
         this.time1 = time1;
         this.normalTime1 = normalTime1;
     }
 
+    //function for setting time2 (second stop arrival) of the trip, when there was no predicted time(no latency)
     setOnlyTime2(time2) {
         this.time2 = time2;
         this.normalTime2 = time2;
     }
 
+    //Function for setting time2 (second stop arrival) of the trip, when there was predicted time(the trip had latency)
     setTime2(time2, normalTime2) {
         this.time2 = time2;
         this.normalTime2 = normalTime2;
     }
 
+    //Function for calculating the travel time of that trip between the two stops
     getTravelTime() {
         
         let date1 = new Date(this.time1*1000);
@@ -196,6 +204,7 @@ class CalculatedTrip {
 
     }
 
+    //Function for calculating the latency that trip picked up between the two stops
     getLatency() {
 
         let date1 = new Date(this.time1*1000);
@@ -206,14 +215,15 @@ class CalculatedTrip {
         let latency1 = date1.getTime()-normalDate1.getTime();
         let latency2 = date2.getTime()-normalDate2.getTime();
 
-        let totalLatency = (latency1-latency2) /1000 /60;
+        let gainedLatency = (latency2-latency1) /1000 /60;
 
-        return totalLatency;
+        return gainedLatency;
 
     }
 
 }
 
+//Function for downloading all the necessary information about the trips and the stopTimes
 async function downloadSegment() {
 
     //calculate avg time pass between stop1 and stop2
@@ -308,6 +318,7 @@ async function downloadSegment() {
 
 }
 
+//Function for showing avg travel time and avg gained latency on the segment(between stop1 and stop2)
 function updateSegment(trips) {
     let usefulTrips = [];
     for (let i=0; i<trips.length; i++) {
@@ -331,6 +342,9 @@ function updateSegment(trips) {
 
     if (isNaN(avgTravelTime) || isNaN(avgLatency)) {
         document.getElementById("result").innerHTML = "Hiba történt a számítás során";
+        console.log("An error occured, avg travel time or avg latency came out to be NaN. Trips used for calculations:");
+        console.log(usefulTrips);
+        console.log("All downloaded trips:");
         console.log(trips);
     } else {
         document.getElementById("result").innerHTML = (
@@ -339,10 +353,14 @@ function updateSegment(trips) {
             avgLatency +
             " perc átlag felszedett késés a szakaszon"
         );
+        console.log("Calculation successfull, acg travel time: "+avgTravelTime+", avg gained latency: "+avgLatency+". Trips used:");
+        console.log(usefulTrips);
+        
     }     
     
 }
 
+//Function for the slow update(every 10 secs), updating hot smokin' and the segment, if it's currently being displayed
 async function slowUpdate() {
 
     if (isUpdatingHotSmoke) {
@@ -356,6 +374,7 @@ async function slowUpdate() {
 
 }
 
+//Function for the quick update(20TPS), checking if the stops were updated and if the segments are correct displaying information
 async function update() {
 
     if (!stopsUpdated) {
@@ -379,6 +398,7 @@ async function update() {
 
 }
 
+//Function for filling the stops from the selected variant into the stop dropdowns
 function fillStops() {
 
     clearStops();
@@ -408,6 +428,7 @@ function fillStops() {
 
 }
 
+//One routeDirection object represents a variant with a name and a list of stops
 class routeDirection {
 
     constructor(name, stops) {
@@ -419,6 +440,7 @@ class routeDirection {
 
     }
 
+    //Function for getting the stops for this specific variant from the full stop list according to the variant list
     loadRealStops() {
 
         let s = this.stops;
@@ -440,6 +462,7 @@ class routeDirection {
 
 }
 
+//Function for updating the stops when a stop dropdown is changed
 function updateStops() {
 
     let dd1 = document.getElementById("dropdown-stop1");
@@ -475,6 +498,7 @@ function updateStops() {
 
 }
 
+//Function for updating the variant when the variant dropdown is changed
 function updateVariant() {
     let dropdown = document.getElementById("dropdown-heading");
     let selectedText = dropdown.options[dropdown.selectedIndex].text;
@@ -486,6 +510,7 @@ function updateVariant() {
     fillStops();
 }
 
+//Function for filling the variants from the selected line into the variant dropdown
 function fillVariants() {
 
     variant1 = new routeDirection(variants[0].headsign, variants[0].stopIds);
@@ -507,6 +532,7 @@ function fillVariants() {
 
 }
 
+//Function for reseting the stops and variants and clearing the variants from the variant dropdown
 function resetStops() {
 
     stops = 0;
@@ -521,6 +547,7 @@ function resetStops() {
 
 }
 
+//Function for clearing the stops from the stop dropdowns
 function clearStops() {
 
     let dd1 = document.getElementById("dropdown-stop1");
@@ -535,6 +562,7 @@ function clearStops() {
 
 }
 
+//Function for downloading the list of stops and variants of the selected line
 async function loadStops() {
 
     await $.ajax({
@@ -563,6 +591,7 @@ async function loadStops() {
 
 }
 
+//Function for searching for the chosen line and downloading the information about it
 async function loadLine() {
 
     let input = document.getElementById("pick-line-text").value;
@@ -589,7 +618,6 @@ async function loadLine() {
         },
         success:function (r) {
             line = r.data.references.routes;
-            console.log(line);
             let done=false;
             for (let prop in line) {
                 if (line[prop].shortName.toLowerCase()==input.toLowerCase()) { //same name
