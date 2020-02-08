@@ -1,0 +1,54 @@
+[2020.02.08. 23:09:54] Successfully connected to the database
+[2020.02.08. 23:09:54] Successfully refreshed top 3 section from database
+[2020.02.08. 23:10:01] GET request at / from ::ffff:127.0.0.1
+[2020.02.08. 23:10:01] Sending 200 response to ::ffff:127.0.0.1
+[2020.02.08. 23:10:01] GET request at /styles.css from ::ffff:127.0.0.1
+[2020.02.08. 23:10:01] Sending 200 response to ::ffff:127.0.0.1
+[2020.02.08. 23:10:01] GET request at /script.js from ::ffff:127.0.0.1
+[2020.02.08. 23:10:01] Sending 200 response to ::ffff:127.0.0.1
+[2020.02.08. 23:10:01] GET request at /jquery.js from ::ffff:127.0.0.1
+[2020.02.08. 23:10:01] Sending 200 response to ::ffff:127.0.0.1
+[2020.02.08. 23:10:01] GET request at /assets/images/background.png from ::ffff:127.0.0.1
+[2020.02.08. 23:10:01] Sending 200 response to ::ffff:127.0.0.1
+[2020.02.08. 23:10:01] GET request at /assets/images/icon.png from ::ffff:127.0.0.1
+[2020.02.08. 23:10:01] Sending 200 response to ::ffff:127.0.0.1
+[2020.02.08. 23:10:01] GET request at /hotsmokin from ::ffff:127.0.0.1
+[2020.02.08. 23:10:01] Responding with cached top 3 list, 22171 ms before next update
+[2020.02.08. 23:10:01] Sending 200 response to ::ffff:127.0.0.1
+[2020.02.08. 23:10:08] POST request at /hotsmokin?callback=jQuery3210386287069186262_1581199801798 from ::ffff:127.0.0.1
+[2020.02.08. 23:10:08] Adding the following section to the database -> 151: Csepel, Határ utca - Karácsony Sándor utca
+[2020.02.08. 23:10:11] GET request at /hotsmokin from ::ffff:127.0.0.1
+[2020.02.08. 23:10:11] Responding with cached top 3 list, 12196 ms before next update
+[2020.02.08. 23:10:11] Sending 200 response to ::ffff:127.0.0.1
+[2020.02.08. 23:10:18] POST request at /hotsmokin?callback=jQuery3210386287069186262_1581199801801 from ::ffff:127.0.0.1
+[2020.02.08. 23:10:18] Increased the following section's count in the database -> 151: Csepel, Határ utca - Karácsony Sándor utca
+[2020.02.08. 23:10:20] POST request at /hotsmokin?callback=jQuery3210386287069186262_1581199801806 from ::ffff:127.0.0.1
+[2020.02.08. 23:10:20] Increased the following section's count in the database -> 151: Csepel, Határ utca - Karácsony Sándor utca
+[2020.02.08. 23:10:21] POST request at /hotsmokin?callback=jQuery3210386287069186262_1581199801810 from ::ffff:127.0.0.1
+[2020.02.08. 23:10:21] Increased the following section's count in the database -> 151: Csepel, Határ utca - Karácsony Sándor utca
+[2020.02.08. 23:10:21] GET request at /hotsmokin from ::ffff:127.0.0.1
+[2020.02.08. 23:10:21] Responding with cached top 3 list, 2196 ms before next update
+[2020.02.08. 23:10:21] Sending 200 response to ::ffff:127.0.0.1
+[2020.02.08. 23:10:23] POST request at /hotsmokin?callback=jQuery3210386287069186262_1581199801822 from ::ffff:127.0.0.1
+[2020.02.08. 23:10:23] Increased the following section's count in the database -> 151: Csepel, Határ utca - Karácsony Sándor utca
+[2020.02.08. 23:10:24] POST request at /hotsmokin?callback=jQuery3210386287069186262_1581199801814 from ::ffff:127.0.0.1
+[2020.02.08. 23:10:25] Increased the following section's count in the database -> 151: Csepel, Határ utca - Karácsony Sándor utca
+[2020.02.08. 23:12:08] POST request at /hotsmokin?callback=jQuery3210386287069186262_1581199801841 from ::ffff:127.0.0.1
+[2020.02.08. 23:12:08] Increased the following section's count in the database -> 151: Csepel, Határ utca - Karácsony Sándor utca
+[2020.02.08. 23:12:18] GET request at /hotsmokin from ::ffff:127.0.0.1
+[2020.02.08. 23:12:18] Successfully refreshed top 3 section from database
+[2020.02.08. 23:12:18] Sending 200 response to ::ffff:127.0.0.1
+[2020.02.08. 23:12:18] POST request at /hotsmokin?callback=jQuery3210386287069186262_1581199801855 from ::ffff:127.0.0.1
+[2020.02.08. 23:12:18] Increased the following section's count in the database -> 151: Csepel, Határ utca - Karácsony Sándor utca
+[2020.02.08. 23:12:20] GET request at /hotsmokin from ::ffff:127.0.0.1
+[2020.02.08. 23:12:20] Responding with cached top 3 list, 28265 ms before next update
+[2020.02.08. 23:12:20] Sending 200 response to ::ffff:127.0.0.1
+[2020.02.08. 23:12:20] POST request at /hotsmokin?callback=jQuery3210386287069186262_1581199801874 from ::ffff:127.0.0.1
+[2020.02.08. 23:12:20] Increased the following section's count in the database -> 151: Csepel, Határ utca - Karácsony Sándor utca
+[2020.02.08. 23:12:21] POST request at /hotsmokin?callback=jQuery3210386287069186262_1581199801901 from ::ffff:127.0.0.1
+[2020.02.08. 23:12:21] Increased the following section's count in the database -> 151: Csepel, Határ utca - Karácsony Sándor utca
+[2020.02.08. 23:12:23] POST request at /hotsmokin?callback=jQuery3210386287069186262_1581199801911 from ::ffff:127.0.0.1
+[2020.02.08. 23:12:23] Increased the following section's count in the database -> 151: Csepel, Határ utca - Karácsony Sándor utca
+[2020.02.08. 23:12:24] POST request at /hotsmokin?callback=jQuery3210386287069186262_1581199801915 from ::ffff:127.0.0.1
+[2020.02.08. 23:12:25] Increased the following section's count in the database -> 151: Csepel, Határ utca - Karácsony Sándor utca
+[2020.02.08. 23:12:49] Shutting down...

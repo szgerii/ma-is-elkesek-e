@@ -74,7 +74,7 @@ exports.log = (message) => {
 		fileOutputStream.write(msg + "\n");
 };
 
-exports.xLog = (message) => {
+exports.xlog = (message) => {
 	const msg = `[${getCurrentTime(true)}] ${message}`;
 	if (options["x-verbose"])
 		console.log(msg);
@@ -90,18 +90,34 @@ exports.error = (message) => {
 };
 
 exports.dir = (obj, message) => {
-	if (message) {
-		console.log(`[${getCurrentTime(true)}]`);
-		console.dir(obj);
+	if (options["verbose"] || options["x-verbose"]) {
+		if (message) {
+			console.log(`[${getCurrentTime(true)}]`);
+			console.dir(obj);
+		}
+		else {
+			console.log(`[${getCurrentTime(true)}] ${message}`);
+			console.dir(obj);
+		}
 	}
-	else {
-		console.log(`[${getCurrentTime(true)}] ${message}`);
-		console.dir(obj);
+};
+
+exports.xdir = (obj, message) => {
+	if (options["x-verbose"]) {
+		if (message) {
+			console.log(`[${getCurrentTime(true)}]`);
+			console.dir(obj);
+		}
+		else {
+			console.log(`[${getCurrentTime(true)}] ${message}`);
+			console.dir(obj);
+		}
 	}
 };
 
 exports.close = () => {
 	if (fileOutputReady) {
+		exports.log("LOGGER: Closing file stream...");
 		fileOutputStream.end();	
 		fileOutputReady = false;
 		options["file-output"] = false;

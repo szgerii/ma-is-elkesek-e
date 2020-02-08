@@ -28,7 +28,7 @@ async function setup() {
 	logger.set("silent", process.argv.includes("-s") || process.argv.includes("--silent"));
 	const outputArgIndex = process.argv.indexOf("-o");
 	if (outputArgIndex !== -1) {
-		logger.set("file-output-dir", process.argv[outputArgIndex + 1] || ".");
+		logger.set("file-output-dir", process.argv[outputArgIndex + 1] || "./logs");
 		logger.set("file-output-name", "server");
 		logger.set("file-output", true);
 	}
@@ -42,7 +42,7 @@ async function setup() {
 
 	getHotSmokin().catch(err => {
 		logger.error("Couldn't get top 3 list from database");
-		logger.xLog(err);
+		logger.xlog(err);
 	});
 
 	// Load public files into files
@@ -56,7 +56,7 @@ async function setup() {
 	// Mongoose setup
 	mongoose.connect(DB_URL, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true }).catch(err => {
 		logger.error("Couldn't connect to the database. Shutting down...");
-		logger.xLog(err);
+		logger.xlog(err);
 		process.exit(1);
 	});
 	
@@ -66,7 +66,7 @@ async function setup() {
 	
 	mongoose.connection.on("error", err => {
 		logger.error("Database connection was terminated. Shutting down...");
-		logger.xLog(err);
+		logger.xlog(err);
 		process.exit(1);
 	});
 	
@@ -82,61 +82,61 @@ function router(req, res) {
     	req.connection.remoteAddress || 
     	req.socket.remoteAddress || 
     	req.connection.socket.remoteAddress;
-	logger.xLog(`${req.method} request at ${req.url} from ${ip}`);
+	logger.xlog(`${req.method} request at ${req.url} from ${ip}`);
 	
 	if (req.method === "GET") {
 		switch (req.baseUrl) {
 			case "/":
 				res.writeHead(200, {"Content-Type": "text/html"});
 				res.end(files[0]);
-				logger.xLog(`Sending ${res.statusCode} response to ${ip}`);
+				logger.xlog(`Sending ${res.statusCode} response to ${ip}`);
 				break;
 			
 			case "/styles.css":
 				res.writeHead(200, {"Content-Type": "text/css"});
 				res.end(files[1]);
-				logger.xLog(`Sending ${res.statusCode} response to ${ip}`);
+				logger.xlog(`Sending ${res.statusCode} response to ${ip}`);
 				break;
 			
 			case "/script.js":
 				res.writeHead(200, {"Content-Type": "text/javascript"});
 				res.end(files[2]);
-				logger.xLog(`Sending ${res.statusCode} response to ${ip}`);
+				logger.xlog(`Sending ${res.statusCode} response to ${ip}`);
 				break;
 
 			case "/jquery.js":
 				res.writeHead(200, {"Content-Type": "text/javascript"});
 				res.end(files[3]);
-				logger.xLog(`Sending ${res.statusCode} response to ${ip}`);
+				logger.xlog(`Sending ${res.statusCode} response to ${ip}`);
 				break;
 
 			case "/assets/images/background.png":
 				res.writeHead(200, {"Content-Type": "image/png"});
 				res.end(files[4]);
-				logger.xLog(`Sending ${res.statusCode} response to ${ip}`);
+				logger.xlog(`Sending ${res.statusCode} response to ${ip}`);
 				break;
 
 			case "/assets/images/icon.png":
 				res.writeHead(200, {"Content-Type": "image/png"});
 				res.end(files[5]);
-				logger.xLog(`Sending ${res.statusCode} response to ${ip}`);
+				logger.xlog(`Sending ${res.statusCode} response to ${ip}`);
 				break;
 			
 			case "/hotsmokin":
 				getHotSmokin().then(top3 => {
 					res.writeHead(200, {"Content-Type": "application/json"});
 					res.end(JSON.stringify(top3));
-					logger.xLog(`Sending ${res.statusCode} response to ${ip}`);
+					logger.xlog(`Sending ${res.statusCode} response to ${ip}`);
 				}).catch(err => {
 					logger.error("Couldn't get top 3 list from database");
-					logger.xLog(err);
+					logger.xlog(err);
 				});
 				break;
 
 			default:
 				res.writeHead(404, {"Content-Type": "text/html"});
 				res.end("404: Page Not Round");
-				logger.xLog(`Sending ${res.statusCode} response to ${ip}`);
+				logger.xlog(`Sending ${res.statusCode} response to ${ip}`);
 				break;
 		}
 	} else if (req.method === "POST") {
@@ -158,14 +158,14 @@ function router(req, res) {
 				default:
 					res.writeHead(404, {"Content-Type": "text/html"});
 					res.end("404: Page Not Round");
-					logger.xLog(`Sending ${res.statusCode} response to ${ip}`);
+					logger.xlog(`Sending ${res.statusCode} response to ${ip}`);
 					break;
 			}
 		});
 	} else {
 		res.writeHead(405, {"Content-Type": "text/html"});
 		res.end(`405: Érvénytelen HTTP metódus (${req.method})`);
-		logger.xLog(`Sending ${res.statusCode} response to ${ip}`);
+		logger.xlog(`Sending ${res.statusCode} response to ${ip}`);
 	}
 }
 
@@ -226,7 +226,7 @@ async function updateSection(lineId, lineName, stop1Id, stop1Name, stop2Id, stop
 	if (sec) {
 		sec.count++;
 		await sec.save();
-		logger.xLog(`Increased the following section's count in the database -> ${sec.lineName}: ${sec.stop1Name} - ${sec.stop2Name}`);
+		logger.xlog(`Increased the following section's count in the database -> ${sec.lineName}: ${sec.stop1Name} - ${sec.stop2Name}`);
 	} else {
 		sec = new section();
 		sec.lineId = lineId;
@@ -237,7 +237,7 @@ async function updateSection(lineId, lineName, stop1Id, stop1Name, stop2Id, stop
 		sec.stop2Name = stop2Name.replace(/\+/g, " ");
 		sec.count = 1;
 		await sec.save();
-		logger.xLog(`Adding the following section to the database -> ${sec.lineName}: ${sec.stop1Name} - ${sec.stop2Name}`);
+		logger.xlog(`Adding the following section to the database -> ${sec.lineName}: ${sec.stop1Name} - ${sec.stop2Name}`);
 	}
 }
 
@@ -251,7 +251,7 @@ function getHotSmokin() {
 	return new Promise((resolve, reject) => {
 		if (!lastDBCheck || Date.now() - lastDBCheck > DB_REFRESH_INTERVAL || !top3.hot1 || !top3.hot2 || !top3.hot3) {
 			updateHotSmokin().then(() => {
-				logger.xLog("Successfully refreshed top 3 section from database");
+				logger.xlog("Successfully refreshed top 3 section from database");
 				resolve(top3);
 			}).catch(err => {
 				reject(err);
@@ -259,7 +259,7 @@ function getHotSmokin() {
 			
 			lastDBCheck = Date.now();
 		} else {
-			logger.xLog(`Responding with cached top 3 list, ${DB_REFRESH_INTERVAL - (Date.now() - lastDBCheck)} ms before next update`);
+			logger.xlog(`Responding with cached top 3 list, ${DB_REFRESH_INTERVAL - (Date.now() - lastDBCheck)} ms before next update`);
 			resolve(top3);
 		}
 	});
