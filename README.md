@@ -23,11 +23,19 @@ npm install
 node server.js
 ```
 
-Az első sor telepít mindent, amire a szervernek szüksége van, a második pedig elindítja azt.
+Az első sor telepít mindent, amire a szervernek szüksége van (ezt csak egyszer kell futtatni), a második pedig elindítja azt.
 Voilá! A szerver mostantól a 1104 vagy a PORT környezeti változóban megadott porton fut.
+
+### Naplózás
+
+Ahhoz, hogy a szerver *beszédes* módban induljon el, adjuk meg a parancssorban a program indítása mellé a "-v" vagy a "--verbose" paramétereket. Ez az olyan alapvető dolgokat fogja a konzolra írni, mint a szerver indítás/leállítás, adatbázis kapcsolódás és alapvető leírás a hibákról, ha történnek. Ha részletesebb hibaüzeneteket szeretnénk látni, arra van az:
+
+*Extra beszédes* mód. Ehhez "-xv"-t vagy "--extra-verbose"-t kell a szervernek megadni. Ez minden kapott kérést és elküldött választ naplózni fog, valamint az adatbázis ellenőrzéseket is. Hiba esetén kiírja az egész hiba objektumot.
+
+Ha a naplót fájlba is szeretnénk menteni, akkor azt az "-o [könyvtár név]" paraméterrel tehetjük meg, ahol a könyvtár név megszabja, hogy hova fognak kerülni a napló fájlok. Minden szerver indításnál létre fog hozni egy **server-[időbélyeg].log** fájlt. **Ehhez a fájlhoz a szerver futása alatt nem tanácsos hozzányúlni**, mivel a program folyamatosan nyitva tart a fájllal egy stream-et. A fájlba írás alapból *extra bőbeszédű* módra van állítva, és ezt egyelőre nem lehet megváltoztatni.
 
 ## Készítők
 
 - [Bandi1234](https://github.com/Bandi1234 "Bandi1234 GitHub Profilja") - Frontend
 - [hentesoposszum](https://github.com/hentesoposszum/ "hentesoposszum GitHub Profilja") - Backend
-- [Kris030](https://github.com/Kris030 "Kris030 GitHub Profilja") - Backend (kisebb segítségek) és [Bandi1234](https://github.com/Bandi1234 "Bandi1234 GitHub Profilja") kódjának megtisztítása
+- [Kris030](https://github.com/Kris030 "Kris030 GitHub Profilja") - [Bandi1234](https://github.com/Bandi1234 "Bandi1234 GitHub Profilja") kódjának megtisztítása
