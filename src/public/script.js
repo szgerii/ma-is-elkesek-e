@@ -395,8 +395,8 @@ function showSegmentInformation(trips) {
     let avgLatency = Math.round(latencyTotal/usefulTrips.length * 10) / 10;
 
     if (isNaN(avgTravelTime) || isNaN(avgLatency)) {
-        if (trips.length==0) {
-            document.getElementById("result").innerHTML = "A megadott időrtatamban egy busz sem haladt el a szakaszon";
+        if (usefulTrips.length==0) {
+            document.getElementById("result").innerHTML = "A megadott időrtatamban egy jármű sem haladt el a szakaszon";
         } else {
             document.getElementById("result").innerHTML = "Hiba történt a számítás során";
         }
