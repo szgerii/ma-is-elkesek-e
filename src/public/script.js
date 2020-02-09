@@ -11,14 +11,12 @@ let variant2 = 0; //Global variable of the 2nd variant of the chosen line
 let currentVariant = variant1; //Global variable of the chosen variant 
 
 let isUpdatingHotSmoke = true; //Global variable determining whether hot smokin' is being updated or not
-let isUpdatingSegment = false; //Global variable determining whether the segment displayed is being updater or not 
+let isUpdatingSegment = false; //Global variable determining whether the segment displayed is being updated or not 
 
 let stop1 = 0; //Global variable of the 1st stop chosen
 let stop2  = 0; //Global variable of the 2nd stop chosen
 let isFinalStop = false; //Global variable determining whether the 2nd stop is the final stop of that variant(special case) or not
 let stop2ForFinalStop = 0; //Global variable of the stop that is used to get information about the real 2nd stop if it's the last stop
-
-let stopsUpdated = false; //Global variable determinig whether the stops have been updated since the last update or not
 
 //Set up slow and quick update ticks and set eventListeners
 window.onload = function() {
@@ -30,8 +28,6 @@ window.onload = function() {
             loadLine();
     });
 
-    update();
-    setInterval(update,50);
     slowUpdate();
     setInterval(slowUpdate,10000);
 
@@ -71,7 +67,7 @@ function uploadHot() {
         data:data,
 
         success: function(r) {console.log("Sent data for hot smokin statistics")},
-        error: function(r) {console.log("An error while uploading hot smokin' data")},
+        error: function(r) {console.log("An error occured while uploading hot smokin' data")},
         
 
     });
@@ -87,6 +83,7 @@ async function downloadHot() {
         dataType:"json",
 
         success:function(r) {
+
             if (r.hot1) {
                 document.getElementById("hot-smoke-1").innerHTML = `${r.hot1.line.name}: ${r.hot1.stop1.name} - ${r.hot1.stop2.name}`;
             } else {
@@ -102,13 +99,16 @@ async function downloadHot() {
             } else {
                 document.getElementById("hot-smoke-3").innerHTML = "Nincs elég adat az információ megjelenítéséhez";
             }
+
         },
 
         error:function(r) {
+
             console.log("An error occured while downloading hot smokin' data");
             document.getElementById("hot-smoke-1").innerHTML = "An error occured during the download of hot smokin' #1 from the server";
             document.getElementById("hot-smoke-2").innerHTML = "An error occured during the download of hot smokin' #2 from the server";
             document.getElementById("hot-smoke-3").innerHTML = "An error occured during the download of hot smokin' #3 from the server";
+        
         }
 
     });
@@ -119,22 +119,29 @@ async function downloadHot() {
 function checkSegment() {
 
     if (stop1==0||stop2==0) {
+
         document.getElementById("stop1").innerHTML = "Megálló A";
         document.getElementById("stop2").innerHTML = "Megálló B";
         document.getElementById("result").innerHTML = "Kérjük válasszon érvényes buszjáratot!";
         return 0;
+
     } else {
+
         document.getElementById("stop1").innerHTML = stop1.name;
         document.getElementById("stop2").innerHTML = stop2.name;
+
     }
 
     if (stop1.id==stop2.id) {
+
         document.getElementById("result").innerHTML = "Kérjük különböző megállókat válasszon!";
         return 0;
+
     }
 
     let stops = currentVariant.stops;
     let correctOrder = false;
+
     for (let i=0; i<stops.length; i++) {
         
         if (stops[i].id==stop1.id) {
@@ -227,17 +234,20 @@ class CalculatedTrip {
 async function downloadSegment() {
 
     //calculate avg time pass between stop1 and stop2
-    //get all arrivals in the last '30' minutes at stop2
+    //get all arrivals in the last x minutes at stop2
     let departures = 0;
     let trips=[];
     let id = 0;
+
     if (isFinalStop) {
         id = stop2ForFinalStop.id;
     } else {
         id = stop2.id;
     }
     
-    await $.ajax({
+    //get the stopTimes
+    await $.ajax({ 
+
         method: "GET",
         url: bkk + "arrivals-and-departures-for-stop.json",
         dataType: "jsonp",
@@ -247,33 +257,58 @@ async function downloadSegment() {
             minutesAfter:0,
             includeReferences:false
         },
+
         success:function(r){
 
-            //we have some stopTimes, let's check when the associated trips visited stop1 
+            //we have some stopTimes, let's check when the associated trips visited the stops
             departures=r.data.entry.stopTimes;
 
+        },
+
+        error:function (xhr, ajaxOptions, thrownError) {
+
+            alert("Error in request:");
+            alert(thrownError);
+
         }
+
     });
 
+    //check stop times
     for (let i=0; i<departures.length; i++) {
+
         let currentTrip = 0;
+
+        //check stop2 time
         if (!isFinalStop) {
+
             if (departures[i].predictedArrivalTime==undefined) {
+
                 //no difference between predicted and normal
                 currentTrip = new CalculatedTrip();
                 currentTrip.setOnlyTime2(departures[i].arrivalTime);
+                console.log("Set stop2 time of a trip based on:");
+                console.log(departures[i]);
+
             } else {
+
                 //there is difference between predicted and normal
                 currentTrip = new CalculatedTrip();
                 currentTrip.setTime2(departures[i].predictedArrivalTime, departures[i].arrivalTime);
+                console.log("Set stop2 time of a trip based on:");
+                console.log(departures[i]);
+
             }
+
         } else {
             currentTrip = new CalculatedTrip();
         }
 
         trips.push(currentTrip);
         
+        //check stop1 time
         await $.ajax({
+
             method: "Get",
             url: bkk + "trip-details.json",
             dataType: "jsonp",
@@ -281,22 +316,31 @@ async function downloadSegment() {
                 tripId:departures[i].tripId,
                 includeReferences:false
             },
+
             success:function(r) {
+
                 let stopTimes = r.data.entry.stopTimes;
+
                 for (let i=0; i<stopTimes.length; i++) {
                     if (stopTimes[i].stopId==stop1.id) {
 
                         if (stopTimes[i].predictedDepartureTime==undefined) {
                             //no difference between predicted and normal
                             currentTrip.setOnlyTime1(stopTimes[i].departureTime);
+                            console.log("Set stop1 time of a trip based on:");
+                            console.log(stopTimes[i]);
+
                         } else {
                             //there is difference between predicted and normal
                             currentTrip.setTime1(stopTimes[i].predictedDepartureTime, stopTimes[i].departureTime);
+                            console.log("Set stop1 time of a trip based on:");
+                            console.log(stopTimes[i]);
                         }
 
                         break;
                     } 
                 }
+
                 if (isFinalStop) {
                     let arrival = stopTimes[stopTimes.length-1];
                     if (arrival.predictedArrivalTime==undefined) {
@@ -307,6 +351,13 @@ async function downloadSegment() {
                         currentTrip.setTime2(arrival.predictedArrivalTime, arrival.arrivalTime);
                     }
                 }
+            },
+
+            error:function (xhr, ajaxOptions, thrownError) {
+
+                alert("Error in request:");
+                alert(thrownError);
+    
             }
 
         });
@@ -319,8 +370,10 @@ async function downloadSegment() {
 }
 
 //Function for showing avg travel time and avg gained latency on the segment(between stop1 and stop2)
-function updateSegment(trips) {
+function showSegmentInformation(trips) {
+
     let usefulTrips = [];
+
     for (let i=0; i<trips.length; i++) {
 
         if (trips[i].time1 != 0 && trips[i].time2 != 0) {
@@ -332,6 +385,7 @@ function updateSegment(trips) {
 
     let travelTimesTotal = 0;
     let latencyTotal = 0;
+
     for (let i=0; i<usefulTrips.length; i++) {
         travelTimesTotal += usefulTrips[i].getTravelTime();
         latencyTotal += usefulTrips[i].getLatency();
@@ -341,18 +395,26 @@ function updateSegment(trips) {
     let avgLatency = Math.round(latencyTotal/usefulTrips.length * 10) / 10;
 
     if (isNaN(avgTravelTime) || isNaN(avgLatency)) {
-        document.getElementById("result").innerHTML = "Hiba történt a számítás során";
+        if (trips.length==0) {
+            document.getElementById("result").innerHTML = "A megadott időrtatamban egy busz sem haladt el a szakaszon";
+        } else {
+            document.getElementById("result").innerHTML = "Hiba történt a számítás során";
+        }
+        
         console.log("An error occured, avg travel time or avg latency came out to be NaN. Trips used for calculations:");
         console.log(usefulTrips);
         console.log("All downloaded trips:");
         console.log(trips);
+
     } else {
+
         document.getElementById("result").innerHTML = (
             avgTravelTime + 
             " perc átlag utazási idő a szakaszon <br />"+
             avgLatency +
             " perc átlag felszedett késés a szakaszon"
         );
+
         console.log("Calculation successfull, acg travel time: "+avgTravelTime+", avg gained latency: "+avgLatency+". Trips used:");
         console.log(usefulTrips);
         
@@ -369,31 +431,7 @@ async function slowUpdate() {
 
     if (isUpdatingSegment) {
         let trips = await downloadSegment();
-        updateSegment(trips);
-    }
-
-}
-
-//Function for the quick update(20TPS), checking if the stops were updated and if the segments are correct displaying information
-async function update() {
-
-    if (!stopsUpdated) {
-        return;
-    }
-    
-    stopsUpdated = false;
-    if (checkSegment()==1) {
-
-        //upload for hot smokin'
-        uploadHot();
-
-        let trips = await downloadSegment();
-        updateSegment(trips);
-
-        isUpdatingSegment = true;
-
-    } else {
-        isUpdatingSegment = false;
+        showSegmentInformation(trips);
     }
 
 }
@@ -463,7 +501,7 @@ class routeDirection {
 }
 
 //Function for updating the stops when a stop dropdown is changed
-function updateStops() {
+async function updateStops() {
 
     let dd1 = document.getElementById("dropdown-stop1");
     let dd2 = document.getElementById("dropdown-stop2");
@@ -494,14 +532,28 @@ function updateStops() {
             break;
         }
 
-    stopsUpdated = true;
+    if (checkSegment()==1) {
+
+        //upload for hot smokin'
+        uploadHot();
+
+        let trips = await downloadSegment();
+        showSegmentInformation(trips);
+
+        isUpdatingSegment = true;
+
+    } else {
+        isUpdatingSegment = false;
+    }
 
 }
 
 //Function for updating the variant when the variant dropdown is changed
 function updateVariant() {
+
     let dropdown = document.getElementById("dropdown-heading");
     let selectedText = dropdown.options[dropdown.selectedIndex].text;
+
     if (selectedText==variant1.name)
         currentVariant = variant1;
     else
@@ -547,8 +599,8 @@ function resetStops() {
 
 }
 
-//Function for clearing the stops from the stop dropdowns
-function clearStops() {
+//Function for clearing the stops from the stop dropdowns, separated from resetSops, because changing variant should only clear stops, but not reset them
+async function clearStops() {
 
     let dd1 = document.getElementById("dropdown-stop1");
     let dd2 = document.getElementById("dropdown-stop2");
@@ -558,7 +610,21 @@ function clearStops() {
 
     stop1 = 0;
     stop2 = 0;
-    stopsUpdated=true;
+    
+    if (checkSegment()==1) {
+
+        //upload for hot smokin'
+        uploadHot();
+
+        let trips = await downloadSegment();
+        showSegmentInformation(trips);
+
+        isUpdatingSegment = true;
+
+    } else {
+        isUpdatingSegment = false;
+    }
+
 
 }
 
@@ -566,12 +632,14 @@ function clearStops() {
 async function loadStops() {
 
     await $.ajax({
+
         method: "GET",
         url:bkk + "route-details.json",
         dataType: "jsonp",
         data: {
             routeId:line.id,
         },
+
         success:function (r) {
 
             if (r.status == "OK") {
@@ -579,13 +647,21 @@ async function loadStops() {
                 variants = r.data.entry.variants;
             } else {
                 alert("Nem sikerült betölteni a megállókat");
+                console.log("Request succeeded but stop loading failed.");
                 resetStops();
                 return;
             }
 
             fillVariants();
             
-        }
+        },
+
+        error:function (xhr, ajaxOptions, thrownError) {
+
+            alert("Error in request:");
+            alert(thrownError);
+
+        },
 
     });
 
@@ -595,33 +671,34 @@ async function loadStops() {
 async function loadLine() {
 
     let input = document.getElementById("pick-line-text").value;
-    
-    let isInputCorrect = true;
 
     let dropdown = document.getElementById("dropdown-vehicleType");
     let vehicleType = dropdown.options[dropdown.selectedIndex].value;
     
     if (input == "") {
-        isInputCorrect=false;
-        alert("Kérjük válasszon járatot")
+        alert("Kérjük válasszon járatot");
         return;
     }
 
     resetStops();
 
     await $.ajax({
+
         method:"GET",
         url:bkk+"search.json",
         dataType:"jsonp",
         data:{
             query:input,
         },
+
         success:function (r) {
+
             line = r.data.references.routes;
             let done=false;
             for (let prop in line) {
                 if (line[prop].shortName.toLowerCase()==input.toLowerCase()) { //same name
                     if (line[prop].type.toLowerCase()==vehicleType.toLowerCase()) { //same type of vehicle
+                        console.log("Found a route with matching name");
                         line = line[prop];
                         done=true;
                         break;
@@ -631,6 +708,7 @@ async function loadLine() {
             if (!done) {
                 for (let prop in line) {
                     if (line[prop].type.toLowerCase()==vehicleType.toLowerCase()) { //same type of vehicle
+                        console.log("Found a route based on the input");
                         line = line[prop];
                         done=true;
                         break;
@@ -640,16 +718,21 @@ async function loadLine() {
 
             if (!line.id || line.id == "BKK_9999") {
                 alert("Nem találtunk járatot");
+                console.log("No search results based on text \'"+input.toLowerCase()+"\'");
                 line = 0;
-                stopsUpdated=true;
+                
                 return;
             } else
+                console.log("Loading line stops and variants");
                 loadStops();
 
         },
+
         error:function (xhr, ajaxOptions, thrownError) {
-            alert("error");
+
+            alert("Error in request:");
             alert(thrownError);
+
         },
         
     });
