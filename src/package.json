@@ -10,8 +10,6 @@
   "author": "rav",
   "license": "ISC",
   "dependencies": {
-    "fs": "0.0.1-security",
-    "http": "0.0.0",
     "mongoose": "^5.8.11",
     "bcrypt": "^3.0.7"
   }
