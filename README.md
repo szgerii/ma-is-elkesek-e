@@ -8,7 +8,7 @@ Pistike: "Jaj ne!"
 
 A busz továbbgördül és Pistike meglátja az előttük álló hatalmas dugót.
 
-Pistike: "Bárcsak lett volna rá mód, hogy előre megnézzem, hogy annyira be van-e állva ez az út szakasz, mint én!"
+Pistike: "Bárcsak lett volna rá mód hogy előre megnézzem mennyire van beállva ez az út szakasz!"
 
 **HÁT VAN IS!** A *Ma is elkések-e?* weboldalon egy útszakasz megadásával megnézheted, hogy körülbelül mennyi idő alatt fogja megtenni a buszod ezt a távot.
 
