@@ -64,7 +64,7 @@ function setup() {
 	});
 	
 	dbManager.connection.on("connected", () => {
-		logger.log(`Successfully connected to the database`);
+		logger.log("Successfully connected to the database");
 	});
 	
 	dbManager.connection.on("error", err => {
@@ -80,86 +80,84 @@ function setup() {
 // The request handler function
 function router(req, res) {
 	parseReq(req);
-
-	const ip = (req.headers["x-forwarded-for"] || "").split(",").pop() ||
-    	req.connection.remoteAddress ||
-    	req.socket.remoteAddress ||
-    	req.connection.socket.remoteAddress;
-	logger.xlog(`${req.method} request at ${req.url} from ${ip}`);
 	
+	logger.xlog(`${req.method} request at ${req.url} from ${req.ip}`);
+	
+	res.on("finish", () => {
+		logger.xlog(`Sending ${res.statusCode} response to ${req.ip}`);
+	});
+
 	if (req.method === "GET") {
 		switch (req.baseUrl) {
 			case "/":
 				res.writeHead(200, {"Content-Type": "text/html"});
 				res.end(files[0]);
-				logger.xlog(`Sending ${res.statusCode} response to ${ip}`);
 				break;
 			
 			case "/styles.css":
 				res.writeHead(200, {"Content-Type": "text/css"});
 				res.end(files[1]);
-				logger.xlog(`Sending ${res.statusCode} response to ${ip}`);
 				break;
 			
 			case "/script.js":
 				res.writeHead(200, {"Content-Type": "text/javascript"});
 				res.end(files[2]);
-				logger.xlog(`Sending ${res.statusCode} response to ${ip}`);
 				break;
 
 			case "/jquery.js":
 				res.writeHead(200, {"Content-Type": "text/javascript"});
 				res.end(files[3]);
-				logger.xlog(`Sending ${res.statusCode} response to ${ip}`);
 				break;
 
 			case "/assets/images/background.png":
 				res.writeHead(200, {"Content-Type": "image/png"});
 				res.end(files[4]);
-				logger.xlog(`Sending ${res.statusCode} response to ${ip}`);
 				break;
 	
 			case "/assets/images/icon.png":
 				res.writeHead(200, {"Content-Type": "image/png"});
 				res.end(files[5]);
-				logger.xlog(`Sending ${res.statusCode} response to ${ip}`);
 				break;
 			
 			case "/hotsmokin":
 				dbManager.getHotSmokin().then(top3 => {
 					res.writeHead(200, {"Content-Type": "application/json"});
 					res.end(JSON.stringify(top3));
-					logger.xlog(`Sending ${res.statusCode} response to ${ip}`);
 				}).catch(err => {
 					logger.error("Couldn't get top 3 list from database");
 					logger.xlog(err);
 				});
 				break;
-
+			
 			default:
 				res.writeHead(404, {"Content-Type": "text/html"});
 				res.end("404: Page Not Round");
-				logger.xlog(`Sending ${res.statusCode} response to ${ip}`);
 				break;
 		}
 	} else if (req.method === "POST") {
 		parseBody(req).then(body => {
 			switch (req.baseUrl) {
 				case "/hotsmokin":
-					dbManager.updateSection(body.lineId, body.lineName, body.stop1Id, body.stop1Name, body.stop2Id, body.stop2Name);
+					dbManager.updateSection(body.lineId, body.lineName, body.stop1Id, body.stop1Name, body.stop2Id, body.stop2Name).then(() => {
+						res.writeHead(200, {"Content-Type": "text/html"});
+						res.end("Successfully updated section in the database");
+					}).catch(err => {
+						logger.error("Couldn't update a section in the database");
+						logger.xlog(err);
+						res.writeHead(500, {"Content-Type": "text/html"});
+						res.end("We were unable to update section in the database");
+					});
 					break;
-			
+							
 				default:
 					res.writeHead(404, {"Content-Type": "text/html"});
 					res.end("404: Page Not Round");
-					logger.xlog(`Sending ${res.statusCode} response to ${ip}`);
 					break;
 			}
 		});
 	} else {
 		res.writeHead(405, {"Content-Type": "text/html"});
 		res.end(`405: Érvénytelen HTTP metódus (${req.method})`);
-		logger.xlog(`Sending ${res.statusCode} response to ${ip}`);
 	}
 }
 
@@ -190,9 +188,14 @@ function parseReq(req) {
 	const urlParts = req.url.split("?");
 	req.baseUrl = urlParts[0];
 
+	req.ip = (req.headers["x-forwarded-for"] || "").split(",").pop() ||
+			req.connection.remoteAddress ||
+			req.socket.remoteAddress ||
+			req.connection.socket.remoteAddress;
+	
 	if (!urlParts[1])
 		return;
-
+		
 	req.query = queryParser(urlParts[1]);
 }
 

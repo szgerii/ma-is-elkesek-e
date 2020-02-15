@@ -2,7 +2,8 @@ const mongoose = require("mongoose");
 const logger = require("./private_modules/logger");
 
 // Mongoose models
-const section = require("./models/section");
+const sectionModel = require("./models/section");
+const userModel = require("./models/user");
 
 const DB_REFRESH_INTERVAL = 30000; // milliseconds
 const top3 = {}; // Top 3 section list
@@ -25,25 +26,33 @@ exports.connection = mongoose.connection;
 	stop2Id: id of the second stop (lookup value)
 	stop2Name: name of the second stop
 */
-exports.updateSection = async (lineId, lineName, stop1Id, stop1Name, stop2Id, stop2Name) => {
-	let sec = await section.findOne({ lineId: lineId, stop1Id: stop1Id, stop2Id: stop2Id });
-	
-	if (sec) {
-		sec.count++;
-		await sec.save();
-		logger.xlog(`Increased the following section's count in the database -> ${sec.lineName}: ${sec.stop1Name} - ${sec.stop2Name}`);
-	} else {
-		sec = new section();
-		sec.lineId = lineId;
-		sec.stop1Id = stop1Id;
-		sec.stop2Id = stop2Id;
-		sec.lineName = lineName.replace(/\+/g, " ");
-		sec.stop1Name = stop1Name.replace(/\+/g, " ");
-		sec.stop2Name = stop2Name.replace(/\+/g, " ");
-		sec.count = 1;
-		await sec.save();
-		logger.xlog(`Adding the following section to the database -> ${sec.lineName}: ${sec.stop1Name} - ${sec.stop2Name}`);
-	}
+exports.updateSection = (lineId, lineName, stop1Id, stop1Name, stop2Id, stop2Name) => {
+	return new Promise(async (resolve, reject) => {
+		try {
+			let sec = await sectionModel.findOne({ lineId: lineId, stop1Id: stop1Id, stop2Id: stop2Id });
+			
+			if (sec) {
+				sec.count++;
+				await sec.save();
+				logger.xlog(`Increased the following section's count in the database -> ${sec.lineName}: ${sec.stop1Name} - ${sec.stop2Name}`);
+				resolve();
+			} else {
+				sec = new sectionModel();
+				sec.lineId = lineId;
+				sec.stop1Id = stop1Id;
+				sec.stop2Id = stop2Id;
+				sec.lineName = lineName.replace(/\+/g, " ");
+				sec.stop1Name = stop1Name.replace(/\+/g, " ");
+				sec.stop2Name = stop2Name.replace(/\+/g, " ");
+				sec.count = 1;
+				await sec.save();
+				logger.xlog(`Adding the following section to the database -> ${sec.lineName}: ${sec.stop1Name} - ${sec.stop2Name}`);
+				resolve();
+			}
+		} catch (err) {
+			reject(err);
+		}
+	});
 }
 
 /*
@@ -81,7 +90,7 @@ function updateHotSmokin() {
 		top3.hot2 = null;
 		top3.hot3 = null;
 		
-		section.find({}).sort("-count").limit(3).exec((err, secs) => {
+		sectionModel.find({}).sort("-count").limit(3).exec((err, secs) => {
 			if (err) {
 				reject(err);
 			}
@@ -142,4 +151,18 @@ function updateHotSmokin() {
 	});
 }
 
-// TODO: refactor with double quotes
+exports.createUser = userData => {
+	return new Promise(async (resolve, reject) => {
+		try {
+			const user = new userModel();
+			user.username = userData.username;
+			user.email = userData.email;
+			user.password = userData.password;
+			user.showWatchlistByDefault = userData.showWatchlistByDefault;
+			await user.save();
+			resolve();
+		} catch (err) {
+			reject(err);
+		}
+	});
+}
