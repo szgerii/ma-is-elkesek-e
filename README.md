@@ -16,15 +16,29 @@ Pistike: "Jajj de hülye voltam, hogy nem néztem rá  a *ma-is-elkesek-e.hu*-ra
 
 ## Használat
 
+Letöltés után a projekt könyvtárán belül a *src* mappában szükséges létrehozni egy *config.js* fájlt a következő tartalommal:
+
+```javascript
+module.exports = {
+	databaseUrl: "mongodb+srv://node-server:9ahtrXRyp5sRvm77@ma-is-elkesek-e-ejiov.mongodb.net/ma-is-elkesek-e?retryWrites=true&w=majority"
+};
+```
+
+Ez a fájl biztonsági okokból nincs fent GitHub-on (tartalmaz minden adatot, ami az adatbázishoz való kapcsolódáshoz szükséges). Amint a repository nyilvánossá válik, ezek az adatok le lesznek cserélve (új felhasználónév, jelszó, stb) és ez a rész ki lesz törölve innen.
+
 A szerver futtatásához szükséges a Node program. Indításhoz navigáljunk a projekt könyvtárán belül a *src* mappába egy parancssorban és írjuk be a következőt: 
 
 ```bash
 npm install
-node server.js
+node server.js -v
 ```
 
 Az első sor telepít mindent, amire a szervernek szüksége van (ezt csak egyszer kell futtatni), a második pedig elindítja azt.
-Voilá! A szerver mostantól a 1104 vagy a PORT környezeti változóban megadott porton fut.
+A szerver a következő sorrendben választ portot a futásra:
+
+1. PORT környezeti változó (ha van)
+2. PORT változó a config.js fájlban (ha van)
+3. 1104
 
 ### Naplózás
 
