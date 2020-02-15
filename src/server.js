@@ -148,7 +148,33 @@ function router(req, res) {
 						res.end("We were unable to update section in the database");
 					});
 					break;
-							
+
+				case "/signup":
+					dbManager.createUser({
+						username: body.username,
+						email: body.email,
+						password: body.password,
+						showWatchlistByDefault: body.showWatchlistByDefault === "true" ? true : false
+					}).then(() => {
+						logger.xlog("Successfully registered new user");
+						res.writeHead(200, {"Content-Type": "text/html"});
+						res.end("Successfully added the user to the database");
+					}).catch(err => {
+						if (err.name === "ValidationError") {
+							res.writeHead(422, {"Content-Type": "text/html"});
+							res.end("The request body contained invalid information");
+						} else if (err.name === "UserAlreadyExistsError") {
+							res.writeHead(422, {"Content-Type": "text/html"});
+							res.end("A user already exists with that username");
+						} else {
+							logger.error("Couldn't add user to the database");
+							logger.xlog(err);
+							res.writeHead(500, {"Content-Type": "text/html"});
+							res.end("We were unable to add the user to the database");
+						}
+					});
+					break;
+				
 				default:
 					res.writeHead(404, {"Content-Type": "text/html"});
 					res.end("404: Page Not Round");
