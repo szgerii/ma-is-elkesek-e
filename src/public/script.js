@@ -18,6 +18,8 @@ let stop2  = 0; //Global variable of the 2nd stop chosen
 let isFinalStop = false; //Global variable determining whether the 2nd stop is the final stop of that variant(special case) or not
 let stop2ForFinalStop = 0; //Global variable of the stop that is used to get information about the real 2nd stop if it's the last stop
 
+let currentHot = 0; //Global variable of the loaded hot smokin' top 3 segments
+
 //Set up slow and quick update ticks and set eventListeners
 window.onload = function() {
     
@@ -30,6 +32,100 @@ window.onload = function() {
 
     slowUpdate();
     setInterval(slowUpdate,10000);
+
+}
+
+//Function for loading a segment with predefined line and stops(IN DEVELOPMENT)
+async function loadPredefinedSegment(prefLine, prefStop1, prefStop2) {
+
+    //reset all stops(delete variants and stops from dropdown, set everything to 0)
+    resetStops();
+
+    //manually set the used line to the predefined one(skip user input AND loadline())
+    line = prefLine;
+    line.shortName = prefLine.name;
+
+    document.getElementById("pick-line-text").value = line.shortName;
+
+    //load stops(and variants) and wait till it finishes loading
+    await loadStops();
+
+    //Determine which variant is used in the predefined segment by searching for stop1 in variant1(skip user input)
+    let isVariant1Ok = false;
+    for (let i=0; i<variant1.stops.length; i++) {
+
+        if (variant1.stops[i].id==prefStop1.id) {
+
+            isVariant1Ok = true;
+            break;
+
+        }
+
+    }
+    
+    if (isVariant1Ok) currentVariant = variant1;    
+    else currentVariant = variant2;
+
+    let dropdown = document.getElementById("dropdown-heading");
+    dropdown.value = currentVariant.name;
+
+    //Fill the stops based on the current variant(skip updateVariant())
+    fillStops();
+
+    //Manually set the used stops to the predefined ones(skip user input)
+    for (let i=0; i<currentVariant.stops.length; i++) {
+        if (currentVariant.stops[i].id==prefStop1.id) {
+            stop1 = currentVariant.stops[i];
+        } else if (currentVariant.stops[i].id==prefStop2.id) {
+            stop2 = currentVariant.stops[i];
+        }
+    }
+
+    document.getElementById("dropdown-vehicleType").value = stop1.type;
+
+    let dd1 = document.getElementById("dropdown-stop1");
+    let dd2 = document.getElementById("dropdown-stop2");
+    dd1.value = stop1.code;
+    dd2.value = stop2.code;
+
+    //Load the segment(skip updateStops())
+    if (checkSegment()==1) {
+
+        //upload for hot smokin'
+        uploadHot();
+
+        let trips = await downloadSegment();
+        showSegmentInformation(trips);
+
+        isUpdatingSegment = true;
+
+    } else {
+        isUpdatingSegment = false;
+    }
+
+
+}
+
+//Function for the onlick event of the hot smoke boxes, starts loading apredefined segment
+function hotSmokeClick(hotSmoke) {
+
+    switch(hotSmoke) {
+        case 1: if (currentHot.hot1) {
+            loadPredefinedSegment(currentHot.hot1.line, currentHot.hot1.stop1, currentHot.hot1.stop2,); 
+            break;
+        }
+            
+        case 2: if (currentHot.hot2) {
+            loadPredefinedSegment(currentHot.hot2.line, currentHot.hot2.stop1, currentHot.hot2.stop2,); 
+            break;
+        }
+            
+        case 3: if (currentHot.hot3) {
+            loadPredefinedSegment(currentHot.hot3.line, currentHot.hot3.stop1, currentHot.hot3.stop2,);
+            break;
+        }
+            
+    }
 
 }
 
@@ -67,7 +163,10 @@ function uploadHot() {
         data:data,
 
         success: function(r) {console.log("Sent data for hot smokin statistics")},
-        error: function(r) {console.log("An error occured while uploading hot smokin' data")},
+        error: function(r) {
+            console.log("An error occured while uploading hot smokin' data");
+            console.log(r);
+        },
         
 
     });
@@ -99,6 +198,8 @@ async function downloadHot() {
             } else {
                 document.getElementById("hot-smoke-3").innerHTML = "Nincs elég adat az információ megjelenítéséhez";
             }
+
+            currentHot = r;
 
         },
 
@@ -572,12 +673,12 @@ function fillVariants() {
 
     let o1 = document.createElement("option");
     o1.innerHTML = variant1.name;
-    o1.value = variant1;
+    o1.value = variant1.name;
     dropdown.appendChild(o1);
 
     let o2 = document.createElement("option");
     o2.innerHTML = variant2.name;
-    o2.value = variant2;
+    o2.value = variant2.name;
     dropdown.appendChild(o2);
 
     updateVariant();
@@ -600,7 +701,7 @@ function resetStops() {
 }
 
 //Function for clearing the stops from the stop dropdowns, separated from resetSops, because changing variant should only clear stops, but not reset them
-async function clearStops() {
+function clearStops() {
 
     let dd1 = document.getElementById("dropdown-stop1");
     let dd2 = document.getElementById("dropdown-stop2");
@@ -611,20 +712,8 @@ async function clearStops() {
     stop1 = 0;
     stop2 = 0;
     
-    if (checkSegment()==1) {
-
-        //upload for hot smokin'
-        uploadHot();
-
-        let trips = await downloadSegment();
-        showSegmentInformation(trips);
-
-        isUpdatingSegment = true;
-
-    } else {
-        isUpdatingSegment = false;
-    }
-
+    isUpdatingSegment = false;
+    
 
 }
 

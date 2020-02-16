@@ -7,6 +7,7 @@
 
     --color-text: white; /* color of main text */
     --color-box: rgb(0, 120, 180); /* background color of boxes */
+    --color-box-hover: rgb(250, 100, 0);
     --color-box-transparent: rgba(0,120,180,0.0); /* background color for partly transparent box */
 
     --borderRadius-perfect: 1.3vh; /* the one and only perfect border radius for boxes */ /* originally 12px */
@@ -167,5 +168,12 @@ body {
     font-size: var(--fontSize-medium);
     color: var(--color-text);
     text-align: center;
+
+}
+
+.hot-smoke-box:hover {
+
+    border: 1px solid var(--color-box-hover);
+    cursor: pointer;
 
 }
