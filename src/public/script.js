@@ -159,7 +159,7 @@ function uploadHot() {
         
         method:"POST",
         url:hotSmokinUrl,
-        dataType:"jsonp",
+        dataType:"html",
         data:data,
 
         success: function(r) {console.log("Sent data for hot smokin statistics")},
