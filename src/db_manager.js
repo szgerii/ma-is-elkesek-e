@@ -15,21 +15,21 @@ exports.connect = dbUrl => {
 
 exports.connection = mongoose.connection;
 
-/*
-	Looks up a section in the database and
-		a) increments its count by one if it founds it
-		b) creates it if it doesn't exist yet
-	lineId: id of the line (lookup value)
-	lineName: name of the line
-	stop1Id: id of the first stop (lookup value)
-	stop1Name: name of the first stop
-	stop2Id: id of the second stop (lookup value)
-	stop2Name: name of the second stop
-*/
-exports.updateSection = (lineId, lineName, stop1Id, stop1Name, stop2Id, stop2Name) => {
+exports.updateSection = sectionData => {
 	return new Promise(async (resolve, reject) => {
+		if (!sectionData.lineId ||
+			!sectionData.lineName ||
+			!sectionData.stop1Id ||
+			!sectionData.stop1Name ||
+			!sectionData.stop2Id ||
+			!sectionData.stop2Name) {
+				const err = new Error("A necessary field was missing from the request body");
+				err.name = "InformationMissingError";
+				reject(err);
+		}
+
 		try {
-			let sec = await sectionModel.findOne({ lineId: lineId, stop1Id: stop1Id, stop2Id: stop2Id });
+			let sec = await sectionModel.findOne({ lineId: sectionData.lineId, stop1Id: sectionData.stop1Id, stop2Id: sectionData.stop2Id });
 			
 			if (sec) {
 				sec.count++;
@@ -38,12 +38,12 @@ exports.updateSection = (lineId, lineName, stop1Id, stop1Name, stop2Id, stop2Nam
 				resolve();
 			} else {
 				sec = new sectionModel();
-				sec.lineId = lineId;
-				sec.stop1Id = stop1Id;
-				sec.stop2Id = stop2Id;
-				sec.lineName = lineName.replace(/\+/g, " ");
-				sec.stop1Name = stop1Name.replace(/\+/g, " ");
-				sec.stop2Name = stop2Name.replace(/\+/g, " ");
+				sec.lineId = sectionData.lineId;
+				sec.stop1Id = sectionData.stop1Id;
+				sec.stop2Id = sectionData.stop2Id;
+				sec.lineName = sectionData.lineName.replace(/\+/g, " ");
+				sec.stop1Name = sectionData.stop1Name.replace(/\+/g, " ");
+				sec.stop2Name = sectionData.stop2Name.replace(/\+/g, " ");
 				sec.count = 1;
 				await sec.save();
 				logger.xlog(`Adding the following section to the database -> ${sec.lineName}: ${sec.stop1Name} - ${sec.stop2Name}`);
@@ -153,6 +153,15 @@ function updateHotSmokin() {
 
 exports.createUser = userData => {
 	return new Promise(async (resolve, reject) => {
+		if (!userData.username ||
+			!userData.email ||
+			!userData.password ||
+			!userData.showWatchlistByDefault) {
+				const err = new Error("A necessary field was missing from the request body");
+				err.name = "InformationMissingError";
+				reject(err);
+		}
+
 		try {
 			const user = new userModel();
 			user.username = userData.username;

@@ -124,6 +124,8 @@ function router(req, res) {
 					res.writeHead(200, {"Content-Type": "application/json"});
 					res.end(JSON.stringify(top3));
 				}).catch(err => {
+					res.writeHead(500, {"Content-Type": "application/json"});
+					res.end("{}");
 					logger.error("Couldn't get top 3 list from database");
 					logger.xlog(err);
 				});
@@ -138,17 +140,35 @@ function router(req, res) {
 		parseBody(req).then(body => {
 			switch (req.baseUrl) {
 				case "/hotsmokin":
-					dbManager.updateSection(body.lineId, body.lineName, body.stop1Id, body.stop1Name, body.stop2Id, body.stop2Name).then(() => {
+					dbManager.updateSection({
+						lineId: body.lineId,
+						lineName: body.lineName,
+						stop1Id: body.stop1Id,
+						stop1Name: body.stop1Name,
+						stop2Id: body.stop2Id,
+						stop2Name: body.stop2Name
+					}).then(() => {
 						res.writeHead(200, {"Content-Type": "text/html"});
 						res.end("Successfully updated section in the database");
 					}).catch(err => {
-						logger.error("Couldn't update a section in the database");
-						logger.xlog(err);
-						res.writeHead(500, {"Content-Type": "text/html"});
-						res.end("We were unable to update section in the database");
+						if (err.name === "InformationMissingError") {
+							res.writeHead(422, {"Content-Type": "text/html"});
+							res.end(err.message);
+						} else {
+							logger.error("Couldn't update a section in the database");
+							logger.xlog(err);
+							res.writeHead(500, {"Content-Type": "text/html"});
+							res.end("We were unable to update section in the database");
+						}
 					});
 					break;
 
+				/*
+					Response codes:
+					200 - successful registration
+					409 - a user with that username already exists
+					422 - a mandatory field was missing or the data wasn't correct (e.g. too short username)
+				*/
 				case "/signup":
 					dbManager.createUser({
 						username: body.username,
@@ -164,13 +184,16 @@ function router(req, res) {
 							res.writeHead(422, {"Content-Type": "text/html"});
 							res.end("The request body contained invalid information");
 						} else if (err.name === "UserAlreadyExistsError") {
+							res.writeHead(409, {"Content-Type": "text/html"});
+							res.end(err.message);
+						} else if (err.name === "InformationMissingError") {
 							res.writeHead(422, {"Content-Type": "text/html"});
-							res.end("A user already exists with that username");
+							res.end(err.message);
 						} else {
 							logger.error("Couldn't add user to the database");
-							logger.xlog(err);
+							logger.error(err);
 							res.writeHead(500, {"Content-Type": "text/html"});
-							res.end("We were unable to add the user to the database");
+							res.end("Unknown error: couldn't add user to the database");
 						}
 					});
 					break;
