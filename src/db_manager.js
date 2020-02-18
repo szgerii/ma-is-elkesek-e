@@ -175,14 +175,3 @@ exports.createUser = userData => {
 		}
 	});
 };
-
-exports.deleteUser = (id, password) => {
-	return new Promise(async (resolve, reject) => {
-		const user = await mongoose.findOne({ _id: id });
-		if (user.comparePassword(password)) {
-			// Correct password
-		} else {
-			// Incorrect password
-		}
-	});
-}

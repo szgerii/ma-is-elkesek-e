@@ -54,13 +54,8 @@ userSchema.pre("save", async function(next) {
 		throw err;
 	}
 
-	bcrypt.hash(this.password, SALT_ROUNDS, (err, hash) => {
-		if (err)
-			throw err;
-		
-		this.password = hash;
-		next();
-	});
+	this.password = bcrypt.hashSync(this.password, SALT_ROUNDS);
+	next();
 });
 
 userSchema.methods.comparePassword = async function(password) {

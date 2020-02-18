@@ -204,42 +204,6 @@ function router(req, res) {
 					break;
 			}
 		});
-	} else if (req.method === "DELETE") {
-		parseBody(req).then(body => {
-			switch (req.urlParts[0]) {
-				case "users":
-					if (!req.urlParts[1] || !body.password) {
-						res.writeHead(400, {"Content-Type": "text/html"});
-						res.end("User ID or password was missing from the request");
-						return;
-					}
-					dbManager.deleteUser(body.id, body.password).then(username => {
-						res.writeHead(200, {"Content-Type": "text/html"});
-						res.end(`Successfully removed the following user from the database: ${username}`);
-					}).catch(err => {
-						switch (err.name) {
-							case "InvalidIDError":
-								res.writeHead(422, {"Content-Type": "text/html"});
-								res.end(err.message);
-								break;
-								
-							case "InvalidPasswordError":
-								res.writeHead(401, {"Content-Type": "text/html"});
-								res.end(err.message);
-								break;
-						
-							default:
-								res.writeHead(500, {"Content-Type": "text/html"});
-								res.end("We were unable to remove the user from the database");
-								break;
-						}
-					});
-					break;
-			
-				default:
-					break;
-			}
-		});
 	} else {
 		res.writeHead(405, {"Content-Type": "text/html"});
 		res.end(`405: Érvénytelen HTTP metódus (${req.method})`);
