@@ -169,7 +169,7 @@ function router(req, res) {
 					409 - a user with that username already exists
 					422 - a mandatory field was missing or the data wasn't correct (e.g. too short username)
 				*/
-				case "/signup":
+				case "/users":
 					dbManager.createUser({
 						username: body.username,
 						email: body.email,
@@ -201,6 +201,42 @@ function router(req, res) {
 				default:
 					res.writeHead(404, {"Content-Type": "text/html"});
 					res.end("404: Page Not Round");
+					break;
+			}
+		});
+	} else if (req.method === "DELETE") {
+		parseBody(req).then(body => {
+			switch (req.urlParts[0]) {
+				case "users":
+					if (!req.urlParts[1] || !body.password) {
+						res.writeHead(400, {"Content-Type": "text/html"});
+						res.end("User ID or password was missing from the request");
+						return;
+					}
+					dbManager.deleteUser(body.id, body.password).then(username => {
+						res.writeHead(200, {"Content-Type": "text/html"});
+						res.end(`Successfully removed the following user from the database: ${username}`);
+					}).catch(err => {
+						switch (err.name) {
+							case "InvalidIDError":
+								res.writeHead(422, {"Content-Type": "text/html"});
+								res.end(err.message);
+								break;
+								
+							case "InvalidPasswordError":
+								res.writeHead(401, {"Content-Type": "text/html"});
+								res.end(err.message);
+								break;
+						
+							default:
+								res.writeHead(500, {"Content-Type": "text/html"});
+								res.end("We were unable to remove the user from the database");
+								break;
+						}
+					});
+					break;
+			
+				default:
 					break;
 			}
 		});
@@ -236,6 +272,8 @@ function parseBody(req) {
 function parseReq(req) {
 	const urlParts = req.url.split("?");
 	req.baseUrl = urlParts[0];
+	req.urlParts = req.baseUrl.split("/");
+	req.urlParts.shift(); // Get rid of empty element (e.g. ['', 'users', '123'] -> ['users'. '123'])
 
 	req.ip = (req.headers["x-forwarded-for"] || "").split(",").pop() ||
 			req.connection.remoteAddress ||

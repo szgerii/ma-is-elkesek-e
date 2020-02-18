@@ -53,7 +53,7 @@ exports.updateSection = sectionData => {
 			reject(err);
 		}
 	});
-}
+};
 
 /*
 	Returns a promise that checks if the top 3 list should be updated and
@@ -77,7 +77,7 @@ exports.getHotSmokin = () => {
 			resolve(top3);
 		}
 	});
-}
+};
 
 /*
 	Returns a promise that updates the top 3 hot smokin section from the database and
@@ -172,6 +172,17 @@ exports.createUser = userData => {
 			resolve();
 		} catch (err) {
 			reject(err);
+		}
+	});
+};
+
+exports.deleteUser = (id, password) => {
+	return new Promise(async (resolve, reject) => {
+		const user = await mongoose.findOne({ _id: id });
+		if (user.comparePassword(password)) {
+			// Correct password
+		} else {
+			// Incorrect password
 		}
 	});
 }
