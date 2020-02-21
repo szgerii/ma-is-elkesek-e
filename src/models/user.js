@@ -14,10 +14,6 @@ const userSchema = new mongoose.Schema({
 		},
 		required: true
 	},
-	email: {
-		type: String,
-		required: true
-	},
 	password: {
 		type: String,
 		validate: {
@@ -27,9 +23,6 @@ const userSchema = new mongoose.Schema({
 			message: props => `Invalid password: ${props.value}`
 		},
 		required: true
-	},
-	passwordReminder: {
-		type: String
 	},
 	signupDate: {
 		type: Date,

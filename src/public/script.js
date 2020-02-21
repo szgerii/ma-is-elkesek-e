@@ -1,5 +1,5 @@
 const bkk = "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/";
-const hotSmokinUrl = "/hotsmokin";
+const hotSmokinUrl = "/api/hotsmokin";
 
 let line = 0; //Global variable of the chosen line
 let stops = 0; //Global variable of the list of stops
@@ -159,13 +159,22 @@ function uploadHot() {
         
         method:"POST",
         url:hotSmokinUrl,
-        dataType:"html",
-        data:data,
+        dataType:"json",
+        data: data,
 
         success: function(r) {console.log("Sent data for hot smokin statistics")},
         error: function(r) {
             console.log("An error occured while uploading hot smokin' data");
-            console.log(r);
+            if (r.status === "error") {
+                console.log(r.message);
+            } else {
+                if (r.data.line)
+                    console.log(r.data.line);
+                if (r.data.stop1)
+                    console.log(r.data.stop1);
+                if (r.data.stop2)
+                    console.log(r.data.stop2);
+            }
         },
         
 
@@ -184,28 +193,29 @@ async function downloadHot() {
         success:function(r) {
 
             if (r.hot1) {
-                document.getElementById("hot-smoke-1").innerHTML = `${r.hot1.line.name}: ${r.hot1.stop1.name} - ${r.hot1.stop2.name}`;
+                document.getElementById("hot-smoke-1").innerHTML = `${r.data.hot1.line.name}: ${r.data.hot1.stop1.name} - ${r.data.hot1.stop2.name}`;
             } else {
                 document.getElementById("hot-smoke-1").innerHTML = "Nincs elég adat az információ megjelenítéséhez";
             }
             if (r.hot2) {
-                document.getElementById("hot-smoke-2").innerHTML = `${r.hot2.line.name}: ${r.hot2.stop1.name} - ${r.hot2.stop2.name}`;
+                document.getElementById("hot-smoke-2").innerHTML = `${r.data.hot2.line.name}: ${r.data.hot2.stop1.name} - ${r.data.hot2.stop2.name}`;
             } else {
                 document.getElementById("hot-smoke-2").innerHTML = "Nincs elég adat az információ megjelenítéséhez";
             }
             if (r.hot3) {
-                document.getElementById("hot-smoke-3").innerHTML = `${r.hot3.line.name}: ${r.hot3.stop1.name} - ${r.hot3.stop2.name}`;
+                document.getElementById("hot-smoke-3").innerHTML = `${r.data.hot3.line.name}: ${r.data.hot3.stop1.name} - ${r.data.hot3.stop2.name}`;
             } else {
                 document.getElementById("hot-smoke-3").innerHTML = "Nincs elég adat az információ megjelenítéséhez";
             }
 
-            currentHot = r;
+            currentHot = r.data;
 
         },
 
         error:function(r) {
 
             console.log("An error occured while downloading hot smokin' data");
+            console.log(r.message);
             document.getElementById("hot-smoke-1").innerHTML = "An error occured during the download of hot smokin' #1 from the server";
             document.getElementById("hot-smoke-2").innerHTML = "An error occured during the download of hot smokin' #2 from the server";
             document.getElementById("hot-smoke-3").innerHTML = "An error occured during the download of hot smokin' #3 from the server";
