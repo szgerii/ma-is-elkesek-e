@@ -173,6 +173,33 @@ router.addHandler("/api/users", "POST", (req, res) => {
 	});
 });
 
+router.addHandler("/api/users/{username}", "DELETE", (req, res) => {
+	req.username = req.params.username; // Until JWT decoding is done (TODO)
+
+	if (req.username !== req.params.username) {
+		res.writeHead(403, {"Content-Type": "application/json"});
+		res.end(genResponse("fail", {
+			username: "The username in the url didn't match the username inside the session token"
+		}));
+		return;
+	}
+
+	dbManager.deleteUser(req.params.username).then(() => {
+		res.writeHead(200, {"Content-Type": "application/json"});
+		res.end(genResponse("success", null));
+	}).catch(err => {
+		if (err.name === "InvalidUsernameError") {
+			res.writeHead(404, {"Content-Type": "application/json"});
+			res.end(genResponse("fail", {
+				username: `A user with the following username doesn't exist: ${req.params.username}`
+			}));
+		} else {
+			res.writeHead(500, {"Content-Type": "application/json"});
+			res.end(genResponse("error", "Couldn't delete user from the database"));
+		}
+	});
+});
+
 router.setFallback((req, res) => {
 	res.writeHead(404, {"Content-Type": "text/html"});
 	res.end("404: Page Not Round");

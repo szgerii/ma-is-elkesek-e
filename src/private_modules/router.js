@@ -45,7 +45,7 @@ exports.requestHandler = async (req, res) => {
             }
 
             if (result) {
-                req.pathParams = temp;
+                req.params = temp;
                 r.handler(req, res);
                 return;
             }

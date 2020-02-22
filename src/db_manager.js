@@ -207,3 +207,22 @@ exports.createUser = userData => {
 		}
 	});
 };
+
+exports.deleteUser = username => {
+	return new Promise(async (resolve, reject) => {
+		const user = await userModel.findOne({ username: username });
+		
+		if (!user) {
+			const err = new Error(`Couldn't find user with the following username: ${username}`);
+			err.name = "InvalidUsernameError";
+			reject(err);
+			return;
+		}
+
+		user.remove().then(() => {
+			resolve();
+		}).catch(err => {
+			reject(err);
+		});
+	});
+};
