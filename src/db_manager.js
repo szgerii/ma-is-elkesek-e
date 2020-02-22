@@ -159,6 +159,14 @@ function updateHotSmokin() {
 	});
 }
 
+function validateUsername(username) {
+	return /^([a-zA-Z0-9_-]){3,16}$/.test(username);
+}
+
+function validatePassword(password) {
+	return password.length >= 6;
+}
+
 exports.createUser = userData => {
 	return new Promise(async (resolve, reject) => {
 		const dataCheck = {};
@@ -178,11 +186,11 @@ exports.createUser = userData => {
 				return;
 		}
 
-		if (!(/^([a-zA-Z0-9_-]){3,16}$/.test(userData.username))) {
+		if (!validateUsername(userData.username)) {
 			dataCheck.username = `Invalid username format: ${userData.username}`;
 		}
 
-		if (userData.password.length < 6) {
+		if (!validatePassword(userData.password)) {
 			dataCheck.password = `Invalid password format`;
 		}
 
@@ -194,17 +202,24 @@ exports.createUser = userData => {
 			return;
 		}
 
-		try {
-			const user = new userModel();
-			user.username = userData.username;
-			user.email = userData.email;
-			user.password = userData.password;
-			user.showWatchlistByDefault = userData.showWatchlistByDefault;
-			await user.save();
-			resolve();
-		} catch (err) {
+		if (await module.exports.findOne({ username: this.username })) {
+			const err = new Error(`A user already exists with the following username: ${this.username}`);
+			err.name = "UserAlreadyExistsError";
 			reject(err);
 		}
+
+		const user = new userModel();
+		user.username = userData.username;
+		user.email = userData.email;
+		user.password = userData.password;
+		user.showWatchlistByDefault = userData.showWatchlistByDefault;
+		user.save().then(() => {
+			resolve();
+		}).catch(err => {
+			logger.error("Couldn't modify user in the database");
+			logger.xlog(err);
+			reject(err);
+		});
 	});
 };
 
@@ -222,6 +237,56 @@ exports.deleteUser = username => {
 		user.remove().then(() => {
 			resolve();
 		}).catch(err => {
+			reject(err);
+		});
+	});
+};
+
+exports.modifyUser = (username, modifications) => {
+	return new Promise(async (resolve, reject) => {
+		const user = await userModel.findOne({ username: username });
+		
+		if (!user) {
+			const err = new Error(`Couldn't find user with the following username: ${username}`);
+			err.name = "InvalidUsernameError";
+			reject(err);
+			return;
+		}
+
+		const dataCheck = {};
+
+		if (modifications.username) {
+			if (!validateUsername(modifications.username))
+				dataCheck.username = `Invalid username value: ${modifications.username}`;
+			else
+				user.username = modifications.username;
+		}
+
+		if (modifications.password) {
+			if (!validatePassword(modifications.password))
+				dataCheck.password = "Invalid password value";
+			else
+				user.password = modifications.password;
+		}
+
+		if (modifications.showWatchlistByDefault === "true" || modifications.showWatchlistByDefault === "false")
+			user.showWatchlistByDefault = modifications.showWatchlistByDefault;
+		else if (modifications.showWatchlistByDefault)
+			dataCheck.showWatchlistByDefault = `Invalid showWatchlistByDefault value: ${modifications.showWatchlistByDefault}`;
+
+		if (dataCheck.username || dataCheck.password || dataCheck.showWatchlistByDefault) {
+			const err = new Error("A field from the request body had invalid formatting");
+			err.name = "ValidationError";
+			err.data = dataCheck;
+			reject(err);
+			return;
+		}
+
+		user.save().then(() => {
+			resolve();
+		}).catch(err => {
+			logger.error("Couldn't modify user in the database");
+			logger.xlog(err);
 			reject(err);
 		});
 	});

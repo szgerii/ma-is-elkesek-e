@@ -28,13 +28,7 @@ const userSchema = new mongoose.Schema({
 	},
 });
 
-userSchema.pre("save", async function(next) {
-	if (await module.exports.findOne({ username: this.username })) {
-		const err = new Error(`A user already exists with the following username: ${this.username}`);
-		err.name = "UserAlreadyExistsError";
-		throw err;
-	}
-
+userSchema.pre("save", function(next) {
 	this.password = bcrypt.hashSync(this.password, SALT_ROUNDS);
 	next();
 });

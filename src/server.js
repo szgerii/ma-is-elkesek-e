@@ -191,11 +191,45 @@ router.addHandler("/api/users/{username}", "DELETE", (req, res) => {
 		if (err.name === "InvalidUsernameError") {
 			res.writeHead(404, {"Content-Type": "application/json"});
 			res.end(genResponse("fail", {
-				username: `A user with the following username doesn't exist: ${req.params.username}`
+				username: err.message
 			}));
 		} else {
 			res.writeHead(500, {"Content-Type": "application/json"});
 			res.end(genResponse("error", "Couldn't delete user from the database"));
+		}
+	});
+});
+
+router.addHandler("/api/users/{username}", "PUT", (req, res) => {
+	req.username = req.params.username; // Until JWT decoding is done (TODO)
+
+	if (req.username !== req.params.username) {
+		res.writeHead(403, {"Content-Type": "application/json"});
+		res.end(genResponse("fail", {
+			username: "The username in the url didn't match the username inside the session token"
+		}));
+		return;
+	}
+
+	dbManager.modifyUser(req.params.username, {
+		username: req.body.username,
+		password: req.body.password,
+		showWatchlistByDefault: req.body.showWatchlistByDefault
+	}).then(() => {
+		res.writeHead(200, {"Content-Type": "application/json"});
+		res.end(genResponse("success", null));
+	}).catch(err => {
+		if (err.name === "InvalidUsernameError") {
+			res.writeHead(404, {"Content-Type": "application/json"});
+			res.end(genResponse("fail", {
+				username: err.message
+			}));
+		} else if (err.name === "ValidationError") {
+			res.writeHead(422, {"Content-Type": "application/json"});
+			res.end(genResponse("fail", err.data));
+		} else {
+			res.writeHead(500, {"Content-Type": "application/json"});
+			res.end(genResponse("error", "Couldn't modify user in the database"));
 		}
 	});
 });
