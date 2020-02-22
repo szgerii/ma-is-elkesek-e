@@ -17,15 +17,23 @@ exports.connection = mongoose.connection;
 
 exports.updateSection = sectionData => {
 	return new Promise(async (resolve, reject) => {
-		if (!sectionData.lineId ||
-			!sectionData.lineName ||
-			!sectionData.stop1Id ||
-			!sectionData.stop1Name ||
-			!sectionData.stop2Id ||
-			!sectionData.stop2Name) {
-				const err = new Error("A necessary field was missing from the request body");
-				err.name = "InformationMissingError";
-				reject(err);
+		const dataCheck = {};
+
+		if (!sectionData.lineId || !sectionData.lineName) {
+			dataCheck.line = "Line information missing";
+		}
+		if (!sectionData.stop1Id || !sectionData.stop1Name) {
+			dataCheck.stop1 = "Stop1 information missing";
+		}
+		if (!sectionData.stop2Id || !sectionData.stop2Name) {
+			dataCheck.stop2 = "Stop2 information missing";
+		}
+
+		if (dataCheck.line || dataCheck.stop1 || dataCheck.stop2) {
+			const err = new Error("A necessary field was missing from the request body");
+			err.name = "InformationMissingError";
+			err.data = dataCheck;
+			reject(err);
 		}
 
 		try {

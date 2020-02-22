@@ -192,17 +192,17 @@ async function downloadHot() {
 
         success:function(r) {
 
-            if (r.hot1) {
+            if (r.data.hot1) {
                 document.getElementById("hot-smoke-1").innerHTML = `${r.data.hot1.line.name}: ${r.data.hot1.stop1.name} - ${r.data.hot1.stop2.name}`;
             } else {
                 document.getElementById("hot-smoke-1").innerHTML = "Nincs elég adat az információ megjelenítéséhez";
             }
-            if (r.hot2) {
+            if (r.data.hot2) {
                 document.getElementById("hot-smoke-2").innerHTML = `${r.data.hot2.line.name}: ${r.data.hot2.stop1.name} - ${r.data.hot2.stop2.name}`;
             } else {
                 document.getElementById("hot-smoke-2").innerHTML = "Nincs elég adat az információ megjelenítéséhez";
             }
-            if (r.hot3) {
+            if (r.data.hot3) {
                 document.getElementById("hot-smoke-3").innerHTML = `${r.data.hot3.line.name}: ${r.data.hot3.stop1.name} - ${r.data.hot3.stop2.name}`;
             } else {
                 document.getElementById("hot-smoke-3").innerHTML = "Nincs elég adat az információ megjelenítéséhez";
