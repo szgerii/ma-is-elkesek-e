@@ -6,22 +6,10 @@ const SALT_ROUNDS = 10;
 const userSchema = new mongoose.Schema({
 	username: {
 		type: String,
-		validate: {
-			validator: function(v) {
-				return /^([a-zA-Z0-9_-]){3,16}$/.test(v);
-			},
-			message: props => `Invalid username: ${props.value}`
-		},
 		required: true
 	},
 	password: {
 		type: String,
-		validate: {
-			validator: function(v) {
-				return v.length >= 6;
-			},
-			message: props => `Invalid password: ${props.value}`
-		},
 		required: true
 	},
 	signupDate: {

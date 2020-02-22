@@ -161,13 +161,37 @@ function updateHotSmokin() {
 
 exports.createUser = userData => {
 	return new Promise(async (resolve, reject) => {
-		if (!userData.username ||
-			!userData.email ||
-			!userData.password ||
-			!userData.showWatchlistByDefault) {
+		const dataCheck = {};
+		
+		if (!userData.username) {
+			dataCheck.username = "Missing field from request body: username"
+		}
+		if (!userData.password) {
+			dataCheck.password = "Missing field from request body: password"
+		}
+
+		if (dataCheck.username || dataCheck.password) {
 				const err = new Error("A necessary field was missing from the request body");
 				err.name = "InformationMissingError";
+				err.data = dataCheck;
 				reject(err);
+				return;
+		}
+
+		if (!(/^([a-zA-Z0-9_-]){3,16}$/.test(userData.username))) {
+			dataCheck.username = `Invalid username format: ${userData.username}`;
+		}
+
+		if (userData.password.length < 6) {
+			dataCheck.password = `Invalid password format`;
+		}
+
+		if (dataCheck.username || dataCheck.password) {
+			const err = new Error("A field from the request body had invalid formatting");
+			err.name = "ValidationError";
+			err.data = dataCheck;
+			reject(err);
+			return;
 		}
 
 		try {

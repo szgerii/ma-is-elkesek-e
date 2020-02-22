@@ -77,56 +77,6 @@ function start() {
 	logger.log(`Server listening on port ${PORT}`);
 }
 
-/*
-	} else if (req.method === "POST") {
-		parseBody(req).then(body => {
-			switch (req.baseUrl) {
-				/*
-					Response codes:
-					200 - successful registration
-					409 - a user with that username already exists
-					422 - a mandatory field was missing or the data wasn't correct (e.g. too short username)
-				*\/
-				case "/users":
-					dbManager.createUser({
-						username: body.username,
-						email: body.email,
-						password: body.password,
-						showWatchlistByDefault: body.showWatchlistByDefault === "true" ? true : false
-					}).then(() => {
-						logger.xlog("Successfully registered new user");
-						res.writeHead(200, {"Content-Type": "text/html"});
-						res.end("Successfully added the user to the database");
-					}).catch(err => {
-						if (err.name === "ValidationError") {
-							res.writeHead(422, {"Content-Type": "text/html"});
-							res.end("The request body contained invalid information");
-						} else if (err.name === "UserAlreadyExistsError") {
-							res.writeHead(409, {"Content-Type": "text/html"});
-							res.end(err.message);
-						} else if (err.name === "InformationMissingError") {
-							res.writeHead(422, {"Content-Type": "text/html"});
-							res.end(err.message);
-						} else {
-							logger.error("Couldn't add user to the database");
-							logger.error(err);
-							res.writeHead(500, {"Content-Type": "text/html"});
-							res.end("Unknown error: couldn't add user to the database");
-						}
-					});
-					break;
-				
-				default:
-					res.writeHead(404, {"Content-Type": "text/html"});
-					res.end("404: Page Not Round");
-					break;
-			}
-		});
-	} else {
-		res.writeHead(405, {"Content-Type": "text/html"});
-		res.end(`405: Érvénytelen HTTP metódus (${req.method})`);
-	}*/
-
 router.addHandler("/", "GET", (req, res) => {
 	res.writeHead(200, {"Content-Type": "text/html"});
 	res.end(files[0]);
@@ -163,7 +113,7 @@ router.addHandler("/api/hotsmokin", "GET", (req, res) => {
 		res.end(genResponse("success", top3));
 	}).catch(err => {
 		res.writeHead(500, {"Content-Type": "application/json"});
-		res.end("{}");
+		res.end(genResponse("error", "Couldn't get top 3 sections from the database"));
 		logger.error("Couldn't get top 3 list from database");
 		logger.xlog(err);
 	});
@@ -193,6 +143,36 @@ router.addHandler("/api/hotsmokin", "POST", (req, res) => {
 	});
 });
 
+router.addHandler("/api/users", "POST", (req, res) => {
+	dbManager.createUser({
+		username: req.body.username,
+		password: req.body.password,
+		showWatchlistByDefault: req.body.showWatchlistByDefault || true
+	}).then(() => {
+		logger.xlog("Successfully registered new user");
+		res.writeHead(200, {"Content-Type": "application/json"});
+		res.end(genResponse("success", null));
+	}).catch(err => {
+		if (err.name === "ValidationError") {
+			res.writeHead(422, {"Content-Type": "application/json"});
+			res.end(genResponse("fail", err.data));
+		} else if (err.name === "UserAlreadyExistsError") {
+			res.writeHead(409, {"Content-Type": "application/json"});
+			res.end(genResponse("fail", {
+				username: err.message
+			}));
+		} else if (err.name === "InformationMissingError") {
+			res.writeHead(422, {"Content-Type": "application/json"});
+			res.end(genResponse("fail", err.data));
+		} else {
+			logger.error("Couldn't add user to the database");
+			logger.error(err);
+			res.writeHead(500, {"Content-Type": "application/json"});
+			res.end(genResponse("error", "Couldn't add user to the database"));
+		}
+	});
+});
+
 router.setFallback((req, res) => {
 	res.writeHead(404, {"Content-Type": "text/html"});
 	res.end("404: Page Not Round");
@@ -201,6 +181,13 @@ router.setFallback((req, res) => {
 start();
 
 function genResponse(status, data) {
+	if (status === "error") {
+		return JSON.stringify({
+			"status": status,
+			"message": data
+		});
+	}
+
 	return JSON.stringify({
 		"status": status,
 		"data": data
