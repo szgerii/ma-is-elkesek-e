@@ -202,10 +202,11 @@ exports.createUser = userData => {
 			return;
 		}
 
-		if (await module.exports.findOne({ username: this.username })) {
+		if (await userModel.findOne({ username: userData.username })) {
 			const err = new Error(`A user already exists with the following username: ${this.username}`);
 			err.name = "UserAlreadyExistsError";
 			reject(err);
+			return;
 		}
 
 		const user = new userModel();

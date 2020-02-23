@@ -47,11 +47,11 @@ function start() {
 		logger.xlog(err);
 	});
 
-	// Load public files into files
+	// Load public files into the files array
 	files.push(fs.readFileSync(__dirname + "/public/index.html")); // 0
 	files.push(fs.readFileSync(__dirname + "/public/style.css")); // 1
 	files.push(fs.readFileSync(__dirname + "/public/script.js")); // 2
-	files.push(fs.readFileSync(__dirname + "/public/lib/jquery.js")); // 3
+	files.push(fs.readFileSync(__dirname + "/public/lib/jQuery.js")); // 3
 	files.push(fs.readFileSync(__dirname + "/public/assets/images/background.png")); // 4
 	files.push(fs.readFileSync(__dirname + "/public/assets/images/icon.png")); // 5
 
@@ -92,7 +92,7 @@ router.addHandler("/script.js", "GET", (req, res) => {
 	res.end(files[2]);
 });
 
-router.addHandler("/jquery.js", "GET", (req, res) => {
+router.addHandler("/jQuery.js", "GET", (req, res) => {
 	res.writeHead(200, {"Content-Type": "text/javascript"});
 	res.end(files[3]);
 });
