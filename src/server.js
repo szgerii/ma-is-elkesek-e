@@ -121,12 +121,12 @@ router.addHandler("/api/hotsmokin", "GET", (req, res) => {
 
 router.addHandler("/api/hotsmokin", "POST", (req, res) => {
 	dbManager.updateSection({
-		lineId: body.lineId,
-		lineName: body.lineName,
-		stop1Id: body.stop1Id,
-		stop1Name: body.stop1Name,
-		stop2Id: body.stop2Id,
-		stop2Name: body.stop2Name
+		lineId: req.body.lineId,
+		lineName: req.body.lineName,
+		stop1Id: req.body.stop1Id,
+		stop1Name: req.body.stop1Name,
+		stop2Id: req.body.stop2Id,
+		stop2Name: req.body.stop2Name
 	}).then(() => {
 		res.writeHead(200, {"Content-Type": "application/json"});
 		res.end(genResponse("success", null));
