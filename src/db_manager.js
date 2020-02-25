@@ -235,11 +235,7 @@ exports.deleteUser = username => {
 			return;
 		}
 
-		user.remove().then(() => {
-			resolve();
-		}).catch(err => {
-			reject(err);
-		});
+		user.remove().then(resolve).catch(err => reject(err));
 	});
 };
 
@@ -304,10 +300,8 @@ exports.getWatchlist = username => {
 			return;
 		}
 
-		user.populate("watchlist").execPopulate().then(popUser => {
-			console.log(popUser.watchlist);
-
-			const watchlist = popUser.watchlist.map(sec => {
+		sectionModel.populate(user, "watchlist").then(popUser => {
+			resolve(popUser.watchlist.map(sec => {
 				return {
 					line: {
 						id: sec.lineId,
@@ -322,9 +316,7 @@ exports.getWatchlist = username => {
 						name: sec.stop2Name
 					}
 				};
-			});
-
-			resolve(watchlist);
+			}));
 		}).catch(err => {
 			logger.error("Couldn't get user from the database");
 			logger.xlog(err);

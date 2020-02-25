@@ -159,7 +159,7 @@ function parseBody(req) {
 		req.on("end", () => {
 			let body;
 			switch (req.headers["content-type"]) {
-				case "application/x-www-form-url-encoded":
+				case "application/x-www-form-urlencoded":
 					body = queryParser(decodeURIComponent(data.concat().toString()), false);
 					resolve(body);
 					break;
