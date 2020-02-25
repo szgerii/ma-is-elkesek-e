@@ -179,7 +179,7 @@ router.addHandler("/api/users/{username}", "DELETE", (req, res) => {
 	if (req.username !== req.params.username) {
 		res.writeHead(403, {"Content-Type": "application/json"});
 		res.end(genResponse("fail", {
-			username: "The username in the url didn't match the username inside the session token"
+			username: `The following user doesn't have access to this resource: ${req.params.username}`
 		}));
 		return;
 	}
@@ -206,7 +206,7 @@ router.addHandler("/api/users/{username}", "PUT", (req, res) => {
 	if (req.username !== req.params.username) {
 		res.writeHead(403, {"Content-Type": "application/json"});
 		res.end(genResponse("fail", {
-			username: "The username in the url didn't match the username inside the session token"
+			username: `The following user doesn't have access to this resource: ${req.params.username}`
 		}));
 		return;
 	}
@@ -230,6 +230,43 @@ router.addHandler("/api/users/{username}", "PUT", (req, res) => {
 		} else {
 			res.writeHead(500, {"Content-Type": "application/json"});
 			res.end(genResponse("error", "Couldn't modify user in the database"));
+		}
+	});
+});
+
+// TODO: Add 409 to API Docs
+router.addHandler("/api/users/{username}/watchlist", "POST", (req, res) => {
+	req.username = req.params.username; // Until JWT decoding is done (TODO)
+
+	if (req.username !== req.params.username) {
+		res.writeHead(403, {"Content-Type": "application/json"});
+		res.end(genResponse("fail", {
+			username: `The following user doesn't have access to this resource: ${req.params.username}`
+		}));
+		return;
+	}
+
+	dbManager.addToWatchlist(req.username, {
+		line: req.body.line,
+		stop1: req.body.stop1,
+		stop2: req.body.stop2
+	}).then(() => {
+		res.writeHead(200, {"Content-Type": "application/json"});
+		res.end(genResponse("success", null));
+	}).catch(err => {
+		if (err.name === "InvalidUsernameError") {
+			res.writeHead(404, {"Content-Type": "application/json"});
+			res.end(genResponse("fail", {
+				username: err.message
+			}));
+		} else if (err.name === "AlreadyInWatchlistError") {
+			res.writeHead(409, {"Content-Type": "application/json"});
+			res.end(genResponse("fail", {
+				section: "A section with that data is already in the database"
+			}));
+		} else {
+			res.writeHead(500, {"Content-Type": "application/json"});
+			res.end(genResponse("error", "Couldn't add section to the user's watchlist"));
 		}
 	});
 });

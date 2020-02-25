@@ -292,3 +292,46 @@ exports.modifyUser = (username, modifications) => {
 		});
 	});
 };
+
+exports.addToWatchlist = (username, section) => {
+	return new Promise(async (resolve, reject) => {
+		const user = await userModel.findOne({ username: username });
+		
+		if (!user) {
+			const err = new Error(`Couldn't find user with the following username: ${username}`);
+			err.name = "InvalidUsernameError";
+			reject(err);
+			return;
+		}
+
+		let id = await sectionModel.findOne({ lineId: section.line.id, stop1Id: section.stop1.id, stop2Id: section.stop2.id }).id;
+		if (!id) {
+			sec = new sectionModel();
+			sec.lineId = sectionData.lineId;
+			sec.stop1Id = sectionData.stop1Id;
+			sec.stop2Id = sectionData.stop2Id;
+			sec.lineName = sectionData.lineName.replace(/\+/g, " ");
+			sec.stop1Name = sectionData.stop1Name.replace(/\+/g, " ");
+			sec.stop2Name = sectionData.stop2Name.replace(/\+/g, " ");
+			sec.count = 1;
+			await sec.save();
+			id = sec.id;
+			logger.xlog(`Adding the following section to the database -> ${sec.lineName}: ${sec.stop1Name} - ${sec.stop2Name}`);
+		}
+
+		sectionModel.populate(user, { path: "section" })
+		.then(() => {
+			user.watchlist.push(id);
+			return user.save();
+		})
+		.then(() => {
+			resolve();
+		})
+		.catch(err => {
+			logger.error("Couldn't modify user in the database");
+			logger.xlog(err);
+			reject(err);
+		});
+
+	});
+};
