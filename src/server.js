@@ -234,7 +234,7 @@ router.addHandler("/api/users/{username}", "PUT", (req, res) => {
 	});
 });
 
-// TODO: Add 409 to API Docs
+// TODO: Add 409 and 422 to API Docs
 router.addHandler("/api/users/{username}/watchlist", "POST", (req, res) => {
 	req.username = req.params.username; // Until JWT decoding is done (TODO)
 
@@ -262,8 +262,11 @@ router.addHandler("/api/users/{username}/watchlist", "POST", (req, res) => {
 		} else if (err.name === "AlreadyInWatchlistError") {
 			res.writeHead(409, {"Content-Type": "application/json"});
 			res.end(genResponse("fail", {
-				section: "A section with that data is already in the database"
+				section: err.message
 			}));
+		} else if (err.name === "ValidationError") {
+			res.writeHead(422, {"Content-Type": "application/json"});
+			res.end(genResponse("fail", err.data));
 		} else {
 			res.writeHead(500, {"Content-Type": "application/json"});
 			res.end(genResponse("error", "Couldn't add section to the user's watchlist"));

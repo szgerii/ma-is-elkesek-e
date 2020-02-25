@@ -14,7 +14,27 @@ class Route {
 }
 
 exports.requestHandler = async (req, res) => {
-	await parseReq(req);
+	try {
+		await parseReq(req);		
+	} catch (err) {
+		if (err.name === "InvalidContentTypeError") {
+			res.writeHead(422, {"Content-Type": "application/json"});
+			res.end(JSON.stringify({
+				status: "fail",
+				data: {
+					header: `Invalid Content-Type in header: ${req.headers["content-type"]}`
+				}
+			}));
+			return;
+		} else {
+			res.writeHead(500, {"Content-Type": "application/json"});
+			res.end(JSON.stringify({
+				status: "error",
+				message: "Something went wrong while processing the request"
+			}));
+			return;
+		}
+	}
 
     logger.xlog(`${req.method} request at ${req.url} from ${req.ip}`);
 	
@@ -92,8 +112,9 @@ function parseReq(req) {
 			
 			req.query = queryParser(urlParts[1]);
 			resolve();
+		}).catch(err => {
+			reject(err);
 		});
-		
 	});
 }
 
@@ -136,8 +157,24 @@ function parseBody(req) {
 		});
 	
 		req.on("end", () => {
-			const body = queryParser(decodeURIComponent(data.concat().toString()), false);
-			resolve(body);
+			let body;
+			switch (req.headers["content-type"]) {
+				case "application/x-www-form-url-encoded":
+					body = queryParser(decodeURIComponent(data.concat().toString()), false);
+					resolve(body);
+					break;
+
+				case "application/json":
+					body = JSON.parse(data.concat().toString());
+					resolve(body);
+					break;
+				
+				default:
+					const err = new Error("Invalid Content-Type header");
+					err.name("InvalidContentTypeError");
+					reject(err);
+					break;
+			}
 		});
 	});
 }

@@ -293,7 +293,7 @@ exports.modifyUser = (username, modifications) => {
 	});
 };
 
-exports.addToWatchlist = (username, section) => {
+exports.addToWatchlist = (username, sectionData) => {
 	return new Promise(async (resolve, reject) => {
 		const user = await userModel.findOne({ username: username });
 		
@@ -304,34 +304,68 @@ exports.addToWatchlist = (username, section) => {
 			return;
 		}
 
-		let id = await sectionModel.findOne({ lineId: section.line.id, stop1Id: section.stop1.id, stop2Id: section.stop2.id }).id;
-		if (!id) {
+		const dataCheck = {};
+
+		if (!sectionData.line) {
+			dataCheck.line = "line object was missing from the request body";
+		}
+		
+		if (!sectionData.stop1) {
+			dataCheck.stop1 = "stop1 object was missing from the request body";
+		}
+		
+		if(!sectionData.stop2) {
+			dataCheck.stop2 = "stop2 object was missing from the request body";
+		}
+
+		if (!dataCheck.line && (!sectionData.line.id || !sectionData.line.name)) {
+			dataCheck.line = "line ID or name was missing from the request body";
+		}
+		
+		if (!dataCheck.stop1 && (!sectionData.stop1.id || !sectionData.stop1.name)) {
+			dataCheck.stop1 = "stop1 ID or name was missing from the request body";
+		}
+		
+		if (!dataCheck.stop2 && (!sectionData.stop2.id || !sectionData.stop2.name)) {
+			dataCheck.stop2 = "stop2 ID or name was missing from the request body";
+		}
+		
+		if (dataCheck.line || dataCheck.stop1 || dataCheck.stop2) {
+			const err = new Error("A field from the request body was missing");
+			err.name = "ValidationError";
+			err.data = dataCheck;
+			reject(err);
+			return;
+		}
+
+		let sec = await sectionModel.findOne({ lineId: sectionData.line.id, stop1Id: sectionData.stop1.id, stop2Id: sectionData.stop2.id });
+		if (!sec) {
 			sec = new sectionModel();
-			sec.lineId = sectionData.lineId;
-			sec.stop1Id = sectionData.stop1Id;
-			sec.stop2Id = sectionData.stop2Id;
-			sec.lineName = sectionData.lineName.replace(/\+/g, " ");
-			sec.stop1Name = sectionData.stop1Name.replace(/\+/g, " ");
-			sec.stop2Name = sectionData.stop2Name.replace(/\+/g, " ");
+			sec.lineId = sectionData.line.id;
+			sec.stop1Id = sectionData.stop1.id;
+			sec.stop2Id = sectionData.stop2.id;
+			sec.lineName = sectionData.line.name.replace(/\+/g, " ");
+			sec.stop1Name = sectionData.stop1.name.replace(/\+/g, " ");
+			sec.stop2Name = sectionData.stop2.name.replace(/\+/g, " ");
 			sec.count = 1;
 			await sec.save();
-			id = sec.id;
 			logger.xlog(`Adding the following section to the database -> ${sec.lineName}: ${sec.stop1Name} - ${sec.stop2Name}`);
 		}
 
-		sectionModel.populate(user, { path: "section" })
-		.then(() => {
-			user.watchlist.push(id);
-			return user.save();
-		})
-		.then(() => {
-			resolve();
-		})
-		.catch(err => {
-			logger.error("Couldn't modify user in the database");
-			logger.xlog(err);
+		if (user.watchlist.includes(sec._id)) {
+			const err = new Error("That section is already in the user's watchlist");
+			err.name = "AlreadyInWatchlistError";
 			reject(err);
-		});
-
+			return;
+		} else {
+			user.watchlist.push(sec._id);
+			user.save().then(() => {
+				resolve();
+			}).catch(err => {
+				logger.error("Couldn't modify user in the database");
+				logger.xlog(err);
+				reject(err);
+			});
+		}
 	});
 };
