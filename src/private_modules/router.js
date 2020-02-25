@@ -169,9 +169,14 @@ function parseBody(req) {
 					resolve(body);
 					break;
 				
+				case null:
+				case undefined:
+					resolve({});
+					break;
+				
 				default:
-					const err = new Error("Invalid Content-Type header");
-					err.name("InvalidContentTypeError");
+					const err = new Error(`Invalid Content-Type header: ${req.headers["content-type"]}`);
+					err.name = "InvalidContentTypeError";
 					reject(err);
 					break;
 			}

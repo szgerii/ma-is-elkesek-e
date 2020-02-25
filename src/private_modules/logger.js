@@ -94,8 +94,7 @@ exports.dir = (obj, message) => {
 		if (message) {
 			console.log(`[${getCurrentTime(true)}]`);
 			console.dir(obj);
-		}
-		else {
+		} else {
 			console.log(`[${getCurrentTime(true)}] ${message}`);
 			console.dir(obj);
 		}

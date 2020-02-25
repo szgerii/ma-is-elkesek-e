@@ -234,6 +234,33 @@ router.addHandler("/api/users/{username}", "PUT", (req, res) => {
 	});
 });
 
+router.addHandler("/api/users/{username}/watchlist", "GET", (req, res) => {
+	req.username = req.params.username; // Until JWT decoding is done (TODO)
+
+	if (req.username !== req.params.username) {
+		res.writeHead(403, {"Content-Type": "application/json"});
+		res.end(genResponse("fail", {
+			username: `The following user doesn't have access to this resource: ${req.params.username}`
+		}));
+		return;
+	}
+
+	dbManager.getWatchlist(req.username).then(watchlist => {
+		res.writeHead(200, {"Content-Type": "application/json"});
+		res.end(genResponse("success", watchlist));
+	}).catch(err => {
+		if (err.name === "InvalidUsernameError") {
+			res.writeHead(404, {"Content-Type": "application/json"});
+			res.end(genResponse("fail", {
+				username: err.message
+			}));
+		} else {
+			res.writeHead(500, {"Content-Type": "application/json"});
+			res.end(genResponse("error", "Couldn't get the user's watchlist from the database"));
+		}
+	});
+});
+
 // TODO: Add 409 and 422 to API Docs
 router.addHandler("/api/users/{username}/watchlist", "POST", (req, res) => {
 	req.username = req.params.username; // Until JWT decoding is done (TODO)

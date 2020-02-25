@@ -293,6 +293,47 @@ exports.modifyUser = (username, modifications) => {
 	});
 };
 
+exports.getWatchlist = username => {
+	return new Promise(async (resolve, reject) => {
+		const user = await userModel.findOne({ username: username });
+		
+		if (!user) {
+			const err = new Error(`Couldn't find user with the following username: ${username}`);
+			err.name = "InvalidUsernameError";
+			reject(err);
+			return;
+		}
+
+		user.populate("watchlist").execPopulate().then(popUser => {
+			console.log(popUser.watchlist);
+
+			const watchlist = popUser.watchlist.map(sec => {
+				return {
+					line: {
+						id: sec.lineId,
+						name: sec.lineName
+					},
+					stop1: {
+						id: sec.stop1Id,
+						name: sec.stop1Name
+					},
+					stop2: {
+						id: sec.stop2Id,
+						name: sec.stop2Name
+					}
+				};
+			});
+
+			resolve(watchlist);
+		}).catch(err => {
+			logger.error("Couldn't get user from the database");
+			logger.xlog(err);
+			reject(err);
+			return;
+		});
+	});
+};
+
 exports.addToWatchlist = (username, sectionData) => {
 	return new Promise(async (resolve, reject) => {
 		const user = await userModel.findOne({ username: username });
