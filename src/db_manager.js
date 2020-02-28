@@ -402,3 +402,58 @@ exports.addToWatchlist = (username, sectionData) => {
 		}
 	});
 };
+
+exports.removeFromWatchlist = (username, sectionData) => {
+	return new Promise(async (resolve, reject) => {
+		const user = await userModel.findOne({ username: username });
+		
+		if (!user) {
+			const err = new Error(`Couldn't find user with the following username: ${username}`);
+			err.name = "InvalidUsernameError";
+			reject(err);
+			return;
+		}
+
+		const dataCheck = {};
+
+		if (!sectionData.lineId) {
+			dataCheck.lineId = "line object was missing from the request body";
+		}
+		
+		if (!sectionData.stop1Id) {
+			dataCheck.stop1Id = "stop1 object was missing from the request body";
+		}
+		
+		if(!sectionData.stop2Id) {
+			dataCheck.stop2Id = "stop2 object was missing from the request body";
+		}
+		
+		if (dataCheck.line || dataCheck.stop1 || dataCheck.stop2) {
+			const err = new Error("A field from the request body was missing");
+			err.name = "ValidationError";
+			err.data = dataCheck;
+			reject(err);
+			return;
+		}
+
+		let sec = await sectionModel.findOne({ lineId: sectionData.lineId, stop1Id: sectionData.stop1Id, stop2Id: sectionData.stop2Id });
+		const i = user.watchlist.indexOf(sec._id);
+
+		if (!sec || i === -1) {
+			const err = new Error("That section is not in the user's watchlist");
+			err.name = "NotInWatchlistError";
+			reject(err);
+			return;
+		}
+
+		user.watchlist.splice(i, 1);
+		
+		user.save().then(() => {
+			resolve();
+		}).catch(err => {
+			logger.error("Couldn't modify user in the database");
+			logger.xlog(err);
+			reject(err);
+		});		
+	});
+};

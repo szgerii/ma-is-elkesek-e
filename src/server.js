@@ -261,7 +261,6 @@ router.addHandler("/api/users/{username}/watchlist", "GET", (req, res) => {
 	});
 });
 
-// TODO: Add 409 and 422 to API Docs
 router.addHandler("/api/users/{username}/watchlist", "POST", (req, res) => {
 	req.username = req.params.username; // Until JWT decoding is done (TODO)
 
@@ -297,6 +296,48 @@ router.addHandler("/api/users/{username}/watchlist", "POST", (req, res) => {
 		} else {
 			res.writeHead(500, {"Content-Type": "application/json"});
 			res.end(genResponse("error", "Couldn't add section to the user's watchlist"));
+		}
+	});
+});
+
+// TODO: Remove unnecessary request body requirements from the API Docs
+router.addHandler("/api/users/{username}/watchlist", "DELETE", (req, res) => {
+	req.username = req.params.username; // Until JWT decoding is done (TODO)
+
+	if (req.username !== req.params.username) {
+		res.writeHead(403, {"Content-Type": "application/json"});
+		res.end(genResponse("fail", {
+			username: `The following user doesn't have access to this resource: ${req.params.username}`
+		}));
+		return;
+	}
+
+	dbManager.removeFromWatchlist(req.username, {
+		lineId: req.body.lineId,
+		stop1Id: req.body.stop1Id,
+		stop2Id: req.body.stop2Id
+	}).then(() => {
+		res.writeHead(200, {"Content-Type": "application/json"});
+		res.end(genResponse("success", null));
+	}).catch(err => {
+		switch (err.name) {
+			case "NotInWatchlistError":
+			case "InvalidUsernameError":
+				res.writeHead(404, {"Content-Type": "application/json"});
+				res.end(genResponse("fail", {
+					username: err.message
+				}));
+				break;
+			
+			case "ValidationError":
+				res.writeHead(422, {"Content-Type": "application/json"});
+				res.end(genResponse("fail", err.data));
+				break;
+
+			default:
+				res.writeHead(500, {"Content-Type": "application/json"});
+				res.end(genResponse("error", "Couldn't remove section from the user's watchlist"));
+				break;
 		}
 	});
 });
