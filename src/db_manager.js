@@ -19,25 +19,40 @@ exports.updateSection = sectionData => {
 	return new Promise(async (resolve, reject) => {
 		const dataCheck = {};
 
-		if (!sectionData.lineId || !sectionData.lineName) {
-			dataCheck.line = "Line information missing";
+		if (!sectionData.line) {
+			dataCheck.line = "line object was missing from the request body";
 		}
-		if (!sectionData.stop1Id || !sectionData.stop1Name) {
-			dataCheck.stop1 = "Stop1 information missing";
+		
+		if (!sectionData.stop1) {
+			dataCheck.stop1 = "stop1 object was missing from the request body";
 		}
-		if (!sectionData.stop2Id || !sectionData.stop2Name) {
-			dataCheck.stop2 = "Stop2 information missing";
+		
+		if(!sectionData.stop2) {
+			dataCheck.stop2 = "stop2 object was missing from the request body";
 		}
 
+		if (!dataCheck.line && (!sectionData.line.id || !validateBKKId(sectionData.line.id) || !sectionData.line.name)) {
+			dataCheck.line = "line ID or name was missing from the request body, or the format was invalid";
+		}
+		
+		if (!dataCheck.stop1 && (!sectionData.stop1.id || !validateBKKId(sectionData.stop1.id) || !sectionData.stop1.name)) {
+			dataCheck.stop1 = "stop1 ID or name was missing from the request body, or the format was invalid";
+		}
+		
+		if (!dataCheck.stop2 && (!sectionData.stop2.id || !validateBKKId(sectionData.stop2.id) || !sectionData.stop2.name)) {
+			dataCheck.stop2 = "stop2 ID or name was missing from the request body, or the format was invalid";
+		}
+		
 		if (dataCheck.line || dataCheck.stop1 || dataCheck.stop2) {
-			const err = new Error("A necessary field was missing from the request body");
-			err.name = "InformationMissingError";
+			const err = new Error("A field from the request body was missing");
+			err.name = "ValidationError";
 			err.data = dataCheck;
 			reject(err);
+			return;
 		}
 
 		try {
-			let sec = await sectionModel.findOne({ lineId: sectionData.lineId, stop1Id: sectionData.stop1Id, stop2Id: sectionData.stop2Id });
+			let sec = await sectionModel.findOne({ lineId: sectionData.line.id, stop1Id: sectionData.stop1.id, stop2Id: sectionData.stop2.id });
 			
 			if (sec) {
 				sec.count++;
@@ -46,12 +61,12 @@ exports.updateSection = sectionData => {
 				resolve();
 			} else {
 				sec = new sectionModel();
-				sec.lineId = sectionData.lineId;
-				sec.stop1Id = sectionData.stop1Id;
-				sec.stop2Id = sectionData.stop2Id;
-				sec.lineName = sectionData.lineName.replace(/\+/g, " ");
-				sec.stop1Name = sectionData.stop1Name.replace(/\+/g, " ");
-				sec.stop2Name = sectionData.stop2Name.replace(/\+/g, " ");
+				sec.lineId = sectionData.line.id;
+				sec.stop1Id = sectionData.stop1.id;
+				sec.stop2Id = sectionData.stop2.id;
+				sec.lineName = sectionData.line.name;
+				sec.stop1Name = sectionData.stop1.name;
+				sec.stop2Name = sectionData.stop2.name;
 				sec.count = 1;
 				await sec.save();
 				logger.xlog(`Adding the following section to the database -> ${sec.lineName}: ${sec.stop1Name} - ${sec.stop2Name}`);
@@ -167,6 +182,10 @@ function validatePassword(password) {
 	return password.length >= 6;
 }
 
+function validateBKKId(id) {
+	return id.startsWith("BKK_");
+}
+
 exports.createUser = userData => {
 	return new Promise(async (resolve, reject) => {
 		const dataCheck = {};
@@ -179,11 +198,11 @@ exports.createUser = userData => {
 		}
 
 		if (dataCheck.username || dataCheck.password) {
-				const err = new Error("A necessary field was missing from the request body");
-				err.name = "InformationMissingError";
-				err.data = dataCheck;
-				reject(err);
-				return;
+			const err = new Error("A necessary field was missing from the request body");
+			err.name = "InformationMissingError";
+			err.data = dataCheck;
+			reject(err);
+			return;
 		}
 
 		if (!validateUsername(userData.username)) {
@@ -202,8 +221,11 @@ exports.createUser = userData => {
 			return;
 		}
 
+		if (userData.showWatchlistByDefault === undefined)
+			userData.showWatchlistByDefault = true;
+
 		if (await userModel.findOne({ username: userData.username })) {
-			const err = new Error(`A user already exists with the following username: ${this.username}`);
+			const err = new Error(`A user already exists with the following username: ${userData.username}`);
 			err.name = "UserAlreadyExistsError";
 			reject(err);
 			return;
@@ -252,23 +274,24 @@ exports.modifyUser = (username, modifications) => {
 
 		const dataCheck = {};
 
-		if (modifications.username) {
+		if (modifications.username !== undefined) {
 			if (!validateUsername(modifications.username))
 				dataCheck.username = `Invalid username value: ${modifications.username}`;
 			else
 				user.username = modifications.username;
 		}
 
-		if (modifications.password) {
-			if (!validatePassword(modifications.password))
+		if (modifications.password !== undefined) {
+			if (!validatePassword(modifications.password)) {
 				dataCheck.password = "Invalid password value";
+			}
 			else
 				user.password = modifications.password;
 		}
 
-		if (modifications.showWatchlistByDefault === "true" || modifications.showWatchlistByDefault === "false")
+		if (typeof modifications.showWatchlistByDefault === "boolean")
 			user.showWatchlistByDefault = modifications.showWatchlistByDefault;
-		else if (modifications.showWatchlistByDefault)
+		else if (modifications.showWatchlistByDefault !== undefined)
 			dataCheck.showWatchlistByDefault = `Invalid showWatchlistByDefault value: ${modifications.showWatchlistByDefault}`;
 
 		if (dataCheck.username || dataCheck.password || dataCheck.showWatchlistByDefault) {
@@ -351,16 +374,16 @@ exports.addToWatchlist = (username, sectionData) => {
 			dataCheck.stop2 = "stop2 object was missing from the request body";
 		}
 
-		if (!dataCheck.line && (!sectionData.line.id || !sectionData.line.name)) {
-			dataCheck.line = "line ID or name was missing from the request body";
+		if (!dataCheck.line && (!sectionData.line.id || !validateBKKId(sectionData.line.id) || !sectionData.line.name)) {
+			dataCheck.line = "line ID or name was missing from the request body, or the format was invalid";
 		}
 		
-		if (!dataCheck.stop1 && (!sectionData.stop1.id || !sectionData.stop1.name)) {
-			dataCheck.stop1 = "stop1 ID or name was missing from the request body";
+		if (!dataCheck.stop1 && (!sectionData.stop1.id || !validateBKKId(sectionData.stop1.id) || !sectionData.stop1.name)) {
+			dataCheck.stop1 = "stop1 ID or name was missing from the request body, or the format was invalid";
 		}
 		
-		if (!dataCheck.stop2 && (!sectionData.stop2.id || !sectionData.stop2.name)) {
-			dataCheck.stop2 = "stop2 ID or name was missing from the request body";
+		if (!dataCheck.stop2 && (!sectionData.stop2.id || !validateBKKId(sectionData.stop2.id) || !sectionData.stop2.name)) {
+			dataCheck.stop2 = "stop2 ID or name was missing from the request body, or the format was invalid";
 		}
 		
 		if (dataCheck.line || dataCheck.stop1 || dataCheck.stop2) {
@@ -428,7 +451,7 @@ exports.removeFromWatchlist = (username, sectionData) => {
 			dataCheck.stop2Id = "stop2 object was missing from the request body";
 		}
 		
-		if (dataCheck.line || dataCheck.stop1 || dataCheck.stop2) {
+		if (dataCheck.lineId || dataCheck.stop1Id || dataCheck.stop2Id) {
 			const err = new Error("A field from the request body was missing");
 			err.name = "ValidationError";
 			err.data = dataCheck;

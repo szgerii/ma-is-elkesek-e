@@ -121,17 +121,14 @@ router.addHandler("/api/hotsmokin", "GET", (req, res) => {
 
 router.addHandler("/api/hotsmokin", "POST", (req, res) => {
 	dbManager.updateSection({
-		lineId: req.body.lineId,
-		lineName: req.body.lineName,
-		stop1Id: req.body.stop1Id,
-		stop1Name: req.body.stop1Name,
-		stop2Id: req.body.stop2Id,
-		stop2Name: req.body.stop2Name
+		line: req.body.line,
+		stop1: req.body.stop1,
+		stop2: req.body.stop2
 	}).then(() => {
 		res.writeHead(200, {"Content-Type": "application/json"});
 		res.end(genResponse("success", null));
 	}).catch(err => {
-		if (err.name === "InformationMissingError") {
+		if (err.name === "InformationMissingError" || err.name === "ValidationError") {
 			res.writeHead(422, {"Content-Type": "application/json"});
 			res.end(genResponse("fail", err.data));
 		} else {
@@ -147,13 +144,14 @@ router.addHandler("/api/users", "POST", (req, res) => {
 	dbManager.createUser({
 		username: req.body.username,
 		password: req.body.password,
-		showWatchlistByDefault: req.body.showWatchlistByDefault || true
+		showWatchlistByDefault: req.body.showWatchlistByDefault
 	}).then(() => {
 		logger.xlog("Successfully registered new user");
 		res.writeHead(200, {"Content-Type": "application/json"});
 		res.end(genResponse("success", null));
 	}).catch(err => {
 		if (err.name === "ValidationError") {
+			console.log("ValidationError");
 			res.writeHead(422, {"Content-Type": "application/json"});
 			res.end(genResponse("fail", err.data));
 		} else if (err.name === "UserAlreadyExistsError") {
@@ -162,6 +160,7 @@ router.addHandler("/api/users", "POST", (req, res) => {
 				username: err.message
 			}));
 		} else if (err.name === "InformationMissingError") {
+			console.log("InformationMissingError");
 			res.writeHead(422, {"Content-Type": "application/json"});
 			res.end(genResponse("fail", err.data));
 		} else {

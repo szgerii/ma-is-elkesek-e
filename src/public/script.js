@@ -145,35 +145,43 @@ function updateTime() {
 //Function for uploading data for hot smokin' statistics
 function uploadHot() {
 
-    let data = {
-        name: "hotSmokinUpload",
-        lineId: line.id,
-        stop1Id: stop1.id,
-        stop2Id: stop2.id,
-        lineName: line.shortName,
-        stop1Name: stop1.name,
-        stop2Name: stop2.name
-    };
+    let data = JSON.stringify({
+        line: {
+            id: line.id,
+            name: line.shortName
+        },
+        stop1: {
+            id: stop1.id,
+            name: stop1.name
+        },
+        stop2: {
+            id: stop2.id,
+            name: stop2.name
+        }
+    });
 
     $.ajax({
         
         method:"POST",
         url:hotSmokinUrl,
+        contentType: "application/json; charset=utf-8",
         dataType:"json",
         data: data,
 
-        success: function(r) {console.log("Sent data for hot smokin statistics")},
+        success: function(r) {
+            console.log("Sent data for hot smokin statistics")
+        },
         error: function(r) {
             console.log("An error occured while uploading hot smokin' data");
-            if (r.status === "error") {
+            if (r.responseJSON && r.responseJSON.status === "error") {
                 console.log(r.message);
             } else {
-                if (r.data.line)
-                    console.log(r.data.line);
-                if (r.data.stop1)
-                    console.log(r.data.stop1);
-                if (r.data.stop2)
-                    console.log(r.data.stop2);
+                if (r.responseJSON.data.line)
+                    console.log(r.responseJSON.data.line);
+                if (r.responseJSON.data.stop1)
+                    console.log(r.responseJSON.data.stop1);
+                if (r.responseJSON.data.stop2)
+                    console.log(r.responseJSON.data.stop2);
             }
         },
         
@@ -215,7 +223,9 @@ async function downloadHot() {
         error:function(r) {
 
             console.log("An error occured while downloading hot smokin' data");
-            console.log(r.message);
+            if (r.responseJSON) {
+                console.log(r.responseJSON.message);
+            }
             document.getElementById("hot-smoke-1").innerHTML = "An error occured during the download of hot smokin' #1 from the server";
             document.getElementById("hot-smoke-2").innerHTML = "An error occured during the download of hot smokin' #2 from the server";
             document.getElementById("hot-smoke-3").innerHTML = "An error occured during the download of hot smokin' #3 from the server";
@@ -526,7 +536,7 @@ function showSegmentInformation(trips) {
             " perc átlag felszedett késés a szakaszon"
         );
 
-        console.log("Calculation successfull, acg travel time: "+avgTravelTime+", avg gained latency: "+avgLatency+". Trips used:");
+        console.log("Calculation successfull, avg travel time: "+avgTravelTime+", avg gained latency: "+avgLatency+". Trips used:");
         console.log(usefulTrips);
         
     }     
