@@ -52,8 +52,13 @@ function start() {
 	files.push(fs.readFileSync(__dirname + "/public/style.css")); // 1
 	files.push(fs.readFileSync(__dirname + "/public/script.js")); // 2
 	files.push(fs.readFileSync(__dirname + "/public/lib/jquery.js")); // 3
-	files.push(fs.readFileSync(__dirname + "/public/assets/images/background.png")); // 4
-	files.push(fs.readFileSync(__dirname + "/public/assets/images/icon.png")); // 5
+	files.push(fs.readFileSync(__dirname + "/public/assets/images/icon.png")); // 4
+	files.push(fs.readFileSync(__dirname + "/public/assets/images/bg-bus.png")); // 5
+	files.push(fs.readFileSync(__dirname + "/public/assets/images/bg-tram.png")); // 6
+	files.push(fs.readFileSync(__dirname + "/public/assets/images/bg-metro.png")); // 7
+	files.push(fs.readFileSync(__dirname + "/public/assets/images/bg-hev.png")); // 8
+	files.push(fs.readFileSync(__dirname + "/public/assets/images/bg-trolley.png")); // 9
+	files.push(fs.readFileSync(__dirname + "/public/assets/images/bg-ship.png")); // 10
 
 	// DB setup
 	dbManager.connect(config.databaseUrl).catch(err => {
@@ -97,14 +102,39 @@ router.addHandler("/jquery.js", "GET", (req, res) => {
 	res.end(files[3]);
 });
 
-router.addHandler("/assets/images/background.png", "GET", (req, res) => {
+router.addHandler("/assets/images/icon.png", "GET", (req, res) => {
 	res.writeHead(200, {"Content-Type": "image/png"});
 	res.end(files[4]);
 });
 
-router.addHandler("/assets/images/icon.png", "GET", (req, res) => {
+router.addHandler("/assets/images/bg-bus.png", "GET", (req, res) => {
 	res.writeHead(200, {"Content-Type": "image/png"});
 	res.end(files[5]);
+});
+
+router.addHandler("/assets/images/bg-tram.png", "GET", (req, res) => {
+	res.writeHead(200, {"Content-Type": "image/png"});
+	res.end(files[6]);
+});
+
+router.addHandler("/assets/images/bg-metro.png", "GET", (req, res) => {
+	res.writeHead(200, {"Content-Type": "image/png"});
+	res.end(files[7]);
+});
+
+router.addHandler("/assets/images/bg-hev.png", "GET", (req, res) => {
+	res.writeHead(200, {"Content-Type": "image/png"});
+	res.end(files[8]);
+});
+
+router.addHandler("/assets/images/bg-trolley.png", "GET", (req, res) => {
+	res.writeHead(200, {"Content-Type": "image/png"});
+	res.end(files[9]);
+});
+
+router.addHandler("/assets/images/bg-ship.png", "GET", (req, res) => {
+	res.writeHead(200, {"Content-Type": "image/png"});
+	res.end(files[10]);
 });
 
 router.addHandler("/api/hotsmokin", "GET", (req, res) => {
