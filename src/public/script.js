@@ -499,7 +499,12 @@ function showSegmentInformation(trips) {
 
         if (trips[i].time1 != 0 && trips[i].time2 != 0) {
 
-            usefulTrips.push(trips[i]);
+            if (trips[i].time1 != undefined && trips[i].time2 != undefined) {
+
+                usefulTrips.push(trips[i]);
+
+            }
+            
 
         }
     }
@@ -733,6 +738,8 @@ function clearStops() {
     stop2 = 0;
     
     isUpdatingSegment = false;
+
+    checkSegment();
     
 
 }
@@ -803,13 +810,13 @@ async function loadLine() {
         success:function (r) {
 
             line = r.data.references.routes;
-            let done=false;
+            let done = false;
             for (let prop in line) {
                 if (line[prop].shortName.toLowerCase()==input.toLowerCase()) { //same name
                     if (line[prop].type.toLowerCase()==vehicleType.toLowerCase()) { //same type of vehicle
                         console.log("Found a route with matching name");
                         line = line[prop];
-                        done=true;
+                        done = true;
                         break;
                     }
                 }
@@ -819,21 +826,30 @@ async function loadLine() {
                     if (line[prop].type.toLowerCase()==vehicleType.toLowerCase()) { //same type of vehicle
                         console.log("Found a route based on the input");
                         line = line[prop];
-                        done=true;
+                        done = true;
                         break;
                     }
                 }
             }
 
-            if (!line.id || line.id == "BKK_9999") {
+            //special cases for daily-changing routes (sweet hard code)
+            let today = new Date().getDay();
+            if (line.id == "BKK_MP53" && (today == 6 || today == 0)) { //normal M3 replacement should be weekend M3 repl at weekends
+                line.id = "BKK_MP533";
+                line.description = "Kőbánya-Kispest M | Lehel tér M";
+                alert("A hétvége miatt a KÖKI és Lehel tér között jár metrópótló, váltás a megfelelő járatra.");
+            }
+
+            if (!line.id || line.id == "BKK_9999") { //check if the returned line is 9999(object for special lines)
                 alert("Nem találtunk járatot");
                 console.log("No search results based on text \'"+input.toLowerCase()+"\'");
                 line = 0;
                 
                 return;
-            } else
+            } else {
                 console.log("Loading line stops and variants");
                 loadStops();
+            }
 
         },
 
