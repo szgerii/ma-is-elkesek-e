@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
 const logger = require("./private_modules/logger");
 
 // Mongoose models
@@ -6,14 +7,27 @@ const sectionModel = require("./models/section");
 const userModel = require("./models/user");
 
 const DB_REFRESH_INTERVAL = 30000; // milliseconds
-const top3 = {}; // Top 3 section list
+const top3 = {}; // Top 3 section list (hotsmokin)
 let lastDBCheck; // Last time the top 3 list was refreshed from the database 
 
-exports.connect = dbUrl => {
-	return mongoose.connect(dbUrl, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true });
-};
+exports.setup = () => {
+	mongoose.connect(process.env.databaseUrl, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true })
+	.catch(err => {
+		logger.error("Couldn't connect to the database. Shutting down...");
+		logger.xlog(err);
+		process.exit(1);
+	});
+	
+	mongoose.connection.on("connected", () => {
+		logger.log("Successfully connected to the database");
+	});
 
-exports.connection = mongoose.connection;
+	mongoose.connection.on("error", err => {
+		logger.xlog(err);
+		logger.error("Database connection was terminated. Shutting down...");
+		process.exit(1);
+	});
+}
 
 exports.updateSection = sectionData => {
 	return new Promise(async (resolve, reject) => {
@@ -78,12 +92,6 @@ exports.updateSection = sectionData => {
 	});
 };
 
-/*
-	Returns a promise that checks if the top 3 list should be updated and
-		a) calls the update function if necessary, and resolves with the top 3 list
-		b) resolves the top 3 list if update isn't necessary
-		c) rejects with the error if something went wrong
-*/
 exports.getHotSmokin = () => {
 	return new Promise((resolve, reject) => {
 		if (!lastDBCheck || Date.now() - lastDBCheck > DB_REFRESH_INTERVAL || !top3.hot1 || !top3.hot2 || !top3.hot3) {
@@ -102,11 +110,6 @@ exports.getHotSmokin = () => {
 	});
 };
 
-/*
-	Returns a promise that updates the top 3 hot smokin section from the database and
-		a) resolves if the update was successful
-		b) rejects with the error if something went wrong
-*/
 function updateHotSmokin() {
 	return new Promise((resolve, reject) => {
 		top3.hot1 = null;
@@ -245,6 +248,54 @@ exports.createUser = userData => {
 		});
 	});
 };
+
+exports.login = (username, password) => {
+	return new Promise(async (resolve, reject) => {
+		const dataCheck = {};
+
+		if (!username) {
+			dataCheck.username = "Missing field from request body: username"
+		} else if (!validateUsername(username)) {
+			dataCheck.username = `Invalid username format: ${username}`
+		}
+
+		if (!password) {
+			dataCheck.password = "Missing field from request body: password"
+		} else if (!validatePassword(password)) {
+			dataCheck.password = `Invalid password format`
+		}
+		
+		if (dataCheck.username || dataCheck.password) {
+			const err = new Error("A field from the request body was missing");
+			err.name = "ValidationError";
+			err.data = dataCheck;
+			reject(err);
+			return;
+		}
+
+		const user = await userModel.findOne({ username: username });
+
+		if (!user) {
+			const err = new Error("The username was invalid or the user has been deleted");
+			err.name = "InvalidUsernameError";
+			reject(err);
+			return;
+		}
+
+		user.checkPassword(password).then(result => {
+			if (result) {
+				const token = jwt.sign({ sub: username }, process.env.jwtKey, { expiresIn: "30m" });
+				resolve(token);
+			} else {
+				const err = new Error("The username was invalid or the user has been deleted");
+				err.name = "InvalidPasswordError";
+				reject(err);
+			}
+		}).catch(err => {
+			reject(err);
+		});
+	});
+}
 
 exports.deleteUser = username => {
 	return new Promise(async (resolve, reject) => {

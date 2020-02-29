@@ -1,16 +1,17 @@
 {
   "name": "ma-is-elkesek-e",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.0",
+  "description": "BKK járatok átlag késését számoló weboldal.",
+  "repository": "github:hentesoposszum/ma-is-elkesek-e",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js -xv"
   },
   "author": "rav",
   "license": "ISC",
   "dependencies": {
-    "mongoose": "^5.8.11",
-    "bcrypt": "^3.0.7"
+    "bcrypt": "^3.0.7",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.8.11"
   }
 }

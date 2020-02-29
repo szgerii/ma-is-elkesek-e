@@ -20,7 +20,8 @@ Letöltés után a projekt könyvtárán belül a *src* mappában szükséges l�
 
 ```javascript
 module.exports = {
-	databaseUrl: "mongodb+srv://node-server:9ahtrXRyp5sRvm77@ma-is-elkesek-e-ejiov.mongodb.net/ma-is-elkesek-e?retryWrites=true&w=majority"
+	databaseUrl: "mongodb+srv://node-server:9ahtrXRyp5sRvm77@ma-is-elkesek-e-ejiov.mongodb.net/ma-is-elkesek-e?retryWrites=true&w=majority",
+	jwtKey: "ee2c1a1df5ca089a92993b24831dd994"
 };
 ```
 

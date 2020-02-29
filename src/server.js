@@ -5,10 +5,29 @@ const logger = require("./private_modules/logger");
 const router = require("./private_modules/router");
 const dbManager = require("./db_manager");
 
-// Config file (e.g. for DB information)
+// Router files
+const staticRoute = require("./routes/static");
+const hotsmokinRoute = require("./routes/hotsmokin");
+const usersRoute = require("./routes/users");
+const watchlistRoute = require("./routes/watchlist");
+
+// Config file content
 let config;
 if (fs.existsSync("./config.js")) {
 	config = require("./config");
+	if (config.databaseUrl) {
+		process.env.databaseUrl = config.databaseUrl;
+	} else {
+		logger.error("Missing property 'databaseUrl' in config.js. Shutting down...");
+		process.exit(3);
+	}
+	
+	if (config.jwtKey) {
+		process.env.jwtKey = config.jwtKey;
+	} else {
+		logger.error("Missing property 'jwtKey' in config.js. Shutting down...");
+		process.exit(3);
+	}
 } else {
 	logger.error("Couldn't find config.js file. Shutting down...");
 	process.exit(3);
@@ -19,7 +38,6 @@ const PORT = process.env.PORT || config.PORT || 1104;
 
 // Other variables
 let server;
-const files = [];
 
 // Sets up everything needed for the server
 function start() {
@@ -41,323 +59,22 @@ function start() {
 		logger.close();
 		process.exit(0);
 	});
-
-	dbManager.getHotSmokin().catch(err => {
-		logger.error("Couldn't get top 3 list from database");
-		logger.xlog(err);
-	});
-
-	// Load public files into the files array
-	files.push(fs.readFileSync(__dirname + "/public/index.html")); // 0
-	files.push(fs.readFileSync(__dirname + "/public/style.css")); // 1
-	files.push(fs.readFileSync(__dirname + "/public/script.js")); // 2
-	files.push(fs.readFileSync(__dirname + "/public/lib/jQuery.js")); // 3
-	files.push(fs.readFileSync(__dirname + "/public/assets/images/background.png")); // 4
-	files.push(fs.readFileSync(__dirname + "/public/assets/images/icon.png")); // 5
-
-	// DB setup
-	dbManager.connect(config.databaseUrl).catch(err => {
-		logger.error("Couldn't connect to the database. Shutting down...");
-		logger.xlog(err);
-		process.exit(1);
-	});
 	
-	dbManager.connection.on("connected", () => {
-		logger.log("Successfully connected to the database");
+	process.once('SIGUSR2', function () {
+		logger.log("Restarting...");
+		logger.close();
 	});
+
+	dbManager.setup();
 	
-	dbManager.connection.on("error", err => {
-		logger.error("Database connection was terminated. Shutting down...");
-		logger.xlog(err);
-		process.exit(1);
-	});
-	
+	staticRoute();
+	hotsmokinRoute();
+	usersRoute();
+	watchlistRoute();
+
 	server = http.createServer(router.requestHandler)
 	server.listen(PORT);
 	logger.log(`Server listening on port ${PORT}`);
 }
 
-router.addHandler("/", "GET", (req, res) => {
-	res.writeHead(200, {"Content-Type": "text/html"});
-	res.end(files[0]);
-});
-
-router.addHandler("/style.css", "GET", (req, res) => {
-	res.writeHead(200, {"Content-Type": "text/css"});
-	res.end(files[1]);
-});
-
-router.addHandler("/script.js", "GET", (req, res) => {
-	res.writeHead(200, {"Content-Type": "text/javascript"});
-	res.end(files[2]);
-});
-
-router.addHandler("/jQuery.js", "GET", (req, res) => {
-	res.writeHead(200, {"Content-Type": "text/javascript"});
-	res.end(files[3]);
-});
-
-router.addHandler("/assets/images/background.png", "GET", (req, res) => {
-	res.writeHead(200, {"Content-Type": "image/png"});
-	res.end(files[4]);
-});
-
-router.addHandler("/assets/images/icon.png", "GET", (req, res) => {
-	res.writeHead(200, {"Content-Type": "image/png"});
-	res.end(files[5]);
-});
-
-router.addHandler("/api/hotsmokin", "GET", (req, res) => {
-	dbManager.getHotSmokin().then(top3 => {
-		res.writeHead(200, {"Content-Type": "application/json"});
-		res.end(genResponse("success", top3));
-	}).catch(err => {
-		res.writeHead(500, {"Content-Type": "application/json"});
-		res.end(genResponse("error", "Couldn't get top 3 sections from the database"));
-		logger.error("Couldn't get top 3 list from database");
-		logger.xlog(err);
-	});
-});
-
-router.addHandler("/api/hotsmokin", "POST", (req, res) => {
-	dbManager.updateSection({
-		line: req.body.line,
-		stop1: req.body.stop1,
-		stop2: req.body.stop2
-	}).then(() => {
-		res.writeHead(200, {"Content-Type": "application/json"});
-		res.end(genResponse("success", null));
-	}).catch(err => {
-		if (err.name === "InformationMissingError" || err.name === "ValidationError") {
-			res.writeHead(422, {"Content-Type": "application/json"});
-			res.end(genResponse("fail", err.data));
-		} else {
-			logger.error("Couldn't update a section in the database");
-			logger.xlog(err);
-			res.writeHead(500, {"Content-Type": "application/json"});
-			res.end(genResponse("error", "We were unable to update the section in the database"));
-		}
-	});
-});
-
-router.addHandler("/api/users", "POST", (req, res) => {
-	dbManager.createUser({
-		username: req.body.username,
-		password: req.body.password,
-		showWatchlistByDefault: req.body.showWatchlistByDefault
-	}).then(() => {
-		logger.xlog("Successfully registered new user");
-		res.writeHead(200, {"Content-Type": "application/json"});
-		res.end(genResponse("success", null));
-	}).catch(err => {
-		if (err.name === "ValidationError") {
-			console.log("ValidationError");
-			res.writeHead(422, {"Content-Type": "application/json"});
-			res.end(genResponse("fail", err.data));
-		} else if (err.name === "UserAlreadyExistsError") {
-			res.writeHead(409, {"Content-Type": "application/json"});
-			res.end(genResponse("fail", {
-				username: err.message
-			}));
-		} else if (err.name === "InformationMissingError") {
-			console.log("InformationMissingError");
-			res.writeHead(422, {"Content-Type": "application/json"});
-			res.end(genResponse("fail", err.data));
-		} else {
-			logger.error("Couldn't add user to the database");
-			logger.error(err);
-			res.writeHead(500, {"Content-Type": "application/json"});
-			res.end(genResponse("error", "Couldn't add user to the database"));
-		}
-	});
-});
-
-router.addHandler("/api/users/{username}", "DELETE", (req, res) => {
-	req.username = req.params.username; // Until JWT decoding is done (TODO)
-
-	if (req.username !== req.params.username) {
-		res.writeHead(403, {"Content-Type": "application/json"});
-		res.end(genResponse("fail", {
-			username: `The following user doesn't have access to this resource: ${req.params.username}`
-		}));
-		return;
-	}
-
-	dbManager.deleteUser(req.params.username).then(() => {
-		res.writeHead(200, {"Content-Type": "application/json"});
-		res.end(genResponse("success", null));
-	}).catch(err => {
-		if (err.name === "InvalidUsernameError") {
-			res.writeHead(404, {"Content-Type": "application/json"});
-			res.end(genResponse("fail", {
-				username: err.message
-			}));
-		} else {
-			res.writeHead(500, {"Content-Type": "application/json"});
-			res.end(genResponse("error", "Couldn't delete user from the database"));
-		}
-	});
-});
-
-router.addHandler("/api/users/{username}", "PUT", (req, res) => {
-	req.username = req.params.username; // Until JWT decoding is done (TODO)
-
-	if (req.username !== req.params.username) {
-		res.writeHead(403, {"Content-Type": "application/json"});
-		res.end(genResponse("fail", {
-			username: `The following user doesn't have access to this resource: ${req.params.username}`
-		}));
-		return;
-	}
-
-	dbManager.modifyUser(req.params.username, {
-		username: req.body.username,
-		password: req.body.password,
-		showWatchlistByDefault: req.body.showWatchlistByDefault
-	}).then(() => {
-		res.writeHead(200, {"Content-Type": "application/json"});
-		res.end(genResponse("success", null));
-	}).catch(err => {
-		if (err.name === "InvalidUsernameError") {
-			res.writeHead(404, {"Content-Type": "application/json"});
-			res.end(genResponse("fail", {
-				username: err.message
-			}));
-		} else if (err.name === "ValidationError") {
-			res.writeHead(422, {"Content-Type": "application/json"});
-			res.end(genResponse("fail", err.data));
-		} else {
-			res.writeHead(500, {"Content-Type": "application/json"});
-			res.end(genResponse("error", "Couldn't modify user in the database"));
-		}
-	});
-});
-
-router.addHandler("/api/users/{username}/watchlist", "GET", (req, res) => {
-	req.username = req.params.username; // Until JWT decoding is done (TODO)
-
-	if (req.username !== req.params.username) {
-		res.writeHead(403, {"Content-Type": "application/json"});
-		res.end(genResponse("fail", {
-			username: `The following user doesn't have access to this resource: ${req.params.username}`
-		}));
-		return;
-	}
-
-	dbManager.getWatchlist(req.username).then(watchlist => {
-		res.writeHead(200, {"Content-Type": "application/json"});
-		res.end(genResponse("success", watchlist));
-	}).catch(err => {
-		if (err.name === "InvalidUsernameError") {
-			res.writeHead(404, {"Content-Type": "application/json"});
-			res.end(genResponse("fail", {
-				username: err.message
-			}));
-		} else {
-			res.writeHead(500, {"Content-Type": "application/json"});
-			res.end(genResponse("error", "Couldn't get the user's watchlist from the database"));
-		}
-	});
-});
-
-router.addHandler("/api/users/{username}/watchlist", "POST", (req, res) => {
-	req.username = req.params.username; // Until JWT decoding is done (TODO)
-
-	if (req.username !== req.params.username) {
-		res.writeHead(403, {"Content-Type": "application/json"});
-		res.end(genResponse("fail", {
-			username: `The following user doesn't have access to this resource: ${req.params.username}`
-		}));
-		return;
-	}
-
-	dbManager.addToWatchlist(req.username, {
-		line: req.body.line,
-		stop1: req.body.stop1,
-		stop2: req.body.stop2
-	}).then(() => {
-		res.writeHead(200, {"Content-Type": "application/json"});
-		res.end(genResponse("success", null));
-	}).catch(err => {
-		if (err.name === "InvalidUsernameError") {
-			res.writeHead(404, {"Content-Type": "application/json"});
-			res.end(genResponse("fail", {
-				username: err.message
-			}));
-		} else if (err.name === "AlreadyInWatchlistError") {
-			res.writeHead(409, {"Content-Type": "application/json"});
-			res.end(genResponse("fail", {
-				section: err.message
-			}));
-		} else if (err.name === "ValidationError") {
-			res.writeHead(422, {"Content-Type": "application/json"});
-			res.end(genResponse("fail", err.data));
-		} else {
-			res.writeHead(500, {"Content-Type": "application/json"});
-			res.end(genResponse("error", "Couldn't add section to the user's watchlist"));
-		}
-	});
-});
-
-// TODO: Remove unnecessary request body requirements from the API Docs
-router.addHandler("/api/users/{username}/watchlist", "DELETE", (req, res) => {
-	req.username = req.params.username; // Until JWT decoding is done (TODO)
-
-	if (req.username !== req.params.username) {
-		res.writeHead(403, {"Content-Type": "application/json"});
-		res.end(genResponse("fail", {
-			username: `The following user doesn't have access to this resource: ${req.params.username}`
-		}));
-		return;
-	}
-
-	dbManager.removeFromWatchlist(req.username, {
-		lineId: req.body.lineId,
-		stop1Id: req.body.stop1Id,
-		stop2Id: req.body.stop2Id
-	}).then(() => {
-		res.writeHead(200, {"Content-Type": "application/json"});
-		res.end(genResponse("success", null));
-	}).catch(err => {
-		switch (err.name) {
-			case "NotInWatchlistError":
-			case "InvalidUsernameError":
-				res.writeHead(404, {"Content-Type": "application/json"});
-				res.end(genResponse("fail", {
-					username: err.message
-				}));
-				break;
-			
-			case "ValidationError":
-				res.writeHead(422, {"Content-Type": "application/json"});
-				res.end(genResponse("fail", err.data));
-				break;
-
-			default:
-				res.writeHead(500, {"Content-Type": "application/json"});
-				res.end(genResponse("error", "Couldn't remove section from the user's watchlist"));
-				break;
-		}
-	});
-});
-
-router.setFallback((req, res) => {
-	res.writeHead(404, {"Content-Type": "text/html"});
-	res.end("404: Page Not Round");
-});
-
 start();
-
-function genResponse(status, data) {
-	if (status === "error") {
-		return JSON.stringify({
-			"status": status,
-			"message": data
-		});
-	}
-
-	return JSON.stringify({
-		"status": status,
-		"data": data
-	});
-}

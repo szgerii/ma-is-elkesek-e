@@ -92,10 +92,10 @@ exports.error = (message) => {
 exports.dir = (obj, message) => {
 	if (options["verbose"] || options["x-verbose"]) {
 		if (message) {
-			console.log(`[${getCurrentTime(true)}]`);
+			console.log(`[${getCurrentTime(true)}] ${message}`);
 			console.dir(obj);
 		} else {
-			console.log(`[${getCurrentTime(true)}] ${message}`);
+			console.log(`[${getCurrentTime(true)}]`);
 			console.dir(obj);
 		}
 	}
@@ -104,11 +104,11 @@ exports.dir = (obj, message) => {
 exports.xdir = (obj, message) => {
 	if (options["x-verbose"]) {
 		if (message) {
-			console.log(`[${getCurrentTime(true)}]`);
+			console.log(`[${getCurrentTime(true)}] ${message}`);
 			console.dir(obj);
 		}
 		else {
-			console.log(`[${getCurrentTime(true)}] ${message}`);
+			console.log(`[${getCurrentTime(true)}]`);
 			console.dir(obj);
 		}
 	}

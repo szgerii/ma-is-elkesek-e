@@ -5,48 +5,47 @@ let routes = [];
 let fallback;
 
 class Route {
-    constructor(method, path, handler) {
-        this.method = method;
+    constructor(method, path, handler, middleware) {
+		this.method = method;
         this.path = path;
         this.pathParts = path.split("/").filter(el => { return el.length !== 0; });
-        this.handler = handler;
+		this.handler = handler;
+		this.middlewares = [];
+		if (middleware)
+			this.middlewares.push(middleware);
     }
 }
 
 exports.requestHandler = async (req, res) => {
 	try {
-		await parseReq(req);		
+		await parseReq(req);
 	} catch (err) {
 		if (err.name === "InvalidContentTypeError") {
 			res.writeHead(422, {"Content-Type": "application/json"});
-			res.end(JSON.stringify({
-				status: "fail",
-				data: {
-					header: `Invalid Content-Type in header: ${req.headers["content-type"]}`
-				}
+			res.end(this.genResponse("fail",{
+				header: `Invalid Content-Type in header: ${req.headers["content-type"]}`
 			}));
 			return;
 		} else {
 			res.writeHead(500, {"Content-Type": "application/json"});
-			res.end(JSON.stringify({
-				status: "error",
-				message: "Something went wrong while processing the request"
-			}));
+			res.end(this.genResponse(500, "Something went wrong while processing the request"));
+			logger.error("Something went wrong while processing a request");
+			logger.xlog(err);
 			return;
 		}
 	}
 
-    logger.xlog(`${req.method} request at ${req.url} from ${req.ip}`);
-	
+	logger.xlog(`${req.method} request at ${req.url} from ${req.ip}`);
+		
 	res.on("finish", () => {
 		logger.xlog(`Sending ${res.statusCode} response to ${req.ip}`);
 	});
 
-    middlewares.forEach(mw => {
-        const result = mw(req, res);
-        if (result === 1)
-            return;
-    });
+    for (const mw of middlewares) {
+		const result = mw(req, res);
+		if (result === -1)
+			return;
+	}
 
     for (const r of routes) {
         if (r.method.toUpperCase() === req.method.toUpperCase()) {
@@ -65,7 +64,14 @@ exports.requestHandler = async (req, res) => {
             }
 
             if (result) {
-                req.params = temp;
+				req.params = temp;
+				if (r.middlewares.length > 0) {
+					for (const mw of r.middlewares) {
+						const result = await mw(req, res);
+						if (result === -1)
+							return;
+					}
+				}
                 r.handler(req, res);
                 return;
             }
@@ -76,23 +82,58 @@ exports.requestHandler = async (req, res) => {
         fallback(req, res);
 };
 
-exports.use = middleware => {
+exports.addMiddleware = middleware => {
     middlewares.push(middleware);
 };
 
-exports.addHandler = (path, method, requestHandler) => {
-    routes.push(new Route(method, path, requestHandler));
+exports.addHandler = (path, method, requestHandler, mv) => {
+    routes.push(new Route(method, path, requestHandler, mv));
 };
 
 exports.setFallback = requestHandler => {
     fallback = requestHandler;
 };
 
+exports.genResponse = (status, data) => {
+	if (status === "error") {
+		return JSON.stringify({
+			"status": status,
+			"message": data
+		});
+	}
+
+	return JSON.stringify({
+		"status": status,
+		"data": data
+	});
+}
+
+exports.cookieBuilder = (key, value, options) => {
+	let c = `${key}=${value};`;
+	
+	if (options.domain !== undefined)
+		c += ` Domain=${options.domain};`
+	if (options.path !== undefined)
+		c += ` Path=${options.path};`
+	if (options.expires !== undefined)
+		c += ` Expires=${options.expires};`
+	if (options.maxAge !== undefined)
+		c += ` Max-Age=${options.maxAge};`
+	if (options.sameSite !== undefined)
+		c += ` SameSite=${options.sameSite};`
+	if (options.httpOnly)
+		c += ` HttpOnly;`
+	if (options.secure)
+		c += ` Secure;`
+	
+	return c.substr(0, c.length - 1);
+}
+
 /*
 	Fills up the request object with the base url (without queries) and a separate query object
 	req: request object
 */
-function parseReq(req) {
+async function parseReq(req) {
 	return new Promise(async (resolve, reject) => {
 		const urlParts = req.url.split("?");
 		req.baseUrl = urlParts[0];
@@ -103,18 +144,21 @@ function parseReq(req) {
 				req.socket.remoteAddress ||
 				req.connection.socket.remoteAddress;
 		
-		parseBody(req).then(body => {
-			req.body = body;
-			if (!urlParts[1]) {
-				resolve();
-				return;
-			}
-			
-			req.query = queryParser(urlParts[1]);
-			resolve();
-		}).catch(err => {
+		await parseCookies(req);
+		try {
+			await parseBody(req)
+		} catch (err) {
 			reject(err);
-		});
+			return;	
+		}
+		
+		if (!urlParts[1]) {
+			resolve();
+			return;
+		}
+		
+		req.query = queryParser(urlParts[1]);
+		resolve();
 	});
 }
 
@@ -158,24 +202,30 @@ function parseBody(req) {
 	
 		req.on("end", () => {
 			let body;
+
 			if (!req.headers["content-type"]) {
-				resolve({});
+				req.body = {};
+				resolve();
 				return;
 			}
+
 			switch (req.headers["content-type"].split(";")[0]) {
 				case "application/x-www-form-urlencoded":
 					body = queryParser(decodeURIComponent(data.concat().toString()), false);
-					resolve(body);
+					req.body = body;
+					resolve();
 					break;
 
 				case "application/json":
 					body = JSON.parse(data.concat().toString());
-					resolve(body);
+					req.body = body;
+					resolve();
 					break;
 				
 				case null:
 				case undefined:
-					resolve({});
+					req.body = {};
+					resolve();
 					break;
 				
 				default:
@@ -185,5 +235,25 @@ function parseBody(req) {
 					break;
 			}
 		});
+	});
+}
+
+function parseCookies(req) {
+	return new Promise((resolve, reject) => {
+		const cookies = {};
+
+		if (req.headers.cookie) {
+			for (const c of req.headers.cookie.split(";")) {
+				const i = c.indexOf("=");
+	
+				let val = c.substring(i + 1).trim();
+				val = val === "true" ? true : val === "false" ? false : val; // Check if the value is a bool
+				
+				cookies[c.substring(0, i).trim()] = val;
+			}
+		}
+
+		req.cookies = cookies;
+		resolve();
 	});
 }
