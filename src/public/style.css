@@ -8,11 +8,10 @@
     --color-text: white; /* color of main text */
     --color-box: rgb(0, 120, 180); /* background color of boxes */
     --color-box-hover: rgb(250, 100, 0);
-    --color-box-transparent: rgba(0,120,180,0.0); /* background color for partly transparent box */
 
     --borderRadius-perfect: 1.3vh; /* the one and only perfect border radius for boxes */ /* originally 12px */
 
-    --fontFamily-beautiful: Calibri; /* Beautiful font family used EVERYWHERE */
+    --fontFamily-beautiful: Roboto; /* Beautiful font family used EVERYWHERE */
 
     --width-topBar: 60%; /* width of topBar in document */
     --width-inputBox: 15%; /* width of input boxes in document */
@@ -27,17 +26,156 @@
 
     --alignment-inInputField: center; /* alignment of text in input elements */
 
+    --background-url: url("assets/images/bg-bus.png");
 
 }
 
+* {
+
+    margin:0px;
+    padding:0px;
+
+}
+
+nav {
+
+    position: sticky;
+    top: 0px;
+    width: 100%;
+    font-size: 30pt;
+    color: var(--color-text);
+    background-color: var(--color-box);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+}
+
+nav #navbar-title {
+
+    display: inline-block;
+
+}
+
+nav ul {
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+}
+
+nav ul li {
+
+    list-style: none;
+    padding:0.5em;
+
+}
+
+nav ul li a {
+
+    text-decoration: none;
+    color: var(--color-text);
+
+}
+
+nav ul li .current {
+
+    font-weight: 1000;
+
+}
+
+.navbar-menu {
+
+   position: absolute;
+   top: 6pt;
+   right: 10pt;
+   display: none;
+   flex-direction: column;
+   justify-content: space-between;
+   width: 40px;
+   height: 32px;
+
+}
+
+.navbar-menu:hover {
+
+    cursor: pointer;
+
+}
+
+.navbar-menu .line {
+
+    width:100%;
+    height: 4px;
+    background-color:black;
+
+}
+
+@media (max-width: 992px) {
+
+    nav {
+
+        display: block;
+        text-align:center;
+
+    }
+
+
+}
+
+@media (max-width: 600px) {
+
+    nav {
+        text-align: left;
+        width: 100%;
+    }
+
+    .navbar-menu {
+
+        display: flex;
+
+    }
+
+    nav ul {
+
+        display: none;
+        flex-direction: column;
+        width: 100%;
+
+    }
+
+    nav ul li a {
+        padding: 0.2em 0.2em;
+    }
+
+    .navbar-active {
+
+        display: flex;
+
+    }
+
+    
+
+}
+
+
 body {
 
-    background: linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.8)), url("assets/images/bg-bus.png");
+    background: linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.8)), var(--background-url);
     background-size: cover;
     background-attachment: fixed;
     font-family: var(--fontFamily-beautiful);
     
 
+}
+
+@media (max-width: 600px) {
+    body {
+        background-position: -640px 0px;
+    }
+    
 }
 
 #top {
@@ -143,6 +281,7 @@ body {
 
 .vertical-content-wrapper {
 
+    margin-top: 10px;
     width: 100%;
     display: inline-block;
 

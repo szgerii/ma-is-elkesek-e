@@ -24,11 +24,19 @@ let currentHot = 0; //Global variable of the loaded hot smokin' top 3 segments
 window.onload = function() {
     
     let pickLineText = document.getElementById("pick-line-text");
+    let menuButton = document.getElementsByClassName("navbar-menu")[0];
+    let navList = document.getElementsByClassName("navbar-list")[0];
+
+    menuButton.addEventListener("click", ()=> {
+        navList.classList.toggle("navbar-active");
+    });
 
     pickLineText.addEventListener("keyup", (event) => {
         if (event.keyCode == 13)
             loadLine();
     });
+
+    
 
     slowUpdate();
     setInterval(slowUpdate,10000);
