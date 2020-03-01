@@ -1,6 +1,13 @@
 const bkk = "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/";
 const hotSmokinUrl = "/api/hotsmokin";
 
+const bus = "BUS";
+const tram = "TRAM";
+const metro = "SUBWAY";
+const trolley = "TROLLEYBUS"
+const hev = "RAIL";
+const ship = "FERRY";
+
 let line = 0; //Global variable of the chosen line
 let stops = 0; //Global variable of the list of stops
 
@@ -19,6 +26,8 @@ let isFinalStop = false; //Global variable determining whether the 2nd stop is t
 let stop2ForFinalStop = 0; //Global variable of the stop that is used to get information about the real 2nd stop if it's the last stop
 
 let currentHot = 0; //Global variable of the loaded hot smokin' top 3 segments
+
+let colorScheme = bus;
 
 //Set up slow and quick update ticks and set eventListeners
 window.onload = function() {
@@ -47,6 +56,130 @@ window.onload = function() {
 
     slowUpdate();
     setInterval(slowUpdate,10000);
+
+}
+
+//Function for updating the current colorScheme
+function updateScheme() {
+
+    let stopSigns = document.getElementsByClassName("stopSign-img");
+    let stopSignUrl = "";
+
+    switch (colorScheme) {
+
+        case bus: {
+
+            document.documentElement.style.setProperty('--color-box','rgb(20,30,100)');
+            document.documentElement.style.setProperty('--color-box-transparent','rgba(20,30,100,0.5)');
+            document.documentElement.style.setProperty('--color-main','white');
+            document.documentElement.style.setProperty('--color-text','black');
+            document.documentElement.style.setProperty('--color-navText','white');
+
+            document.documentElement.style.setProperty('--background-url','url("assets/images/bg-bus.png")');
+            document.documentElement.style.setProperty('--background-positioning-desktop','0px 0px');
+            document.documentElement.style.setProperty('--background-positioning-mobile','-700px 0px');
+            
+            stopSignUrl = "assets/images/stopSign-bus.png";
+
+            break;
+
+        }
+        case tram: {
+           
+            document.documentElement.style.setProperty('--color-box','rgb(220,220,0)');
+            document.documentElement.style.setProperty('--color-box-transparent','rgba(220,220,0,0.5)');
+            document.documentElement.style.setProperty('--color-main','white');
+            document.documentElement.style.setProperty('--color-text','black');
+            document.documentElement.style.setProperty('--color-navText','black');
+
+            document.documentElement.style.setProperty('--background-url','url("assets/images/bg-tram.png")');
+            document.documentElement.style.setProperty('--background-positioning-desktop','0px 0px');
+            document.documentElement.style.setProperty('--background-positioning-mobile','-640px 0px');
+
+            stopSignUrl = "assets/images/stopSign-tram.png";
+
+            break;
+
+        }
+        case metro: {
+            
+            document.documentElement.style.setProperty('--color-box','rgb(80,80,80)');
+            document.documentElement.style.setProperty('--color-box-transparent','rgba(80,80,80,0.5)');
+            document.documentElement.style.setProperty('--color-main','white');
+            document.documentElement.style.setProperty('--color-text','black');
+            document.documentElement.style.setProperty('--color-navText','white');
+
+            document.documentElement.style.setProperty('--background-url','url("assets/images/bg-metro.png")');
+            document.documentElement.style.setProperty('--background-positioning-desktop','0px 0px');
+            document.documentElement.style.setProperty('--background-positioning-mobile','-300px 0px');
+            
+            stopSignUrl = "assets/images/stopSign-metro.png";
+
+            break;
+
+        }
+        case trolley: {
+            
+            document.documentElement.style.setProperty('--color-box','rgb(220,0,0)');
+            document.documentElement.style.setProperty('--color-box-transparent','rgba(220,0,0,0.5)');
+            document.documentElement.style.setProperty('--color-main','white');
+            document.documentElement.style.setProperty('--color-text','black');
+            document.documentElement.style.setProperty('--color-navText','white');
+
+            document.documentElement.style.setProperty('--background-url','url("assets/images/bg-trolley.png")');
+            document.documentElement.style.setProperty('--background-positioning-desktop','0px 0px');
+            document.documentElement.style.setProperty('--background-positioning-mobile','-500px 0px');
+            
+            stopSignUrl = "assets/images/stopSign-trolley.png";
+
+            break;
+
+        }
+        case hev: {
+            
+            document.documentElement.style.setProperty('--color-box','rgb(0,140,0)');
+            document.documentElement.style.setProperty('--color-box-transparent','rgba(0,140,0,0.5)');
+            document.documentElement.style.setProperty('--color-main','white');
+            document.documentElement.style.setProperty('--color-text','black');
+            document.documentElement.style.setProperty('--color-navText','white');
+
+            document.documentElement.style.setProperty('--background-url','url("assets/images/bg-hev.png")');
+            document.documentElement.style.setProperty('--background-positioning-desktop','200px 200px');
+            document.documentElement.style.setProperty('--background-positioning-mobile','-400px 0px');
+            
+            stopSignUrl = "assets/images/stopSign-hev.png";
+
+            break;
+
+        }
+        case ship: {
+            
+            document.documentElement.style.setProperty('--color-box','rgb(240,240,240)');
+            document.documentElement.style.setProperty('--color-box-transparent','rgba(240,240,240,0.5)');
+            document.documentElement.style.setProperty('--color-main','white');
+            document.documentElement.style.setProperty('--color-text','black');
+            document.documentElement.style.setProperty('--color-navText','black');
+
+            document.documentElement.style.setProperty('--background-url','url("assets/images/bg-ship.png")');
+            document.documentElement.style.setProperty('--background-positioning-desktop','0px 0px');
+            document.documentElement.style.setProperty('--background-positioning-mobile','-300px 200px');
+            
+            stopSignUrl = "assets/images/stopSign-ship.png";
+
+            break;
+
+        }
+
+        
+
+
+    }
+
+    for (let i=0; i<stopSigns.length; i++) {
+
+        stopSigns[i].setAttribute("src", stopSignUrl);
+
+    }
 
 }
 
@@ -97,6 +230,8 @@ async function loadPredefinedSegment(prefLine, prefStop1, prefStop2) {
     }
 
     document.getElementById("dropdown-vehicleType").value = stop1.type;
+    colorScheme = stop1.type;
+    updateScheme();
 
     let dd1 = document.getElementById("dropdown-stop1");
     let dd2 = document.getElementById("dropdown-stop2");
@@ -843,6 +978,8 @@ async function loadLine() {
                 return;
             } else {
                 console.log("Loading line stops and variants");
+                colorScheme = vehicleType;
+                updateScheme();
                 loadStops();
             }
 

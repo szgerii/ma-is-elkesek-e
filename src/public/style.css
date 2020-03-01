@@ -1,33 +1,21 @@
 :root {
     
-    --fontSize-title: 12vh; /* font size for the big title*/             /* originally 70pt */
-    --fontSize-big: 9vh; /* font size for main content */               /* originally 60pt */
-    --fontSize-medium: 4vh; /*font size for texts like hot smokin' */       /* originally 26pt */
-    --fontSize-main: 3vh; /* font size for input boxes */                   /* originally 18pt */
-
-    --color-text: white; /* color of main text */
-    --color-box: rgb(20, 30, 100); /* background color of boxes */
-    --color-box-transparent: rgba(20, 30, 100, 0.5);
-    --color-box-hover: rgb(250, 100, 0);
-
-    --borderRadius-perfect: 1.3vh; /* the one and only perfect border radius for boxes */ /* originally 12px */
-
     --fontFamily-beautiful: Roboto; /* Beautiful font family used EVERYWHERE */
 
-    --width-topBar: 60%; /* width of topBar in document */
-    --width-inputBox: 15%; /* width of input boxes in document */
-    --width-mainContent: 100%; /*width of main content box in document */
-    --width-inputElement: 90%; /* width of input elements in input boxes */
+    --fontSize-small: 16pt; /* Smallest fontsize only used on phone for hot smokin and pick-line form*/
+    --fontSize-medium: 20pt; /* Medium fontSize used for smaller things */
+    --fontSize-large: 30pt; /* Large fontSize used for larger things */
+    --fontSize-gigantic: 60pt; /* Largest fontSize only used on dekstop for the result*/
 
-    --hot-smoke-height: 10vh; /*Height of hot smoke */ /* originally 200px */
+    --color-main: white; /* Color of main text/inputs */ /* DYNAMIC */
+    --color-text: black; /*Color of text in inputs */ /* DYNAMIC */
+    --color-navText: white; /*Color of text in navBar*/ /*DYNAMIC */
+    --color-box: rgb(20, 30, 100); /* Background color of boxes */ /* DYNAMIC */
+    --color-box-transparent: rgba(20, 30, 100, 0.5); /*Color of half tranparent boxes */ /* DYNAMIC */
 
-    --margin-bigBreak: 6vh; /* margin for big breaks between boxes */ /* originally 40pt */
-    --margin-smallBreak: 3vh; /* margin for small breaks between boxes */ /* originally 20pt */
-    --margin-main: 0.66vh; /* main margin used to position input elements */ /* originally 6px */
-
-    --alignment-inInputField: center; /* alignment of text in input elements */
-
-    --background-url: url("assets/images/bg-bus.png");
+    --background-url: url("assets/images/bg-bus.png"); /* Url of the background image */ /* DYNAMIC */
+    --bakcground-positioning-desktop: 0px 0px; /* Positioning of the background on dekstop */ /* DYNAMIC */
+    --background-positioning-mobile: -700px 0px; /* Positioning of the background on phone */ /* DYNAMIC */
 
 }
 
@@ -43,8 +31,8 @@ nav {
     position: sticky;
     top: 0px;
     width: 100%;
-    font-size: 30pt;
-    color: var(--color-text);
+    font-size: var(--fontSize-large);
+    color: var(--color-navText);
     background-color: var(--color-box);
     display: flex;
     flex-direction: row;
@@ -77,7 +65,7 @@ nav ul li {
 nav ul li a {
 
     text-decoration: none;
-    color: var(--color-text);
+    color: var(--color-navText);
 
 }
 
@@ -104,7 +92,7 @@ nav ul li .current {
 
     width: 100%;
     height: 4px;
-    background-color: var(--color-text);
+    background-color: var(--color-navText);
 
 }
 
@@ -142,7 +130,7 @@ nav ul li .current {
         display: none;
         flex-direction: column;
         width: 100%;
-        font-size:20pt;
+        font-size: var(--fontSize-medium);
 
     }
 
@@ -169,6 +157,7 @@ body {
     background: linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.8)), var(--background-url);
     background-size: cover;
     background-attachment: fixed;
+    background-position: var(--background-positioning-desktop);
     font-family: var(--fontFamily-beautiful);
     
 
@@ -185,8 +174,11 @@ body {
 }
 
 @media (max-width: 600px) {
+
     body {
-        background-position: -640px 0px;
+
+        background-position: var(--background-positioning-mobile);
+
     }
 
     .content {
@@ -209,7 +201,6 @@ body {
     flex-direction: row;
     justify-content: space-evenly;
     margin-top: 5em;
-    font-size: 16pt;
 
 }
 
@@ -244,8 +235,9 @@ body {
 
 .settings-input {
 
-    font-size: 20pt;
+    font-size: var(--fontSize-medium);
     width: 70%;
+    background-color: var(--color-main);
 
 }
 
@@ -295,9 +287,9 @@ select option {
 
 .hot-smoke {
 
-    background-color: white;
+    background-color: var(--color-main);
     width: 100%;
-    font-size: 20pt;
+    font-size: var(--fontSize-medium);
     display: block;
 
 }
@@ -313,8 +305,8 @@ select option {
     display: none;
     flex-direction: row;
     justify-content: space-between;
-    color: white;
-    font-size: 20pt;
+    color: var(--color-main);
+    font-size: var(--fontSize-medium);
     padding: 0.5em;
 
 }
@@ -349,7 +341,7 @@ select option {
 
         margin: 0.2em;
         width: 80%;
-        font-size: 16pt;
+        font-size: var(--fontSize-small);
 
     }
 
@@ -388,14 +380,14 @@ select option {
 
         margin: 0.4em;
         display: none;
-        font-size: 16pt; 
+        font-size: var(--fontSize-small); 
     
     }
 
     .hot-smoke-menu {
 
         display: flex;
-        font-size: 16pt; 
+        font-size: var(--fontSize-small); 
 
     }
 
@@ -425,17 +417,17 @@ select option {
 .segment-line {
 
     border: none;
-    border-top: 20pt dashed white;
-    height: 20pt;
+    border-top: var(--fontSize-medium) dashed var(--color-main);
+    height: var(--fontSize-medium);
     width: 20%;
 
 }
 
 #result {
 
-    font-size: 60pt;
+    font-size: var(--fontSize-gigantic);
     margin: 1em;
-    color: white;
+    color: var(--color-main);
     font-weight: 1000;
     width: 20%;
     text-align: center;
@@ -469,7 +461,7 @@ select option {
         align-self: center;
         text-align: center;
         margin: 0.2em;
-        font-size: 30pt;
+        font-size: var(--fontSize-large);
 
     }
 }
