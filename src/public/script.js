@@ -26,9 +26,16 @@ window.onload = function() {
     let pickLineText = document.getElementById("pick-line-text");
     let menuButton = document.getElementsByClassName("navbar-menu")[0];
     let navList = document.getElementsByClassName("navbar-list")[0];
+    let hotSmokeMenu = document.getElementsByClassName("hot-smoke-menu")[0];
+    let hotSmokeItems = document.getElementsByClassName("hot-smoke");
 
     menuButton.addEventListener("click", ()=> {
         navList.classList.toggle("navbar-active");
+    });
+
+    hotSmokeMenu.addEventListener("click", ()=> {
+        for (let i=0; i<hotSmokeItems.length; i++) 
+            hotSmokeItems[i].classList.toggle("hot-smoke-active");
     });
 
     pickLineText.addEventListener("keyup", (event) => {
@@ -239,21 +246,14 @@ function checkSegment() {
 
     if (stop1==0||stop2==0) {
 
-        document.getElementById("stop1").innerHTML = "Megálló A";
-        document.getElementById("stop2").innerHTML = "Megálló B";
-        document.getElementById("result").innerHTML = "Kérjük válasszon érvényes buszjáratot!";
+        document.getElementById("result").innerHTML = "Nincs járat!";
         return 0;
-
-    } else {
-
-        document.getElementById("stop1").innerHTML = stop1.name;
-        document.getElementById("stop2").innerHTML = stop2.name;
 
     }
 
     if (stop1.id==stop2.id) {
 
-        document.getElementById("result").innerHTML = "Kérjük különböző megállókat válasszon!";
+        document.getElementById("result").innerHTML = "Eggyeznek a megállók!";
         return 0;
 
     }
@@ -277,10 +277,10 @@ function checkSegment() {
     
 
     if (correctOrder==false) {
-        document.getElementById("result").innerHTML = "A megállók fordítva vannak!";
+        document.getElementById("result").innerHTML = "Rossz sorrend!";
         return 0;
     } else {
-        document.getElementById("result").innerHTML = "Számolás folyamatban...";
+        document.getElementById("result").innerHTML = "Számolás...";
         return 1;
     }
 
@@ -520,9 +520,9 @@ function showSegmentInformation(trips) {
 
     if (isNaN(avgTravelTime) || isNaN(avgLatency)) {
         if (usefulTrips.length==0) {
-            document.getElementById("result").innerHTML = "A megadott időrtatamban egy jármű sem haladt el a szakaszon";
+            document.getElementById("result").innerHTML = "Nincs adat!";
         } else {
-            document.getElementById("result").innerHTML = "Hiba történt a számítás során";
+            document.getElementById("result").innerHTML = "hiba történt!";
         }
         
         console.log("An error occured, avg travel time or avg latency came out to be NaN. Trips used for calculations:");
@@ -533,10 +533,7 @@ function showSegmentInformation(trips) {
     } else {
 
         document.getElementById("result").innerHTML = (
-            avgTravelTime + 
-            " perc átlag utazási idő a szakaszon <br />"+
-            avgLatency +
-            " perc átlag felszedett késés a szakaszon"
+            avgTravelTime+" perc"
         );
 
         console.log("Calculation successfull, acg travel time: "+avgTravelTime+", avg gained latency: "+avgLatency+". Trips used:");
