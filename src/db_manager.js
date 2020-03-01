@@ -239,6 +239,7 @@ exports.createUser = userData => {
 		user.email = userData.email;
 		user.password = userData.password;
 		user.showWatchlistByDefault = userData.showWatchlistByDefault;
+		user.hash = true;
 		user.save().then(() => {
 			resolve();
 		}).catch(err => {
@@ -262,7 +263,7 @@ exports.login = (username, password) => {
 		if (!password) {
 			dataCheck.password = "Missing field from request body: password"
 		} else if (!validatePassword(password)) {
-			dataCheck.password = `Invalid password format`
+			dataCheck.password = "Invalid password format"
 		}
 		
 		if (dataCheck.username || dataCheck.password) {

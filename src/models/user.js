@@ -25,15 +25,18 @@ const userSchema = new mongoose.Schema({
 		type: Boolean,
 		required: true,
 		default: true
-	},
+	}
 });
 
 userSchema.pre("save", function(next) {
-	this.password = bcrypt.hashSync(this.password, SALT_ROUNDS);
+	if (this.hash) {
+		this.password = bcrypt.hashSync(this.password, SALT_ROUNDS);
+		this.hash = false;
+	}
 	next();
 });
 
-userSchema.methods.checkPassword = function(password) {
+userSchema.methods.checkPassword = async function(password) {
 	return bcrypt.compare(password, this.password);
 };
 
