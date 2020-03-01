@@ -59,6 +59,24 @@ function start() {
 	files.push(fs.readFileSync(__dirname + "/public/assets/images/bg-hev.png")); // 8
 	files.push(fs.readFileSync(__dirname + "/public/assets/images/bg-trolley.png")); // 9
 	files.push(fs.readFileSync(__dirname + "/public/assets/images/bg-ship.png")); // 10
+	try {
+		files.push(fs.readFileSync(__dirname + "/public/assets/images/stopSign-bus.png")); // 11
+	} catch (error) {}
+	try {
+		files.push(fs.readFileSync(__dirname + "/public/assets/images/stopSign-tram.png")); // 11
+	} catch (error) {}
+	try {
+		files.push(fs.readFileSync(__dirname + "/public/assets/images/stopSign-metro.png")); // 11
+	} catch (error) {}
+	try {
+		files.push(fs.readFileSync(__dirname + "/public/assets/images/stopSign-hev.png")); // 11
+	} catch (error) {}
+	try {
+		files.push(fs.readFileSync(__dirname + "/public/assets/images/stopSign-trolley.png")); // 11
+	} catch (error) {}
+	try {
+		files.push(fs.readFileSync(__dirname + "/public/assets/images/stopSign-ship.png")); // 11
+	} catch (error) {}
 
 	// DB setup
 	dbManager.connect(config.databaseUrl).catch(err => {
@@ -135,6 +153,78 @@ router.addHandler("/assets/images/bg-trolley.png", "GET", (req, res) => {
 router.addHandler("/assets/images/bg-ship.png", "GET", (req, res) => {
 	res.writeHead(200, {"Content-Type": "image/png"});
 	res.end(files[10]);
+});
+
+router.addHandler("/assets/images/stopSign-bus.png", "GET", (req, res) => {
+	if (files[11]) {
+		res.writeHead(200, {"Content-Type": "image/png"});
+		res.end(files[11]);
+	} else {
+		res.writeHead(404, {"Content-Type": "application/json"});
+		res.end(genResponse("fail", {
+			image: "This image has not yet been created. It will be available on this route after it's been finished."
+		}));
+	}
+});
+
+router.addHandler("/assets/images/stopSign-tram.png", "GET", (req, res) => {
+	if (files[12]) {
+		res.writeHead(200, {"Content-Type": "image/png"});
+		res.end(files[12]);
+	} else {
+		res.writeHead(404, {"Content-Type": "application/json"});
+		res.end(genResponse("fail", {
+			image: "This image has not yet been created. It will be available on this route after it's been finished."
+		}));
+	}
+});
+
+router.addHandler("/assets/images/stopSign-metro.png", "GET", (req, res) => {
+	if (files[13]) {
+		res.writeHead(200, {"Content-Type": "image/png"});
+		res.end(files[13]);
+	} else {
+		res.writeHead(404, {"Content-Type": "application/json"});
+		res.end(genResponse("fail", {
+			image: "This image has not yet been created. It will be available on this route after it's been finished."
+		}));
+	}
+});
+
+router.addHandler("/assets/images/stopSign-hev.png", "GET", (req, res) => {
+	if (files[14]) {
+		res.writeHead(200, {"Content-Type": "image/png"});
+		res.end(files[14]);
+	} else {
+		res.writeHead(404, {"Content-Type": "application/json"});
+		res.end(genResponse("fail", {
+			image: "This image has not yet been created. It will be available on this route after it's been finished."
+		}));
+	}
+});
+
+router.addHandler("/assets/images/stopSign-trolley.png", "GET", (req, res) => {
+	if (files[15]) {
+		res.writeHead(200, {"Content-Type": "image/png"});
+		res.end(files[15]);
+	} else {
+		res.writeHead(404, {"Content-Type": "application/json"});
+		res.end(genResponse("fail", {
+			image: "This image has not yet been created. It will be available on this route after it's been finished."
+		}));
+	}
+});
+
+router.addHandler("/assets/images/stopSign-ship.png", "GET", (req, res) => {
+	if (files[16]) {
+		res.writeHead(200, {"Content-Type": "image/png"});
+		res.end(files[16]);
+	} else {
+		res.writeHead(404, {"Content-Type": "application/json"});
+		res.end(genResponse("fail", {
+			image: "This image has not yet been created. It will be available on this route after it's been finished."
+		}));
+	}
 });
 
 router.addHandler("/api/hotsmokin", "GET", (req, res) => {
