@@ -16,7 +16,7 @@ module.exports = () => {
 					httpOnly: true
 				})
 			});
-			res.end(router.genResponse(200, null));
+			res.end(router.genResponse("success", null));
 		}).catch(err => {
 			switch (err.name) {
 				case "ValidationError":
@@ -85,11 +85,28 @@ module.exports = () => {
 		});
 	});
 
+	router.addHandler("/api/users/{username}", "GET", (req, res) => {
+		if (req.username !== req.params.username) {
+			res.writeHead(403, {"Content-Type": "application/json"});
+			res.end(router.genResponse("fail", {
+				username: `The following user doesn't have access to this resource: ${req.username}`
+			}));
+			return;
+		}
+
+		dbManager.getUserSettings(req.username).then(settings => {
+			res.writeHead(200, {"Content-Type": "application/json"});
+			res.end(router.genResponse("success", settings));
+		}).catch(err => {
+			
+		});
+	}, jwt_verification);
+
 	router.addHandler("/api/users/{username}", "DELETE", (req, res) => {
 		if (req.username !== req.params.username) {
 			res.writeHead(403, {"Content-Type": "application/json"});
 			res.end(router.genResponse("fail", {
-				username: `The following user doesn't have access to this resource: ${req.params.username}`
+				username: `The following user doesn't have access to this resource: ${req.username}`
 			}));
 			return;
 		}
@@ -114,7 +131,7 @@ module.exports = () => {
 		if (req.username !== req.params.username) {
 			res.writeHead(403, {"Content-Type": "application/json"});
 			res.end(router.genResponse("fail", {
-				username: `The following user doesn't have access to this resource: ${req.params.username}`
+				username: `The following user doesn't have access to this resource: ${req.username}`
 			}));
 			return;
 		}

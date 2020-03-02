@@ -313,6 +313,24 @@ exports.deleteUser = username => {
 	});
 };
 
+exports.getUserSettings = username => {
+	return new Promise(async (resolve, reject) => {
+		const user = await userModel.findOne({ username: username });
+		
+		if (!user) {
+			const err = new Error(`Couldn't find user with the following username: ${username}`);
+			err.name = "InvalidUsernameError";
+			reject(err);
+			return;
+		}
+
+		resolve({
+			username: user.username,
+			showWatchlistByDefault: user.showWatchlistByDefault
+		});
+	});
+};
+
 exports.modifyUser = (username, modifications) => {
 	return new Promise(async (resolve, reject) => {
 		const user = await userModel.findOne({ username: username });
