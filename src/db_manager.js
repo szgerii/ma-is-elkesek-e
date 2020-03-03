@@ -7,8 +7,8 @@ const sectionModel = require("./models/section");
 const userModel = require("./models/user");
 
 const DB_REFRESH_INTERVAL = 30000; // milliseconds
-const top3 = {}; // Top 3 section list (hotsmokin)
-let lastDBCheck; // Last time the top 3 list was refreshed from the database 
+let hotsmokinList = {}; // Top 5 section list (hotsmokin)
+let lastDBCheck; // Last time the top 5 list was refreshed from the database 
 
 exports.setup = () => {
 	mongoose.connect(process.env.databaseUrl, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true })
@@ -94,82 +94,49 @@ exports.updateSection = sectionData => {
 
 exports.getHotSmokin = () => {
 	return new Promise((resolve, reject) => {
-		if (!lastDBCheck || Date.now() - lastDBCheck > DB_REFRESH_INTERVAL || !top3.hot1 || !top3.hot2 || !top3.hot3) {
+		if (!lastDBCheck || Date.now() - lastDBCheck > DB_REFRESH_INTERVAL || hotsmokinList.length !== 5) {
 			updateHotSmokin().then(() => {
-				logger.xlog("Successfully refreshed top 3 section from database");
-				resolve(top3);
+				logger.xlog("Successfully refreshed hotsmokin list from database");
+				resolve(hotsmokinList);
 			}).catch(err => {
 				reject(err);
 			});
 			
 			lastDBCheck = Date.now();
 		} else {
-			logger.xlog(`Responding with cached top 3 list, ${DB_REFRESH_INTERVAL - (Date.now() - lastDBCheck)} ms before next update`);
-			resolve(top3);
+			logger.xlog(`Responding with cached hotsmokin list, ${DB_REFRESH_INTERVAL - (Date.now() - lastDBCheck)} ms before next update`);
+			resolve(hotsmokinList);
 		}
 	});
 };
 
 function updateHotSmokin() {
 	return new Promise((resolve, reject) => {
-		top3.hot1 = null;
-		top3.hot2 = null;
-		top3.hot3 = null;
+		hotsmokinList = [];
 		
-		sectionModel.find({}).sort("-count").limit(3).exec((err, secs) => {
+		sectionModel.find({}).sort("-count").limit(5).exec((err, secs) => {
 			if (err) {
 				reject(err);
 			}
 
-			if (secs.length >= 1) {
-				top3.hot1 = {
+			for (let i = 0; i < 5; i++) {
+				if (!secs[i])
+					break;
+				
+				hotsmokinList.push({
 					line: {
-						id: secs[0].lineId,
-						name: secs[0].lineName
+						id: secs[i].lineId,
+						name: secs[i].lineName
 					},
 					stop1: {
-						id: secs[0].stop1Id,
-						name: secs[0].stop1Name
+						id: secs[i].stop1Id,
+						name: secs[i].stop1Name
 					},
 					stop2: {
-						id: secs[0].stop2Id,
-						name: secs[0].stop2Name
+						id: secs[i].stop2Id,
+						name: secs[i].stop2Name
 					}
-				};
-			}
-
-			if (secs.length >= 2) {
-				top3.hot2 = {
-					line: {
-						id: secs[1].lineId,
-						name: secs[1].lineName
-					},
-					stop1: {
-						id: secs[1].stop1Id,
-						name: secs[1].stop1Name
-					},
-					stop2: {
-						id: secs[1].stop2Id,
-						name: secs[1].stop2Name
-					}
-				};
-			}
-
-			if (secs.length >= 3) {
-				top3.hot3 = {
-					line: {
-						id: secs[2].lineId,
-						name: secs[2].lineName
-					},
-					stop1: {
-						id: secs[2].stop1Id,
-						name: secs[2].stop1Name
-					},
-					stop2: {
-						id: secs[2].stop2Id,
-						name: secs[2].stop2Name
-					}
-				};
+				});
 			}
 
 			resolve();

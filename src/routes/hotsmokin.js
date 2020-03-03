@@ -9,13 +9,13 @@ module.exports = () => {
 	});
 
 	router.addHandler("/api/hotsmokin", "GET", (req, res) => {
-		dbManager.getHotSmokin().then(top3 => {
+		dbManager.getHotSmokin().then(hotsmokinList => {
 			res.writeHead(200, {"Content-Type": "application/json"});
-			res.end(router.genResponse("success", top3));
+			res.end(router.genResponse("success", hotsmokinList));
 		}).catch(err => {
 			res.writeHead(500, {"Content-Type": "application/json"});
-			res.end(router.genResponse("error", "Couldn't get top 3 sections from the database"));
-			logger.error("Couldn't get top 3 list from database");
+			res.end(router.genResponse("error", "Couldn't get top 5 sections from the database"));
+			logger.error("Couldn't get top 5 list from database");
 			logger.xlog(err);
 		});
 	});
