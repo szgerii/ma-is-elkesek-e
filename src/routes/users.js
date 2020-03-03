@@ -4,7 +4,7 @@ const dbManager = require("../db_manager");
 const jwt_verification = require("../middlewares/jwt_verification");
 
 module.exports = () => {
-	router.addHandler("/api/login", "POST", async (req, res) => {
+	router.addHandler("/api/login", "POST", (req, res) => {
 		dbManager.login(req.body.username, req.body.password).then(token => {
 			res.writeHead(200, {
 				"Content-Type": "application/json",
@@ -30,7 +30,7 @@ module.exports = () => {
 						"WWW-Authenticate": `Bearer realm="Access to ${req.baseUrl}"`
 					});
 					res.end(router.genResponse("fail", {
-						username: `No user with the following username was found: ${req.body.username}`
+						username: `No user was found with the following username: ${req.body.username}`
 					}));
 					break;
 				
@@ -60,7 +60,7 @@ module.exports = () => {
 			password: req.body.password,
 			showWatchlistByDefault: req.body.showWatchlistByDefault
 		}).then(() => {
-			logger.xlog("Successfully registered new user");
+			logger.xlog(`Successfully registered new user: ${req.body.username}`);
 			res.writeHead(200, {"Content-Type": "application/json"});
 			res.end(router.genResponse("success", null));
 		}).catch(err => {
@@ -93,12 +93,20 @@ module.exports = () => {
 			}));
 			return;
 		}
-
+		
 		dbManager.getUserSettings(req.username).then(settings => {
 			res.writeHead(200, {"Content-Type": "application/json"});
 			res.end(router.genResponse("success", settings));
 		}).catch(err => {
-			
+			if (err.name === "InvalidUsernameError") {
+				res.writeHead(404, {"Content-Type": "application/json"});
+				res.end(router.genResponse("fail", {
+					username: `A user with the following username doesn't exist: ${req.username}`
+				}));
+			} else {
+				res.writeHead(500, {"Content-Type": "application/json"});
+				res.end(router.genResponse("error", "Couldn't get the user's settings"));
+			}
 		});
 	}, jwt_verification);
 
@@ -140,8 +148,18 @@ module.exports = () => {
 			username: req.body.username,
 			password: req.body.password,
 			showWatchlistByDefault: req.body.showWatchlistByDefault
-		}).then(() => {
-			res.writeHead(200, {"Content-Type": "application/json"});
+		}).then(async () => {
+			const token = await dbManager.genToken(req.body.username);
+			res.writeHead(200, {
+				"Content-Type": "application/json",
+				"Set-Cookie": router.cookieBuilder("auth-token", token, {
+					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
+					path: "/",
+					maxAge: 1800,
+					sameSite: "Strict",
+					httpOnly: true
+				})
+			});
 			res.end(router.genResponse("success", null));
 		}).catch(err => {
 			if (err.name === "InvalidUsernameError") {

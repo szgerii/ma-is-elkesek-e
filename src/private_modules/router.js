@@ -133,7 +133,7 @@ exports.cookieBuilder = (key, value, options) => {
 	Fills up the request object with the base url (without queries) and a separate query object
 	req: request object
 */
-async function parseReq(req) {
+function parseReq(req) {
 	return new Promise(async (resolve, reject) => {
 		const urlParts = req.url.split("?");
 		req.baseUrl = urlParts[0];

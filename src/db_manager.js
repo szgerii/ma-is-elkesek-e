@@ -8,7 +8,7 @@ const userModel = require("./models/user");
 
 const DB_REFRESH_INTERVAL = 30000; // milliseconds
 let hotsmokinList = {}; // Top 5 section list (hotsmokin)
-let lastDBCheck; // Last time the top 5 list was refreshed from the database 
+let lastDBCheck; // Last time the top 5 list was refreshed from the database
 
 exports.setup = () => {
 	mongoose.connect(process.env.databaseUrl, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true })
@@ -250,10 +250,9 @@ exports.login = (username, password) => {
 			return;
 		}
 
-		user.checkPassword(password).then(result => {
+		user.checkPassword(password).then(async result => {
 			if (result) {
-				const token = jwt.sign({ sub: username }, process.env.jwtKey, { expiresIn: "30m" });
-				resolve(token);
+				resolve(await this.genToken(username));
 			} else {
 				const err = new Error("The username was invalid or the user has been deleted");
 				err.name = "InvalidPasswordError";
@@ -264,6 +263,10 @@ exports.login = (username, password) => {
 		});
 	});
 }
+
+exports.genToken = username => {
+	return Promise.resolve(jwt.sign({ sub: username }, process.env.jwtKey, { expiresIn: "30m" }));
+};
 
 exports.deleteUser = username => {
 	return new Promise(async (resolve, reject) => {
@@ -497,7 +500,7 @@ exports.removeFromWatchlist = (username, sectionData) => {
 		}
 
 		let sec = await sectionModel.findOne({ lineId: sectionData.lineId, stop1Id: sectionData.stop1Id, stop2Id: sectionData.stop2Id });
-		const i = user.watchlist.indexOf(sec._id);
+		const i = sec ? user.watchlist.indexOf(sec._id) : -1;
 
 		if (!sec || i === -1) {
 			const err = new Error("That section is not in the user's watchlist");

@@ -7,7 +7,7 @@ module.exports = () => {
 		if (req.username !== req.params.username) {
 			res.writeHead(403, {"Content-Type": "application/json"});
 			res.end(router.genResponse("fail", {
-				username: `The following user doesn't have access to this resource: ${req.params.username}`
+				username: `The following user doesn't have access to this resource: ${req.username}`
 			}));
 			return;
 		}
@@ -32,7 +32,7 @@ module.exports = () => {
 		if (req.username !== req.params.username) {
 			res.writeHead(403, {"Content-Type": "application/json"});
 			res.end(router.genResponse("fail", {
-				username: `The following user doesn't have access to this resource: ${req.params.username}`
+				username: `The following user doesn't have access to this resource: ${req.username}`
 			}));
 			return;
 		}
@@ -69,7 +69,7 @@ module.exports = () => {
 		if (req.username !== req.params.username) {
 			res.writeHead(403, {"Content-Type": "application/json"});
 			res.end(router.genResponse("fail", {
-				username: `The following user doesn't have access to this resource: ${req.params.username}`
+				username: `The following user doesn't have access to this resource: ${req.username}`
 			}));
 			return;
 		}
