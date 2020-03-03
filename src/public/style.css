@@ -280,8 +280,8 @@ select option {
     width: 30%;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    padding: 1em;
+    justify-content: space-around;
+    padding: 0 1em;
 
 }
 
@@ -290,6 +290,7 @@ select option {
     background-color: var(--color-main);
     width: 100%;
     font-size: var(--fontSize-medium);
+    text-align: center;
     display: block;
 
 }

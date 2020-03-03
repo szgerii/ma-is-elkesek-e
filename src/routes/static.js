@@ -8,20 +8,19 @@ function loadFiles() {
 	files.push(fs.readFileSync(__dirname + "/../public/style.css")); // 1
 	files.push(fs.readFileSync(__dirname + "/../public/script.js")); // 2
 	files.push(fs.readFileSync(__dirname + "/../public/lib/jQuery.js")); // 3
-	files.push(fs.readFileSync(__dirname + "/../public/assets/images/background.png")); // 4
-	files.push(fs.readFileSync(__dirname + "/../public/assets/images/icon.png")); // 5
-	files.push(fs.readFileSync(__dirname + "/public/assets/images/bg-bus.png")); // 5
-	files.push(fs.readFileSync(__dirname + "/public/assets/images/bg-tram.png")); // 6
-	files.push(fs.readFileSync(__dirname + "/public/assets/images/bg-metro.png")); // 7
-	files.push(fs.readFileSync(__dirname + "/public/assets/images/bg-hev.png")); // 8
-	files.push(fs.readFileSync(__dirname + "/public/assets/images/bg-trolley.png")); // 9
-	files.push(fs.readFileSync(__dirname + "/public/assets/images/bg-ship.png")); // 10
-	files.push(fs.readFileSync(__dirname + "/public/assets/images/stopSign-bus.png")); // 11
-	files.push(fs.readFileSync(__dirname + "/public/assets/images/stopSign-tram.png")); // 12
-	files.push(fs.readFileSync(__dirname + "/public/assets/images/stopSign-metro.png")); // 13
-	files.push(fs.readFileSync(__dirname + "/public/assets/images/stopSign-hev.png")); // 14
-	files.push(fs.readFileSync(__dirname + "/public/assets/images/stopSign-trolley.png")); // 15
-	files.push(fs.readFileSync(__dirname + "/public/assets/images/stopSign-ship.png")); // 16
+	files.push(fs.readFileSync(__dirname + "/../public/assets/images/icon.png")); // 4
+	files.push(fs.readFileSync(__dirname + "/../public/assets/images/bg-bus.png")); // 5
+	files.push(fs.readFileSync(__dirname + "/../public/assets/images/bg-tram.png")); // 6
+	files.push(fs.readFileSync(__dirname + "/../public/assets/images/bg-metro.png")); // 7
+	files.push(fs.readFileSync(__dirname + "/../public/assets/images/bg-hev.png")); // 8
+	files.push(fs.readFileSync(__dirname + "/../public/assets/images/bg-trolley.png")); // 9
+	files.push(fs.readFileSync(__dirname + "/../public/assets/images/bg-ship.png")); // 10
+	files.push(fs.readFileSync(__dirname + "/../public/assets/images/stopSign-bus.png")); // 11
+	files.push(fs.readFileSync(__dirname + "/../public/assets/images/stopSign-tram.png")); // 12
+	files.push(fs.readFileSync(__dirname + "/../public/assets/images/stopSign-metro.png")); // 13
+	files.push(fs.readFileSync(__dirname + "/../public/assets/images/stopSign-hev.png")); // 14
+	files.push(fs.readFileSync(__dirname + "/../public/assets/images/stopSign-trolley.png")); // 15
+	files.push(fs.readFileSync(__dirname + "/../public/assets/images/stopSign-ship.png")); // 16
 }
 
 module.exports = () => {

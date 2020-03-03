@@ -25,7 +25,7 @@ let stop2  = 0; //Global variable of the 2nd stop chosen
 let isFinalStop = false; //Global variable determining whether the 2nd stop is the final stop of that variant(special case) or not
 let stop2ForFinalStop = 0; //Global variable of the stop that is used to get information about the real 2nd stop if it's the last stop
 
-let currentHot = 0; //Global variable of the loaded hot smokin' top 3 segments
+let currentHot = 0; //Global variable of the loaded hot smokin' top 4 segments
 
 let colorScheme = bus;
 
@@ -259,22 +259,8 @@ async function loadPredefinedSegment(prefLine, prefStop1, prefStop2) {
 //Function for the onlick event of the hot smoke boxes, starts loading apredefined segment
 function hotSmokeClick(hotSmoke) {
 
-    switch(hotSmoke) {
-        case 1: if (currentHot.hot1) {
-            loadPredefinedSegment(currentHot.hot1.line, currentHot.hot1.stop1, currentHot.hot1.stop2,); 
-            break;
-        }
-            
-        case 2: if (currentHot.hot2) {
-            loadPredefinedSegment(currentHot.hot2.line, currentHot.hot2.stop1, currentHot.hot2.stop2,); 
-            break;
-        }
-            
-        case 3: if (currentHot.hot3) {
-            loadPredefinedSegment(currentHot.hot3.line, currentHot.hot3.stop1, currentHot.hot3.stop2,);
-            break;
-        }
-            
+    if (currentHot[hotSmoke - 1]) {
+        loadPredefinedSegment(currentHot[hotSmoke - 1].line, currentHot[hotSmoke - 1].stop1, currentHot[hotSmoke - 1].stop2);
     }
 
 }
@@ -350,20 +336,14 @@ async function downloadHot() {
 
         success:function(r) {
 
-            if (r.data.hot1) {
-                document.getElementById("hot-smoke-1").innerHTML = `${r.data.hot1.line.name}: ${r.data.hot1.stop1.name} - ${r.data.hot1.stop2.name}`;
-            } else {
-                document.getElementById("hot-smoke-1").innerHTML = "Nincs elég adat az információ megjelenítéséhez";
-            }
-            if (r.data.hot2) {
-                document.getElementById("hot-smoke-2").innerHTML = `${r.data.hot2.line.name}: ${r.data.hot2.stop1.name} - ${r.data.hot2.stop2.name}`;
-            } else {
-                document.getElementById("hot-smoke-2").innerHTML = "Nincs elég adat az információ megjelenítéséhez";
-            }
-            if (r.data.hot3) {
-                document.getElementById("hot-smoke-3").innerHTML = `${r.data.hot3.line.name}: ${r.data.hot3.stop1.name} - ${r.data.hot3.stop2.name}`;
-            } else {
-                document.getElementById("hot-smoke-3").innerHTML = "Nincs elég adat az információ megjelenítéséhez";
+            if (r.status === "success") {
+                for (let i = 0; i < 4; i++) {
+                    if (r.data[i]) {
+                        document.querySelector(`#hot-smoke-${i + 1}`).innerText = `${r.data[i].line.name}: ${r.data[i].stop1.name} - ${r.data[i].stop2.name}`;
+                    } else {
+                        document.querySelector(`#hot-smoke-${i + 1}`).innerText = "Nincs elég adat az információ megjelenítéséhez";
+                    }
+                }
             }
 
             currentHot = r.data;
@@ -376,9 +356,10 @@ async function downloadHot() {
             if (r.responseJSON) {
                 console.log(r.responseJSON.message);
             }
-            document.getElementById("hot-smoke-1").innerHTML = "An error occured during the download of hot smokin' #1 from the server";
-            document.getElementById("hot-smoke-2").innerHTML = "An error occured during the download of hot smokin' #2 from the server";
-            document.getElementById("hot-smoke-3").innerHTML = "An error occured during the download of hot smokin' #3 from the server";
+
+            for (let i = 0; i < 4; i++) {
+                document.getElementById(`hot-smoke-${i + 1}`).innerText = "Hiba történt a betöltés során";                
+            }
         
         }
 
@@ -398,7 +379,7 @@ function checkSegment() {
 
     if (stop1.id==stop2.id) {
 
-        document.getElementById("result").innerHTML = "Eggyeznek a megállók!";
+        document.getElementById("result").innerHTML = "Egyeznek a megállók!";
         return 0;
 
     }
