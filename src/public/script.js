@@ -1,6 +1,13 @@
 const bkk = "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/";
 const hotSmokinUrl = "/api/hotsmokin";
 
+const bus = "BUS";
+const tram = "TRAM";
+const metro = "SUBWAY";
+const trolley = "TROLLEYBUS"
+const hev = "RAIL";
+const ship = "FERRY";
+
 let line = 0; //Global variable of the chosen line
 let stops = 0; //Global variable of the list of stops
 
@@ -20,18 +27,159 @@ let stop2ForFinalStop = 0; //Global variable of the stop that is used to get inf
 
 let currentHot = 0; //Global variable of the loaded hot smokin' top 3 segments
 
+let colorScheme = bus;
+
 //Set up slow and quick update ticks and set eventListeners
 window.onload = function() {
     
     let pickLineText = document.getElementById("pick-line-text");
+    let menuButton = document.getElementsByClassName("navbar-menu")[0];
+    let navList = document.getElementsByClassName("navbar-list")[0];
+    let hotSmokeMenu = document.getElementsByClassName("hot-smoke-menu")[0];
+    let hotSmokeItems = document.getElementsByClassName("hot-smoke");
+
+    menuButton.addEventListener("click", ()=> {
+        navList.classList.toggle("navbar-active");
+    });
+
+    hotSmokeMenu.addEventListener("click", ()=> {
+        for (let i=0; i<hotSmokeItems.length; i++) 
+            hotSmokeItems[i].classList.toggle("hot-smoke-active");
+    });
 
     pickLineText.addEventListener("keyup", (event) => {
         if (event.keyCode == 13)
             loadLine();
     });
 
+    
+
     slowUpdate();
     setInterval(slowUpdate,10000);
+
+}
+
+//Function for updating the current colorScheme
+function updateScheme() {
+
+    let stopSigns = document.getElementsByClassName("stopSign-img");
+    let stopSignUrl = "";
+
+    switch (colorScheme) {
+
+        case bus: {
+
+            document.documentElement.style.setProperty('--color-box','rgb(20,30,100)');
+            document.documentElement.style.setProperty('--color-box-transparent','rgba(20,30,100,0.5)');
+            document.documentElement.style.setProperty('--color-main','white');
+            document.documentElement.style.setProperty('--color-text','black');
+            document.documentElement.style.setProperty('--color-navText','white');
+
+            document.documentElement.style.setProperty('--background-url','url("assets/images/bg-bus.png")');
+            document.documentElement.style.setProperty('--background-positioning-desktop','0px 0px');
+            document.documentElement.style.setProperty('--background-positioning-mobile','-700px 0px');
+            
+            stopSignUrl = "assets/images/stopSign-bus.png";
+
+            break;
+
+        }
+        case tram: {
+           
+            document.documentElement.style.setProperty('--color-box','rgb(220,220,0)');
+            document.documentElement.style.setProperty('--color-box-transparent','rgba(220,220,0,0.5)');
+            document.documentElement.style.setProperty('--color-main','white');
+            document.documentElement.style.setProperty('--color-text','black');
+            document.documentElement.style.setProperty('--color-navText','black');
+
+            document.documentElement.style.setProperty('--background-url','url("assets/images/bg-tram.png")');
+            document.documentElement.style.setProperty('--background-positioning-desktop','0px 0px');
+            document.documentElement.style.setProperty('--background-positioning-mobile','-640px 0px');
+
+            stopSignUrl = "assets/images/stopSign-tram.png";
+
+            break;
+
+        }
+        case metro: {
+            
+            document.documentElement.style.setProperty('--color-box','rgb(80,80,80)');
+            document.documentElement.style.setProperty('--color-box-transparent','rgba(80,80,80,0.5)');
+            document.documentElement.style.setProperty('--color-main','white');
+            document.documentElement.style.setProperty('--color-text','black');
+            document.documentElement.style.setProperty('--color-navText','white');
+
+            document.documentElement.style.setProperty('--background-url','url("assets/images/bg-metro.png")');
+            document.documentElement.style.setProperty('--background-positioning-desktop','0px 0px');
+            document.documentElement.style.setProperty('--background-positioning-mobile','-300px 0px');
+            
+            stopSignUrl = "assets/images/stopSign-metro.png";
+
+            break;
+
+        }
+        case trolley: {
+            
+            document.documentElement.style.setProperty('--color-box','rgb(220,0,0)');
+            document.documentElement.style.setProperty('--color-box-transparent','rgba(220,0,0,0.5)');
+            document.documentElement.style.setProperty('--color-main','white');
+            document.documentElement.style.setProperty('--color-text','black');
+            document.documentElement.style.setProperty('--color-navText','white');
+
+            document.documentElement.style.setProperty('--background-url','url("assets/images/bg-trolley.png")');
+            document.documentElement.style.setProperty('--background-positioning-desktop','0px 0px');
+            document.documentElement.style.setProperty('--background-positioning-mobile','-500px 0px');
+            
+            stopSignUrl = "assets/images/stopSign-trolley.png";
+
+            break;
+
+        }
+        case hev: {
+            
+            document.documentElement.style.setProperty('--color-box','rgb(0,140,0)');
+            document.documentElement.style.setProperty('--color-box-transparent','rgba(0,140,0,0.5)');
+            document.documentElement.style.setProperty('--color-main','white');
+            document.documentElement.style.setProperty('--color-text','black');
+            document.documentElement.style.setProperty('--color-navText','white');
+
+            document.documentElement.style.setProperty('--background-url','url("assets/images/bg-hev.png")');
+            document.documentElement.style.setProperty('--background-positioning-desktop','200px 200px');
+            document.documentElement.style.setProperty('--background-positioning-mobile','-400px 0px');
+            
+            stopSignUrl = "assets/images/stopSign-hev.png";
+
+            break;
+
+        }
+        case ship: {
+            
+            document.documentElement.style.setProperty('--color-box','rgb(240,240,240)');
+            document.documentElement.style.setProperty('--color-box-transparent','rgba(240,240,240,0.5)');
+            document.documentElement.style.setProperty('--color-main','white');
+            document.documentElement.style.setProperty('--color-text','black');
+            document.documentElement.style.setProperty('--color-navText','black');
+
+            document.documentElement.style.setProperty('--background-url','url("assets/images/bg-ship.png")');
+            document.documentElement.style.setProperty('--background-positioning-desktop','0px 0px');
+            document.documentElement.style.setProperty('--background-positioning-mobile','-300px 200px');
+            
+            stopSignUrl = "assets/images/stopSign-ship.png";
+
+            break;
+
+        }
+
+        
+
+
+    }
+
+    for (let i=0; i<stopSigns.length; i++) {
+
+        stopSigns[i].setAttribute("src", stopSignUrl);
+
+    }
 
 }
 
@@ -82,6 +230,8 @@ async function loadPredefinedSegment(prefLine, prefStop1, prefStop2) {
     }
 
     document.getElementById("dropdown-vehicleType").value = stop1.type;
+    colorScheme = stop1.type;
+    updateScheme();
 
     let dd1 = document.getElementById("dropdown-stop1");
     let dd2 = document.getElementById("dropdown-stop2");
@@ -241,21 +391,14 @@ function checkSegment() {
 
     if (stop1==0||stop2==0) {
 
-        document.getElementById("stop1").innerHTML = "Megálló A";
-        document.getElementById("stop2").innerHTML = "Megálló B";
-        document.getElementById("result").innerHTML = "Kérjük válasszon érvényes buszjáratot!";
+        document.getElementById("result").innerHTML = "Nincs járat!";
         return 0;
-
-    } else {
-
-        document.getElementById("stop1").innerHTML = stop1.name;
-        document.getElementById("stop2").innerHTML = stop2.name;
 
     }
 
     if (stop1.id==stop2.id) {
 
-        document.getElementById("result").innerHTML = "Kérjük különböző megállókat válasszon!";
+        document.getElementById("result").innerHTML = "Eggyeznek a megállók!";
         return 0;
 
     }
@@ -279,10 +422,10 @@ function checkSegment() {
     
 
     if (correctOrder==false) {
-        document.getElementById("result").innerHTML = "A megállók fordítva vannak!";
+        document.getElementById("result").innerHTML = "Rossz sorrend!";
         return 0;
     } else {
-        document.getElementById("result").innerHTML = "Számolás folyamatban...";
+        document.getElementById("result").innerHTML = "Számolás...";
         return 1;
     }
 
@@ -522,9 +665,9 @@ function showSegmentInformation(trips) {
 
     if (isNaN(avgTravelTime) || isNaN(avgLatency)) {
         if (usefulTrips.length==0) {
-            document.getElementById("result").innerHTML = "A megadott időrtatamban egy jármű sem haladt el a szakaszon";
+            document.getElementById("result").innerHTML = "Nincs adat!";
         } else {
-            document.getElementById("result").innerHTML = "Hiba történt a számítás során";
+            document.getElementById("result").innerHTML = "hiba történt!";
         }
         
         console.log("An error occured, avg travel time or avg latency came out to be NaN. Trips used for calculations:");
@@ -535,10 +678,7 @@ function showSegmentInformation(trips) {
     } else {
 
         document.getElementById("result").innerHTML = (
-            avgTravelTime + 
-            " perc átlag utazási idő a szakaszon <br />"+
-            avgLatency +
-            " perc átlag felszedett késés a szakaszon"
+            avgTravelTime+" perc"
         );
 
         console.log("Calculation successfull, avg travel time: "+avgTravelTime+", avg gained latency: "+avgLatency+". Trips used:");
@@ -848,6 +988,8 @@ async function loadLine() {
                 return;
             } else {
                 console.log("Loading line stops and variants");
+                colorScheme = vehicleType;
+                updateScheme();
                 loadStops();
             }
 

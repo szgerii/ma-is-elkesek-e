@@ -1,41 +1,72 @@
 <!Doctype html>
 <html>
+
     <head>    
+
         <title>Ma is elkések-e?</title>
 
+        <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet" />
         <link rel="stylesheet" type="text/css" href="style.css" />
         <link rel="icon" type="image/png" href="assets/images/icon.png" />
 
+        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
         <meta charset="UTF-8" />
+
     </head>
+
     <body>
-        <div class="vertical-content-wrapper">
-            <div id="left">
-                <div id="content-line">
-                    <center>
-                        <input class="pick-line-input" type="text" placeholder="járat" maxlength="5" id="pick-line-text"/> <br />
-                        <select class="pick-line-input" id="dropdown-vehicleType">
+
+        <nav>
+
+            <div id="navbar-title">Ma is elkések-e?</div>
+
+            <div class="navbar-menu">
+
+                <span class="line"></span>
+                <span class="line"></span>
+                <span class="line"></span>
+
+            </div>
+
+            <ul class="navbar-list">
+
+                <li><a href="#" class="current">Főoldal</a></li>
+                <li><a href="#">Belépés</a></li>
+                <li><a href="#">Regisztráció</a></li>
+
+            </ul>
+
+        </nav>
+        <div class="content">
+            <div class="upper-row">
+
+                <div class="settings-box">
+
+                    <div class="settings-box-pickLine">
+                        
+                        <select id="dropdown-vehicleType" class="settings-input">
                             <option value="BUS">Busz</option>
                             <option value="TRAM">Villamos</option>
                             <option value="SUBWAY">Metró</option>
                             <option value="TROLLEYBUS">Trolibusz</option>
                             <option value="RAIL">Hév</option>
-                            <option value="FERRY">Hajó</option>
+                            <option value="FERRY">Hajó</option>  
                         </select>
-                        <input class="pick-line-input" type="button" value="járat választása" onclick="loadLine()" id="pick-line-btn"/>
-                    </center>
-                </div>
 
+                        <input type="text" id="pick-line-text" placeholder="járat" maxlength="6" class="settings-input"/>
 
-                <div id="content-stop">
-                    <center>
-                        <select class="pick-stop-input" id="dropdown-heading" onchange="updateVariant()">
-                        </select>
-                        <select class="pick-stop-input" id="dropdown-stop1" onchange="updateStops()">
-                        </select>
-                        <select class="pick-stop-input" id="dropdown-stop2" onchange="updateStops()">
-                        </select>
-                        <select class="pick-stop-input" id="dropdown-time" onchange="updateTime()">
+                        <input type="button" id="pick-line-btn" onclick="loadLine();" value="Járat választása"  class="settings-input"/>
+
+                    </div>
+
+                    <div class="input-wrapper"><select id="dropdown-heading" onchange="updateVariant();" class="settings-input"></select></div>
+
+                    <div class="input-wrapper"><select id="dropdown-stop1" onchange="updateStops();"  class="settings-input"></select></div>
+
+                    <div class="input-wrapper"><select id="dropdown-stop2" onchange="updateStops();"  class="settings-input"></select></div>
+
+                    <div class="input-wrapper">
+                        <select id="dropdown-time" onchange="updateTime();"  class="settings-input">
                             <option value="10">10 perc</option>
                             <option value="20">20 perc</option>
                             <option value="30">30 perc</option>
@@ -43,46 +74,35 @@
                             <option value="90">1,5 óra</option>
                             <option value="120">2 óra</option>
                         </select>
-                    </center>
+                    </div>
+
                 </div>
-            </div>
 
-            <div id="content-main">
-                <center>
-                    <div id="top">
-                            
-                        <p class="title-text" id="mainTitle"><b>Ma is elkések-e?</b></p>
-                            
-                    </div>
-                </center>
-                <center>
-                    <span class="main-text" id="stop1">Megálló A</span> <br />
-                    <span class="main-text">|</span> <br />
-                    <span class="main-text" id="result">Kérjük válasszon érvényes buszjáratot!</span> <br />
-                    <span class="main-text">|</span> <br />
-                    <span class="main-text" id="stop2">Megálló B</span>
-                </center>
-            </div>
+                <div class="hotSmoke-box">
 
-        </div>
-        <div class="vertical-content-wrapper">
+                    <div class="hot-smoke-menu"> <div>˅</div>  <div>HOT</div>  <div>˅</div> </div>
 
-            <div id="footer">
-                <center><b class="footer-title">Top 3 hot smokin' szakasz</b></center> <br />
-                <div id="hot-smoke-content">
-                    <div class="hot-smoke-split">
-                        <center><div class="hot-smoke-box" id="hot-smoke-1" onclick="hotSmokeClick(1)">Betöltés...</div></center>
-                    </div>
-                    <div class="hot-smoke-split">
-                        <center><div class="hot-smoke-box" id="hot-smoke-2" onclick="hotSmokeClick(2)">Betöltés...</div></center>
-                    </div>
-                    <div class="hot-smoke-split">
-                        <center><div class="hot-smoke-box" id="hot-smoke-3" onclick="hotSmokeClick(3)">Betöltés...</div></center>
-                    </div>
+                    <div class="hot-smoke" id="hot-smoke-1" onclick="hotSmokeClick(1);">Betöltés...</div>
+                    <div class="hot-smoke" id="hot-smoke-2" onclick="hotSmokeClick(2);">Betöltés...</div>
+                    <div class="hot-smoke" id="hot-smoke-3" onclick="hotSmokeClick(3);">Betöltés...</div>
+
                 </div>
-               
+
             </div>
 
+            <div class="bottom-row">
+
+                <img src="assets/images/stopSign-bus.png" class="stopSign-img">
+
+                <div class="segment-line"></div>
+
+                <div id="result">Nincs járat!</div>
+
+                <div class="segment-line"></div>
+
+                <img src="assets/images/stopSign-bus.png" class="stopSign-img">
+
+            </div>
         </div>
         
         <script type="text/javascript" src="jQuery.js"></script>
