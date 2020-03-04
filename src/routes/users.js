@@ -64,23 +64,30 @@ module.exports = () => {
 			res.writeHead(200, {"Content-Type": "application/json"});
 			res.end(router.genResponse("success", null));
 		}).catch(err => {
-			if (err.name === "ValidationError") {
-				res.writeHead(422, {"Content-Type": "application/json"});
-				res.end(router.genResponse("fail", err.data));
-			} else if (err.name === "UserAlreadyExistsError") {
-				res.writeHead(409, {"Content-Type": "application/json"});
-				res.end(router.genResponse("fail", {
-					username: err.message
-				}));
-			} else if (err.name === "InformationMissingError") {
-				console.log("InformationMissingError");
-				res.writeHead(422, {"Content-Type": "application/json"});
-				res.end(router.genResponse("fail", err.data));
-			} else {
-				logger.error("Couldn't add user to the database");
-				logger.error(err);
-				res.writeHead(500, {"Content-Type": "application/json"});
-				res.end(router.genResponse("error", "Couldn't add user to the database"));
+			switch (err.name) {
+				case "ValidationError":
+					res.writeHead(422, {"Content-Type": "application/json"});
+					res.end(router.genResponse("fail", err.data));
+					break;
+				
+				case "UserAlreadyExistsError":
+					res.writeHead(409, {"Content-Type": "application/json"});
+					res.end(router.genResponse("fail", {
+						username: err.message
+					}));
+					break;
+				
+				case "InformationMissingError":
+					res.writeHead(422, {"Content-Type": "application/json"});
+					res.end(router.genResponse("fail", err.data));
+					break;
+				
+				default:
+					logger.error("Couldn't add user to the database");
+					logger.error(err);
+					res.writeHead(500, {"Content-Type": "application/json"});
+					res.end(router.genResponse("error", "Couldn't add user to the database"));
+					break;
 			}
 		});
 	});
@@ -98,14 +105,18 @@ module.exports = () => {
 			res.writeHead(200, {"Content-Type": "application/json"});
 			res.end(router.genResponse("success", settings));
 		}).catch(err => {
-			if (err.name === "InvalidUsernameError") {
-				res.writeHead(404, {"Content-Type": "application/json"});
-				res.end(router.genResponse("fail", {
-					username: `A user with the following username doesn't exist: ${req.username}`
-				}));
-			} else {
-				res.writeHead(500, {"Content-Type": "application/json"});
-				res.end(router.genResponse("error", "Couldn't get the user's settings"));
+			switch (err.name) {
+				case "InvalidUsernameError":
+					res.writeHead(404, {"Content-Type": "application/json"});
+					res.end(router.genResponse("fail", {
+						username: `A user with the following username doesn't exist: ${req.username}`
+					}));
+					break;
+			
+				default:
+					res.writeHead(500, {"Content-Type": "application/json"});
+					res.end(router.genResponse("error", "Couldn't get the user's settings"));
+					break;
 			}
 		});
 	}, jwt_verification);
@@ -123,14 +134,18 @@ module.exports = () => {
 			res.writeHead(200, {"Content-Type": "application/json"});
 			res.end(router.genResponse("success", null));
 		}).catch(err => {
-			if (err.name === "InvalidUsernameError") {
-				res.writeHead(404, {"Content-Type": "application/json"});
-				res.end(router.genResponse("fail", {
-					username: err.message
-				}));
-			} else {
-				res.writeHead(500, {"Content-Type": "application/json"});
-				res.end(router.genResponse("error", "Couldn't delete user from the database"));
+			switch (err.name) {
+				case "InvalidUsernameError":
+					res.writeHead(404, {"Content-Type": "application/json"});
+					res.end(router.genResponse("fail", {
+						username: err.message
+					}));
+					break;
+			
+				default:
+					res.writeHead(500, {"Content-Type": "application/json"});
+					res.end(router.genResponse("error", "Couldn't delete user from the database"));
+					break;
 			}
 		});
 	}, jwt_verification);
@@ -162,17 +177,23 @@ module.exports = () => {
 			});
 			res.end(router.genResponse("success", null));
 		}).catch(err => {
-			if (err.name === "InvalidUsernameError") {
-				res.writeHead(404, {"Content-Type": "application/json"});
-				res.end(router.genResponse("fail", {
-					username: err.message
-				}));
-			} else if (err.name === "ValidationError") {
-				res.writeHead(422, {"Content-Type": "application/json"});
-				res.end(router.genResponse("fail", err.data));
-			} else {
-				res.writeHead(500, {"Content-Type": "application/json"});
-				res.end(router.genResponse("error", "Couldn't modify user in the database"));
+			switch (err.name) {
+				case "InvalidUsernameError":
+					res.writeHead(404, {"Content-Type": "application/json"});
+					res.end(router.genResponse("fail", {
+						username: err.message
+					}));					
+					break;
+				
+				case "ValidationError":
+					res.writeHead(422, {"Content-Type": "application/json"});
+					res.end(router.genResponse("fail", err.data));
+					break;
+
+				default:
+					res.writeHead(500, {"Content-Type": "application/json"});
+					res.end(router.genResponse("error", "Couldn't modify user in the database"));
+					break;
 			}
 		});
 	}, jwt_verification);

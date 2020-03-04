@@ -40,7 +40,7 @@ const PORT = process.env.PORT || config.PORT || 1104;
 let server;
 
 // Sets up everything needed for the server
-function start() {
+async function start() {
 	// Logger setup
 	logger.set("verbose", process.argv.includes("-v") || process.argv.includes("--verbose"));
 	logger.set("x-verbose", process.argv.includes("-xv") || process.argv.includes("--extra-verbose"));
@@ -67,7 +67,14 @@ function start() {
 
 	dbManager.setup();
 	
-	staticRoute();
+	await staticRoute().catch(err => {
+		logger.error("Couldn't load static files\nThis might be because the files.json file is missing from the public directory, or because it pointed to a file that doesn't exist.");
+		logger.xlog(err);
+		logger.log("Shutting down...");
+		logger.close();
+		process.exit(1);
+	});
+
 	hotsmokinRoute();
 	usersRoute();
 	watchlistRoute();
