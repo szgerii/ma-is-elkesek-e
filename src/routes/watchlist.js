@@ -16,18 +16,14 @@ module.exports = () => {
 			res.writeHead(200, {"Content-Type": "application/json"});
 			res.end(router.genResponse("success", watchlist));
 		}).catch(err => {
-			switch (err.name) {
-				case "InvalidUsernameError":
-					res.writeHead(404, {"Content-Type": "application/json"});
-					res.end(router.genResponse("fail", {
-						username: err.message
-					}));
-					break;
-			
-				default:
-					res.writeHead(500, {"Content-Type": "application/json"});
-					res.end(router.genResponse("error", "Couldn't get the user's watchlist from the database"));
-					break;
+			if (err.name === "InvalidUsernameError") {
+				res.writeHead(404, {"Content-Type": "application/json"});
+				res.end(router.genResponse("fail", {
+					username: err.message
+				}));
+			} else {
+				res.writeHead(500, {"Content-Type": "application/json"});
+				res.end(router.genResponse("error", "Couldn't get the user's watchlist from the database"));
 			}
 		});
 	}, jwt_verification);
@@ -49,30 +45,22 @@ module.exports = () => {
 			res.writeHead(200, {"Content-Type": "application/json"});
 			res.end(router.genResponse("success", null));
 		}).catch(err => {
-			switch (err.name) {
-				case "InvalidUsernameError":
-					res.writeHead(404, {"Content-Type": "application/json"});
-					res.end(router.genResponse("fail", {
-						username: err.message
-					}));
-					break;
-				
-				case "AlreadyInWatchlistError":
-					res.writeHead(409, {"Content-Type": "application/json"});
-					res.end(router.genResponse("fail", {
-						section: err.message
-					}));
-					break;
-
-				case "ValidationError":
-					res.writeHead(422, {"Content-Type": "application/json"});
-					res.end(router.genResponse("fail", err.data));
-					break;
-			
-				default:
-					res.writeHead(500, {"Content-Type": "application/json"});
-					res.end(router.genResponse("error", "Couldn't add section to the user's watchlist"));
-					break;
+			if (err.name === "InvalidUsernameError") {
+				res.writeHead(404, {"Content-Type": "application/json"});
+				res.end(router.genResponse("fail", {
+					username: err.message
+				}));
+			} else if (err.name === "AlreadyInWatchlistError") {
+				res.writeHead(409, {"Content-Type": "application/json"});
+				res.end(router.genResponse("fail", {
+					section: err.message
+				}));
+			} else if (err.name === "ValidationError") {
+				res.writeHead(422, {"Content-Type": "application/json"});
+				res.end(router.genResponse("fail", err.data));
+			} else {
+				res.writeHead(500, {"Content-Type": "application/json"});
+				res.end(router.genResponse("error", "Couldn't add section to the user's watchlist"));
 			}
 		});
 	}, jwt_verification);
