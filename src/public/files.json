@@ -1,0 +1,87 @@
+[
+	{
+		"url": "/",
+		"path": "index.html",
+		"type": "text/html"
+	},
+	{
+		"url": "/script.js",
+		"path": "script.js",
+		"type": "text/javascript"
+	},
+	{
+		"url": "/style.css",
+		"path": "style.css",
+		"type": "text/css"
+	},
+	{
+		"url": "/jQuery.js",
+		"path": "lib/jQuery.js",
+		"type": "text/javascript"
+	},
+	{
+		"url": "/assets/images/bg-bus.png",
+		"path": "assets/images/bg-bus.png",
+		"type": "image/png"
+	},
+	{
+		"url": "/assets/images/bg-hev.png",
+		"path": "assets/images/bg-hev.png",
+		"type": "image/png"
+	},
+	{
+		"url": "/assets/images/bg-metro.png",
+		"path": "assets/images/bg-metro.png",
+		"type": "image/png"
+	},
+	{
+		"url": "/assets/images/bg-ship.png",
+		"path": "assets/images/bg-ship.png",
+		"type": "image/png"
+	},
+	{
+		"url": "/assets/images/bg-tram.png",
+		"path": "assets/images/bg-tram.png",
+		"type": "image/png"
+	},
+	{
+		"url": "/assets/images/bg-trolley.png",
+		"path": "assets/images/bg-trolley.png",
+		"type": "image/png"
+	},
+	{
+		"url": "/assets/images/icon.png",
+		"path": "assets/images/icon.png",
+		"type": "image/png"
+	},
+	{
+		"url": "/assets/images/stopSign-bus.png",
+		"path": "assets/images/stopSign-bus.png",
+		"type": "image/png"
+	},
+	{
+		"url": "/assets/images/stopSign-hev.png",
+		"path": "assets/images/stopSign-hev.png",
+		"type": "image/png"
+	},
+	{
+		"url": "/assets/images/stopSign-metro.png",
+		"path": "assets/images/stopSign-metro.png",
+		"type": "image/png"
+	},
+	{
+		"url": "/assets/images/stopSign-ship.png",
+		"path": "assets/images/stopSign-ship.png",
+		"type": "image/png"
+	},
+	{
+		"url": "/assets/images/stopSign-tram.png",
+		"path": "assets/images/stopSign-tram.png",
+		"type": "image/png"
+	},
+	{
+		"url": "/assets/images/stopSign-trolley.png",
+		"path": "assets/images/stopSign-trolley.png",
+		"type": "image/png"
+	}
+]

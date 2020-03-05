@@ -1,7 +1,7 @@
 const fs = require("fs");
 const router = require("../private_modules/router");
-const files = [];
 
+<<<<<<< HEAD
 function loadFiles() {
 	// Load public files into the files array
 	files.push(fs.readFileSync(__dirname + "/../public/index.html")); // 0
@@ -21,11 +21,44 @@ function loadFiles() {
 	files.push(fs.readFileSync(__dirname + "/../public/assets/images/stopSign-hev.png")); // 14
 	files.push(fs.readFileSync(__dirname + "/../public/assets/images/stopSign-trolley.png")); // 15
 	files.push(fs.readFileSync(__dirname + "/../public/assets/images/stopSign-ship.png")); // 16
+=======
+class File {
+	constructor(url, filePath, type) {
+		this.url = url;
+		this.path = filePath;
+		this.type = type;
+		this.content = fs.readFileSync(path.resolve(__dirname, "../public", filePath));
+	}
+}
+
+function setup() {
+	const fileList = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../public/files.json"))).map(f => {
+		return new File(f.url, f.path, f.type);
+	});
+	
+	for (const file of fileList) {
+		router.addHandler(file.url, "GET", (req, res) => {
+			res.writeHead(200, {"Content-Type": file.type});
+			res.end(file.content);
+		});
+	}
+>>>>>>> develop
 }
 
 module.exports = () => {
-	loadFiles();
+	return new Promise((resolve, reject) => {
+		try {
+			setup();
+		} catch (err) {
+			reject(err);
+		}
+	
+		router.setFallback((req, res) => {
+			res.writeHead(404, {"Content-Type": "text/html"});
+			res.end("404: Page Not Found");
+		});
 
+<<<<<<< HEAD
 	router.addHandler("/", "GET", (req, res) => {
 		res.writeHead(200, {"Content-Type": "text/html"});
 		res.end(files[0]);
@@ -114,5 +147,8 @@ module.exports = () => {
 	router.setFallback((req, res) => {
 		res.writeHead(404, {"Content-Type": "text/html"});
 		res.end("404: Page Not Found");
+=======
+		resolve();
+>>>>>>> develop
 	});
 };
