@@ -86,8 +86,8 @@ function updateScheme() {
         }
         case tram: {
            
-            document.documentElement.style.setProperty('--color-box','rgb(220,220,0)');
-            document.documentElement.style.setProperty('--color-box-transparent','rgba(220,220,0,0.5)');
+            document.documentElement.style.setProperty('--color-box','rgb(180,180,0)');
+            document.documentElement.style.setProperty('--color-box-transparent','rgba(180,180,0,0.5)');
             document.documentElement.style.setProperty('--color-main','white');
             document.documentElement.style.setProperty('--color-text','black');
             document.documentElement.style.setProperty('--color-navText','black');
@@ -120,8 +120,8 @@ function updateScheme() {
         }
         case trolley: {
             
-            document.documentElement.style.setProperty('--color-box','rgb(220,0,0)');
-            document.documentElement.style.setProperty('--color-box-transparent','rgba(220,0,0,0.5)');
+            document.documentElement.style.setProperty('--color-box','rgb(160,0,0)');
+            document.documentElement.style.setProperty('--color-box-transparent','rgba(160,0,0,0.5)');
             document.documentElement.style.setProperty('--color-main','white');
             document.documentElement.style.setProperty('--color-text','black');
             document.documentElement.style.setProperty('--color-navText','white');
@@ -340,6 +340,7 @@ async function downloadHot() {
                 for (let i = 0; i < 4; i++) {
                     if (r.data[i]) {
                         document.querySelector(`#hot-smoke-${i + 1}`).innerText = `${r.data[i].line.name}: ${r.data[i].stop1.name} - ${r.data[i].stop2.name}`;
+                        //document.querySelector(`#hot-smoke-${i+1}`)
                     } else {
                         document.querySelector(`#hot-smoke-${i + 1}`).innerText = "Nincs elég adat az információ megjelenítéséhez";
                     }
@@ -358,8 +359,11 @@ async function downloadHot() {
             }
 
             for (let i = 0; i < 4; i++) {
-                document.getElementById(`hot-smoke-${i + 1}`).innerText = "Hiba történt a betöltés során";                
+                document.getElementById(`hot-smoke-${i + 1}`).innerText = "Hiba történt a betöltés során";  
+                              
             }
+
+            currentHot = 0;
         
         }
 
@@ -512,8 +516,8 @@ async function downloadSegment() {
 
         error:function (xhr, ajaxOptions, thrownError) {
 
-            alert("Error in request:");
-            alert(thrownError);
+            console.log("Error in request:");
+            console.log(thrownError);
 
         }
 
@@ -600,8 +604,8 @@ async function downloadSegment() {
 
             error:function (xhr, ajaxOptions, thrownError) {
 
-                alert("Error in request:");
-                alert(thrownError);
+                console.log("Error in request:");
+                console.log(thrownError);
     
             }
 
@@ -883,7 +887,6 @@ async function loadStops() {
                 stops = r.data.references.stops;
                 variants = r.data.entry.variants;
             } else {
-                alert("Nem sikerült betölteni a megállókat");
                 console.log("Request succeeded but stop loading failed.");
                 resetStops();
                 return;
@@ -895,8 +898,8 @@ async function loadStops() {
 
         error:function (xhr, ajaxOptions, thrownError) {
 
-            alert("Error in request:");
-            alert(thrownError);
+            console.log("Error in request:");
+            console.log(thrownError);
 
         },
 
@@ -958,7 +961,6 @@ async function loadLine() {
             if (line.id == "BKK_MP53" && (today == 6 || today == 0)) { //normal M3 replacement should be weekend M3 repl at weekends
                 line.id = "BKK_MP533";
                 line.description = "Kőbánya-Kispest M | Lehel tér M";
-                alert("A hétvége miatt a KÖKI és Lehel tér között jár metrópótló, váltás a megfelelő járatra.");
             }
 
             if (!line.id || line.id == "BKK_9999") { //check if the returned line is 9999(object for special lines)
@@ -978,8 +980,8 @@ async function loadLine() {
 
         error:function (xhr, ajaxOptions, thrownError) {
 
-            alert("Error in request:");
-            alert(thrownError);
+            console.log("Error in request:");
+            console.log(thrownError);
 
         },
         

@@ -2,10 +2,12 @@
     
     --fontFamily-beautiful: Roboto; /* Beautiful font family used EVERYWHERE */
 
-    --fontSize-small: 16pt; /* Smallest fontsize only used on phone for hot smokin and pick-line form*/
-    --fontSize-medium: 20pt; /* Medium fontSize used for smaller things */
-    --fontSize-large: 30pt; /* Large fontSize used for larger things */
-    --fontSize-gigantic: 60pt; /* Largest fontSize only used on dekstop for the result*/
+    --fontSize-desktop-medium: 1.75vh; /* Medium fontSize used for smaller things */
+    --fontSize-desktop-large: 2.5vh; /* Large fontSize used for larger things */
+    --fontSize-desktop-gigantic: 5vh; /* Largest fontSize only used on dekstop for the result*/
+    --fontSize-phone-small: 16pt;
+    --fontSize-phone-medium: 20pt;
+    --fontSize-phone-large: 30pt;
 
     --color-main: white; /* Color of main text/inputs */ /* DYNAMIC */
     --color-text: black; /*Color of text in inputs */ /* DYNAMIC */
@@ -31,7 +33,7 @@ nav {
     position: sticky;
     top: 0px;
     width: 100%;
-    font-size: var(--fontSize-large);
+    font-size: var(--fontSize-desktop-large);
     color: var(--color-navText);
     background-color: var(--color-box);
     display: flex;
@@ -44,6 +46,7 @@ nav {
 nav #navbar-title {
 
     display: inline-block;
+    margin: 0.5em;
 
 }
 
@@ -58,7 +61,8 @@ nav ul {
 nav ul li {
 
     list-style: none;
-    padding:0.5em;
+    padding: 0.5em;
+    font-weight: 300;
 
 }
 
@@ -71,7 +75,7 @@ nav ul li a {
 
 nav ul li .current {
 
-    font-weight: 1000;
+    font-weight: 900;
 
 }
 
@@ -110,13 +114,13 @@ nav ul li .current {
 @media (max-width: 600px) {
 
     nav {
-        text-align: left;
         width: 100%;
+        font-size: var(--fontSize-phone-medium);
     }
 
     #navbar-title {
         text-align: left;
-        width:100%;
+        width: 100%;
     }
 
     .navbar-menu {
@@ -130,7 +134,6 @@ nav ul li .current {
         display: none;
         flex-direction: column;
         width: 100%;
-        font-size: var(--fontSize-medium);
 
     }
 
@@ -168,8 +171,10 @@ body {
     width: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
-    max-height: 80%;
+    justify-content: space-between;
+    height: 80vh;
+    margin-top: 5vh;
+    margin-bottom: 5vh;
 
 }
 
@@ -200,7 +205,6 @@ body {
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
-    margin-top: 5em;
 
 }
 
@@ -211,6 +215,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
+    align-items: center;
     padding: 0.5em;
 
 }
@@ -219,9 +224,8 @@ body {
 
     display: flex;
     flex-direction: row;
-    justify-content: space-evenly;
-    width: 100%;
-    margin: 0.5em;
+    justify-content: space-between;
+    width: 80%;
 
 }
 
@@ -235,13 +239,13 @@ body {
 
 .settings-input {
 
-    font-size: var(--fontSize-medium);
-    width: 70%;
+    font-size: var(--fontSize-desktop-medium);
+    width: 80%;
     background-color: var(--color-main);
 
 }
 
-select option {
+select {
 
     text-align: center;
     text-align-last: center;
@@ -281,6 +285,7 @@ select option {
     display: flex;
     flex-direction: column;
     justify-content: space-around;
+    align-items: center;
     padding: 0 1em;
 
 }
@@ -288,10 +293,11 @@ select option {
 .hot-smoke {
 
     background-color: var(--color-main);
-    width: 100%;
-    font-size: var(--fontSize-medium);
+    width: 80%;
+    font-size: var(--fontSize-desktop-medium);
     text-align: center;
     display: block;
+    text-overflow: "...";
 
 }
 
@@ -307,8 +313,9 @@ select option {
     flex-direction: row;
     justify-content: space-between;
     color: var(--color-main);
-    font-size: var(--fontSize-medium);
+    font-size: var(--fontSize-desktop-medium);
     padding: 0.5em;
+    width: 100%;
 
 }
 
@@ -342,19 +349,19 @@ select option {
 
         margin: 0.2em;
         width: 80%;
-        font-size: var(--fontSize-small);
+        font-size: var(--fontSize-phone-small);
 
     }
 
     #dropdown-vehicleType {
 
-        width: 55%;
+        width: 80%;
 
     }
 
     #pick-line-text {
 
-        width: 40%;
+        width: 80%;
 
     }
 
@@ -381,14 +388,14 @@ select option {
 
         margin: 0.4em;
         display: none;
-        font-size: var(--fontSize-small); 
+        font-size: var(--fontSize-phone-small); 
     
     }
 
     .hot-smoke-menu {
 
         display: flex;
-        font-size: var(--fontSize-small); 
+        font-size: var(--fontSize-phone-small); 
 
     }
 
@@ -411,22 +418,21 @@ select option {
     justify-content: space-between;
     align-self: center;
     align-items: center;
-    margin-top: 10em;
 
 }
 
 .segment-line {
 
     border: none;
-    border-top: var(--fontSize-medium) dashed var(--color-main);
-    height: var(--fontSize-medium);
+    border-top: var(--fontSize-desktop-medium) dashed var(--color-main);
+    height: 0px;
     width: 20%;
 
 }
 
 #result {
 
-    font-size: var(--fontSize-gigantic);
+    font-size: var(--fontSize-desktop-gigantic);
     margin: 1em;
     color: var(--color-main);
     font-weight: 1000;
@@ -462,7 +468,7 @@ select option {
         align-self: center;
         text-align: center;
         margin: 0.2em;
-        font-size: var(--fontSize-large);
+        font-size: var(--fontSize-phone-large);
 
     }
 }
