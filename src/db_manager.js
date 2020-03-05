@@ -117,6 +117,7 @@ function updateHotSmokin() {
 		sectionModel.find({}).sort("-count").limit(5).exec((err, secs) => {
 			if (err) {
 				reject(err);
+				return;
 			}
 
 			for (let i = 0; i < 5; i++) {
