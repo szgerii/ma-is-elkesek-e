@@ -338,11 +338,13 @@ async function downloadHot() {
 
             if (r.status === "success") {
                 for (let i = 0; i < 4; i++) {
+                    const hotSmokinItem = document.querySelector(`#hot-smoke-${i + 1}`);
                     if (r.data[i]) {
-                        document.querySelector(`#hot-smoke-${i + 1}`).innerText = `${r.data[i].line.name}: ${r.data[i].stop1.name} - ${r.data[i].stop2.name}`;
-                        //document.querySelector(`#hot-smoke-${i+1}`)
+                        hotSmokinItem.innerText = `${r.data[i].line.name}: ${r.data[i].stop1.name} - ${r.data[i].stop2.name}`;
+                        hotSmokinItem.title = `${r.data[i].line.name}: ${r.data[i].stop1.name} - ${r.data[i].stop2.name}`;
                     } else {
-                        document.querySelector(`#hot-smoke-${i + 1}`).innerText = "Nincs elég adat az információ megjelenítéséhez";
+                        hotSmokinItem.innerText = "Nincs elég adat az információ megjelenítéséhez";
+                        hotSmokinItem.title = "Nincs elég adat az információ megjelenítéséhez";
                     }
                 }
             }
@@ -359,8 +361,9 @@ async function downloadHot() {
             }
 
             for (let i = 0; i < 4; i++) {
-                document.getElementById(`hot-smoke-${i + 1}`).innerText = "Hiba történt a betöltés során";  
-                              
+                const hotsmokinItem = document.getElementById(`hot-smoke-${i + 1}`)
+                hotsmokinItem.innerText = "Hiba történt a betöltés során";
+                hotsmokinItem.title = "Hiba történt a betöltés során";
             }
 
             currentHot = 0;

@@ -120,7 +120,7 @@ nav ul li .current {
 
     #navbar-title {
         text-align: left;
-        width: 100%;
+        width: calc(100% - 0.5em);
     }
 
     .navbar-menu {
@@ -297,7 +297,10 @@ select {
     font-size: var(--fontSize-desktop-medium);
     text-align: center;
     display: block;
-    text-overflow: "...";
+    padding: 0 2%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 
 }
 
@@ -419,6 +422,10 @@ select {
     align-self: center;
     align-items: center;
 
+}
+
+.stopSign-img {
+    width: 12vw;
 }
 
 .segment-line {
