@@ -19,7 +19,8 @@ function setup() {
 	for (const file of fileList) {
 		router.addHandler(file.url, "GET", (req, res) => {
 			res.writeHead(200, {"Content-Type": file.type});
-			res.end(file.content);
+			//res.end(file.content);
+			res.end(fs.readFileSync(path.resolve(__dirname, "../public", file.path))); // TODO: Replace this line with the previous one (this is only here so the server doesn't need a restart for showing changes in static files)
 		});
 	}
 }
@@ -34,7 +35,7 @@ module.exports = () => {
 	
 		router.setFallback((req, res) => {
 			res.writeHead(404, {"Content-Type": "text/html"});
-			res.end("404: Page Not Found");
+			res.end(fs.readFileSync(path.resolve(__dirname, "../public/404_page/404.html")));
 		});
 
 		resolve();

@@ -1,18 +1,28 @@
 [
 	{
 		"url": "/",
-		"path": "index.html",
+		"path": "main_page/index.html",
 		"type": "text/html"
 	},
 	{
+		"url": "/style.css",
+		"path": "main_page/style.css",
+		"type": "text/css"
+	},
+	{
 		"url": "/script.js",
-		"path": "script.js",
+		"path": "main_page/script.js",
 		"type": "text/javascript"
 	},
 	{
-		"url": "/style.css",
-		"path": "style.css",
+		"url": "/404.css",
+		"path": "404_page/404.css",
 		"type": "text/css"
+	},
+	{
+		"url": "/404.js",
+		"path": "404_page/404.js",
+		"type": "text/javascript"
 	},
 	{
 		"url": "/jQuery.js",

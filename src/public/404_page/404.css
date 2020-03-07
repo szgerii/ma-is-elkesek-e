@@ -1,0 +1,186 @@
+:root {
+    --fontFamily-beautiful: Roboto; /* Beautiful font family used EVERYWHERE */
+
+    --fontSize-desktop-large: 2.5vh;
+    --fontSize-phone-medium: 20pt;
+
+    --color-main: white; /* Color of main text/inputs */ /* DYNAMIC */
+    --color-text: black; /*Color of text in inputs */ /* DYNAMIC */
+    --color-navText: white; /*Color of text in navBar*/ /*DYNAMIC */
+	--color-box: rgb(20, 30, 100); /* Background color of boxes */ /* DYNAMIC */
+	
+	--background-gradient: linear-gradient(150deg, rgb(60, 77, 110), rgb(47, 143, 103));
+}
+
+* {
+    margin:0px;
+    padding:0px;
+}
+
+body {
+    background: var(--background-gradient);
+    background-attachment: fixed;
+	font-family: var(--fontFamily-beautiful);
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+nav {
+    position: sticky;
+    top: 0px;
+    width: 100%;
+    font-size: var(--fontSize-desktop-large);
+    color: var(--color-navText);
+    background-color: var(--color-box);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+nav #navbar-title {
+    display: inline-block;
+    margin: 0.5em;
+}
+
+nav ul {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+nav ul li {
+    list-style: none;
+    padding: 0.5em;
+    font-weight: 300;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: var(--color-navText);
+}
+
+nav ul li .current {
+    font-weight: 900;
+}
+
+.navbar-menu {
+   position: absolute;
+   top: 10pt;
+   right: 7pt;
+   display: none;
+   flex-direction: column;
+   justify-content: space-between;
+   width: 30px;
+   height: 21px;
+}
+
+.navbar-menu .line {
+    width: 100%;
+    height: 4px;
+    background-color: var(--color-navText);
+}
+
+#content-container {
+	width: 50%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-content: center;
+	margin: 0 auto;
+}
+
+#content-container h1,p {
+	color: var(--color-main);
+	text-align: center;
+	margin-bottom: 5vh;
+}
+
+#content-container h1 {
+	font-size: 58px;
+}
+
+#content-container p {
+	font-size: 28px;
+}
+
+#content-container button {
+	background-color: var(--color-box);
+	color: var(--color-main);
+	font-size: 24px;
+	padding: 15px;
+	border: 0;
+	margin: 0 auto;
+	outline: none;
+}
+
+#content-container button:hover {
+	background-color: var(--color-main);
+	color: var(--color-box);
+	cursor: pointer;
+}
+
+#content-container button:active,
+#content-container button::-moz-focus-inner,
+#content-container button:focus {
+	outline: none;
+	border: 0;
+}
+
+@media (max-width: 992px) {
+    nav {
+        flex-direction: column;
+	}
+	
+	#content-container {
+		width: 75%;
+	}
+
+	#content-container h1 {
+		font-size: 48px;
+	}
+	
+	#content-container p {
+		font-size: 24px;
+	}
+	
+	#content-container button {
+		font-size: 21px;
+	}
+}
+
+@media (max-width: 600px) {
+    nav {
+        width: 100%;
+        font-size: var(--fontSize-phone-medium);
+    }
+
+    #navbar-title {
+        text-align: left;
+        width: calc(100% - 0.5em);
+    }
+
+    .navbar-menu {
+        display: flex;
+    }
+
+    nav ul {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    nav ul li a {
+        padding: 0.2em 0.2em;
+    }
+
+    .navbar-active {
+        display: flex;
+	}
+	
+	#content-container h1 {
+		font-size: 44px;
+	}
+}
