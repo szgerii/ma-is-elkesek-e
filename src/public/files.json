@@ -25,6 +25,21 @@
 		"type": "text/javascript"
 	},
 	{
+		"url": "/login",
+		"path": "login_page/login.html",
+		"type": "text/html"
+	},
+	{
+		"url": "/login.css",
+		"path": "login_page/login.css",
+		"type": "text/css"
+	},
+	{
+		"url": "/login.js",
+		"path": "login_page/login.js",
+		"type": "text/javascript"
+	},
+	{
 		"url": "/jQuery.js",
 		"path": "lib/jQuery.js",
 		"type": "text/javascript"

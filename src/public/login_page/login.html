@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+    <head>    
+
+        <title>Ma is elkések-e?</title>
+
+        <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,900&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" type="text/css" href="login.css" />
+        <link rel="icon" type="image/png" href="assets/images/icon.png" />
+
+        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+        <meta charset="UTF-8" />
+
+    </head>
+    <body>
+
+        <nav>
+            <div id="navbar-title">Ma is elkések-e?</div>
+                    
+            <div class="navbar-menu">
+                <span class="line"></span>
+                <span class="line"></span>
+                <span class="line"></span>
+            </div>
+                    
+            <ul class="navbar-list">
+                <li><a href="/">Főoldal</a></li>
+                <li><a href="/login" class="current">Belépés</a></li>
+                <li><a href="#">Regisztráció</a></li>
+            </ul>
+        </nav>
+
+        <div class="content">
+            
+            <div class="error-box">
+                <span class="error-text"></span>
+            </div>
+
+            <div class="login-box">
+
+                <input type="text" id="input-username" maxlength="16" placeholder="Felhasználónév" class="login-input"/>
+                <input type="password" id="input-password" placeholder="Jelszó"  class="login-input"/>
+                <input type="button" id="input-submitBtn" onclick="login();" value="Bejelentkezés"  class="login-input"/>
+
+            </div>
+
+        </div>
+
+        <script type="text/javascript" src="jQuery.js"></script>
+        <script type="text/javascript" src="login.js"></script>
+
+    </body>
+</html>
