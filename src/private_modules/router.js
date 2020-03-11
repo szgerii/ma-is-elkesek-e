@@ -20,18 +20,33 @@ exports.requestHandler = async (req, res) => {
 	try {
 		await parseReq(req);
 	} catch (err) {
-		if (err.name === "InvalidContentTypeError") {
-			res.writeHead(422, {"Content-Type": "application/json"});
-			res.end(this.genResponse("fail",{
-				header: `Invalid Content-Type in header: ${req.headers["content-type"]}`
-			}));
-			return;
-		} else {
-			res.writeHead(500, {"Content-Type": "application/json"});
-			res.end(this.genResponse(500, "Something went wrong while processing the request"));
-			logger.error("Something went wrong while processing a request");
-			logger.xlog(err);
-			return;
+		logger.xlog(`${req.method} request at ${req.url} from ${req.ip}`);
+		
+		res.on("finish", () => {
+			logger.xlog(`Sending ${res.statusCode} response to ${req.ip}`);
+		});
+
+		switch (err.name) {
+			case "InvalidContentTypeError":
+				res.writeHead(422, {"Content-Type": "application/json"});
+				res.end(this.genResponse("fail",{
+					header: `Invalid Content-Type in header: ${req.headers["content-type"]}`
+				}));
+				return;
+			
+			case "InvalidBodyError":
+				res.writeHead(400, {"Content-Type": "application/json"});
+				res.end(this.genResponse("fail", {
+					body: "The server was unable to process the body of the request, probably due to malformed syntax"
+				}));
+				return;
+		
+			default:
+				res.writeHead(500, {"Content-Type": "application/json"});
+				res.end(this.genResponse(500, "Something went wrong while processing the request"));
+				logger.error("Something went wrong while processing a request");
+				logger.xlog(err);
+				return;
 		}
 	}
 
@@ -135,14 +150,14 @@ exports.cookieBuilder = (key, value, options) => {
 */
 function parseReq(req) {
 	return new Promise(async (resolve, reject) => {
+		req.ip = (req.headers["x-forwarded-for"] || "").split(",").pop() ||
+			req.connection.remoteAddress ||
+			req.socket.remoteAddress ||
+			req.connection.socket.remoteAddress;
+
 		const urlParts = req.url.split("?");
 		req.baseUrl = urlParts[0];
 		req.urlParts = req.baseUrl.split("/").filter(el => { return el.length !== 0; });
-	
-		req.ip = (req.headers["x-forwarded-for"] || "").split(",").pop() ||
-				req.connection.remoteAddress ||
-				req.socket.remoteAddress ||
-				req.connection.socket.remoteAddress;
 		
 		await parseCookies(req);
 		try {
@@ -217,9 +232,15 @@ function parseBody(req) {
 					break;
 
 				case "application/json":
-					body = JSON.parse(data.concat().toString());
-					req.body = body;
-					resolve();
+					try {
+						body = JSON.parse(data.concat().toString());
+						req.body = body;
+						resolve();
+					} catch (error) {
+						const err = new Error(`Invalid request body`);
+						err.name = "InvalidBodyError";
+						reject(err);
+					}
 					break;
 				
 				case null:

@@ -211,7 +211,7 @@ exports.createUser = userData => {
 		user.save().then(() => {
 			resolve();
 		}).catch(err => {
-			logger.error("Couldn't modify user in the database");
+			logger.error("Couldn't save user to the database");
 			logger.xlog(err);
 			reject(err);
 		});
@@ -341,6 +341,10 @@ exports.modifyUser = (username, modifications) => {
 			err.data = dataCheck;
 			reject(err);
 			return;
+		}
+
+		if (modifications.password) {
+			user.hash = true;
 		}
 
 		user.save().then(() => {
