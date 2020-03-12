@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+
+    <head>    
+
+        <title>Ma is elkések-e?</title>
+
+        <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,900&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" type="text/css" href="style.css" />
+        <link rel="icon" type="image/png" href="assets/images/icon.png" />
+
+        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+        <meta charset="UTF-8" />
+
+    </head>
+
+    <body>
+
+        <nav>
+
+            <div id="navbar-title">Ma is elkések-e?</div>
+
+            <div class="navbar-menu">
+
+                <span class="line"></span>
+                <span class="line"></span>
+                <span class="line"></span>
+
+            </div>
+
+            <ul class="navbar-list">
+
+                <li><a href="/" class="current">Főoldal</a></li>
+                <li><a href="#">Lista</a></li>
+                <li><a href="#">Fiók</a></li>
+                <li><a href="#" id="logout">Kijelentkezés</a></li>
+
+            </ul>
+
+        </nav>
+        <div class="content">
+            <div class="upper-row">
+
+                <div class="settings-box">
+
+                    <div class="settings-box-pickLine">
+                        
+                        <select id="dropdown-vehicleType" class="settings-input">
+                            <option value="BUS">Busz</option>
+                            <option value="TRAM">Villamos</option>
+                            <option value="SUBWAY">Metró</option>
+                            <option value="TROLLEYBUS">Trolibusz</option>
+                            <option value="RAIL">HÉV</option>
+                            <option value="FERRY">Hajó</option>  
+                        </select>
+
+                        <input type="text" id="pick-line-text" placeholder="járat" maxlength="6" class="settings-input"/>
+
+                        <input type="button" id="pick-line-btn" onclick="loadLine();" value="Járat választása"  class="settings-input"/>
+
+                    </div>
+
+                    <div class="input-wrapper"><select id="dropdown-heading" onchange="updateVariant();" class="settings-input"></select></div>
+
+                    <div class="input-wrapper"><select id="dropdown-stop1" onchange="updateStops();"  class="settings-input"></select></div>
+
+                    <div class="input-wrapper"><select id="dropdown-stop2" onchange="updateStops();"  class="settings-input"></select></div>
+
+                    <div class="input-wrapper">
+                        <select id="dropdown-time" onchange="updateTime();"  class="settings-input">
+                            <option value="10">10 perc</option>
+                            <option value="20">20 perc</option>
+                            <option value="30">30 perc</option>
+                            <option value="60">1 óra</option>
+                            <option value="90">1,5 óra</option>
+                            <option value="120">2 óra</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="hotSmoke-box">
+
+                    <div class="hot-smoke-menu"> <div>˅</div>  <div>HOT</div>  <div>˅</div> </div>
+
+                    <div class="hot-smoke" id="hot-smoke-1" title="Betöltés..." onclick="hotSmokeClick(1);">Betöltés...</div>
+                    <div class="hot-smoke" id="hot-smoke-2" title="Betöltés..." onclick="hotSmokeClick(2);">Betöltés...</div>
+                    <div class="hot-smoke" id="hot-smoke-3" title="Betöltés..." onclick="hotSmokeClick(3);">Betöltés...</div>
+                    <div class="hot-smoke" id="hot-smoke-4" title="Betöltés..." onclick="hotSmokeClick(4);">Betöltés...</div>
+
+                </div>
+
+            </div>
+
+            <div class="bottom-row">
+
+                <img src="assets/images/stopSign-bus.png" class="stopSign-img">
+
+                <div class="segment-line"></div>
+
+                <div id="result">Nincs járat!</div>
+
+                <div class="segment-line"></div>
+
+                <img src="assets/images/stopSign-bus.png" class="stopSign-img">
+
+            </div>
+        </div>
+        
+        <script type="text/javascript" src="jQuery.js"></script>
+        <script type="text/javascript" src="script.js"></script>
+    </body>
+</html>

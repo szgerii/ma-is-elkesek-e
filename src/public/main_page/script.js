@@ -37,6 +37,7 @@ window.onload = function() {
     let navList = document.getElementsByClassName("navbar-list")[0];
     let hotSmokeMenu = document.getElementsByClassName("hot-smoke-menu")[0];
     let hotSmokeItems = document.getElementsByClassName("hot-smoke");
+    const logoutLink = document.querySelector("#logout");
 
     menuButton.addEventListener("click", ()=> {
         navList.classList.toggle("navbar-active");
@@ -52,7 +53,12 @@ window.onload = function() {
             loadLine();
     });
 
-    
+    if (logoutLink) {
+        logoutLink.addEventListener("click", () => {
+            document.cookie = "auth-token=;Expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+            window.location.reload();
+        });
+    }
 
     slowUpdate();
     setInterval(slowUpdate,10000);

@@ -73,7 +73,6 @@ module.exports = () => {
 					username: err.message
 				}));
 			} else if (err.name === "InformationMissingError") {
-				console.log("InformationMissingError");
 				res.writeHead(422, {"Content-Type": "application/json"});
 				res.end(router.genResponse("fail", err.data));
 			} else {

@@ -1,10 +1,5 @@
 [
 	{
-		"url": "/",
-		"path": "main_page/index.html",
-		"type": "text/html"
-	},
-	{
 		"url": "/style.css",
 		"path": "main_page/style.css",
 		"type": "text/css"

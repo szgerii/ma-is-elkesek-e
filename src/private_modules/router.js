@@ -16,6 +16,16 @@ class Route {
     }
 }
 
+class SplitRoute {
+	constructor(method, path, splitter, handlers) {
+		this.method = method;
+        this.path = path;
+        this.pathParts = path.split("/").filter(el => { return el.length !== 0; });
+		this.splitter = splitter;
+		this.handlers = handlers;
+	}
+}
+
 exports.requestHandler = async (req, res) => {
 	try {
 		await parseReq(req);
@@ -79,16 +89,28 @@ exports.requestHandler = async (req, res) => {
             }
 
             if (result) {
-				req.params = temp;
-				if (r.middlewares.length > 0) {
-					for (const mw of r.middlewares) {
-						const result = await mw(req, res);
-						if (result === -1)
-							return;
+				if (r.constructor === SplitRoute) {
+					const splitResult = await r.splitter(req, res);
+					if (splitResult >= r.handlers.length) {
+						logger.error(`There was an error while processing a request at ${req.url}: splitter function referenced a handler that wasn't provided to the router`);
+						res.writeHead(500, {"Content-Type": "text/html"});
+						res.end("Belső hiba történt a kérésed feldolgozása közben. Kérlek jelentsd ezt a balesetet a következő email címre: ma.is.elkesek.e@gmail.com");
+						return;
 					}
+					r.handlers[splitResult](req, res);
+				} else {
+					req.params = temp;
+					if (r.middlewares.length > 0) {
+						for (const mw of r.middlewares) {
+							const result = await mw(req, res);
+							if (result === -1)
+								return;
+						}
+					}
+					r.handler(req, res);
+					return;
 				}
-                r.handler(req, res);
-                return;
+
             }
         }
     }
@@ -104,6 +126,10 @@ exports.addMiddleware = middleware => {
 exports.addHandler = (path, method, requestHandler, mv) => {
     routes.push(new Route(method, path, requestHandler, mv));
 };
+
+exports.addSplitHandler = function(path, method, splitter) {
+	routes.push(new SplitRoute(method, path, splitter, Array.from(arguments).slice(3)));
+}
 
 exports.setFallback = requestHandler => {
     fallback = requestHandler;
