@@ -33,14 +33,26 @@
 
         <div class="content">
             
+            <div class="title">
+                Bejelentkezés
+            </div>
+
             <div class="error-box">
                 <span class="error-text"></span>
             </div>
 
             <div class="login-box">
 
-                <input type="text" id="input-username" maxlength="16" placeholder="Felhasználónév" class="login-input"/>
-                <input type="password" id="input-password" placeholder="Jelszó"  class="login-input"/>
+                <div class="input-box">
+                    <span class="input-label">Felhasználónév: </span>
+                    <input type="text" id="input-username" maxlength="16" placeholder="Felhasználónév" class="login-input"/>
+                </div>
+
+                <div class="input-box">
+                    <span class="input-label">Jelszó: </span>
+                    <input type="password" id="input-password" placeholder="Jelszó"  class="login-input"/>
+                </div>
+
                 <input type="button" id="input-submitBtn" onclick="login();" value="Bejelentkezés"  class="login-input"/>
 
             </div>

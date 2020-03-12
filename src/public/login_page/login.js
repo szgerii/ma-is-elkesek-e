@@ -13,7 +13,7 @@ function login() {
     let password = document.querySelector("#input-password").value;
     let error = document.querySelector(".error-text");
 
-    error.innerText = "";
+    error.innerText = "Kérjük várjon...";
 
     switch(checkUsernameFormat(username)) {
 
@@ -40,31 +40,34 @@ function login() {
         url: loginUrl,
         contentType: "application/json; charset=utf-8",
         dataType: "json",
-        data: {username: username, password: password},
+        data: JSON.stringify({username: username, password: password}),
 
         success: function(r) {
 
-            if (r.status==200) {
+            if (r.status=="success") {
 
                 window.location.replace("/");
 
-            } else if (r.status==401) {
-
-               error.innerText = "A megadott felhasználónév vagy jelszó helytelen!"; 
-
-            } else if (r.status==422) {
-
-                error.innerText = "A megadott felhasználónév vagy jelszó formátuma nem megfelelő";
-                if (r.data.username) console.log(r.data.username);
-                if (r.data.password) console.log(r.data.password);
-
-            }
+            } 
 
         },
 
-        error: function() {
+        error: function(r) {
 
-            error.innerText = "Hiba történt  a bejelentkezés során.";
+            if (r.status==401) {
+
+                error.innerText = "A megadott felhasználónév vagy jelszó helytelen!"; 
+ 
+            } else if (r.status==422) {
+ 
+                 error.innerText = "A megadott felhasználónév vagy jelszó formátuma nem megfelelő";
+                 if (r.data.username) console.log(r.data.username);
+                 if (r.data.password) console.log(r.data.password);
+ 
+            } else {
+                error.innerText = "Hiba történt  a bejelentkezés során.";
+            }
+            
 
         }
 
