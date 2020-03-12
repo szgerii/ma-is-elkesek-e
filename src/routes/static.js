@@ -36,22 +36,37 @@ module.exports = () => {
 				res.writeHead(404, {"Content-Type": "text/html"});
 				res.end(notFoundPage);
 			});
-			
+
 			// Landing page
 			const guestMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_guest.html"));
 			const loggedInMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_logged_in.html"));
 			
 			router.addSplitHandler("/", "GET", loginSplitter,
-			// User isn't logged in
-			(req, res) => {
-				res.writeHead(200, {"Content-Type": "text/html"});
+				// User isn't logged in
+				(req, res) => {
+					res.writeHead(200, {"Content-Type": "text/html"});
+					res.end(guestMainPage);
+				},
+				// User is logged in
+				(req, res) => {
+					res.writeHead(200, {"Content-Type": "text/html"});
+					res.end(loggedInMainPage);
+				});
+
+			// Logout
+			router.addHandler("/logout", "POST", (req, res) => {
+				res.writeHead(200, {
+					"Content-Type": "text/html",
+					"Set-Cookie": router.cookieBuilder("auth-token", "", {
+						domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
+						path: "/",
+						expires: "Thu, 01 Jan 1970 00:00:00 GMT",
+						sameSite: "Strict",
+						httpOnly: true
+					})
+				});
 				res.end(guestMainPage);
-			},
-			// User is logged in
-			(req, res) => {
-				res.writeHead(200, {"Content-Type": "text/html"});
-				res.end(loggedInMainPage);
-			});
+			});	
 
 			resolve();
 		} catch (err) {

@@ -55,8 +55,9 @@ window.onload = function() {
 
     if (logoutLink) {
         logoutLink.addEventListener("click", () => {
-            document.cookie = "auth-token=;Expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
-            window.location.reload();
+            $.post("/logout", () => {
+                window.location.reload();
+            });
         });
     }
 

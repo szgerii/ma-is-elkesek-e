@@ -79,7 +79,7 @@ async function start() {
 	usersRoute();
 	watchlistRoute();
 
-	server = http.createServer(router.requestHandler)
+	server = http.createServer(router.requestHandler);
 	server.listen(PORT);
 	logger.log(`Server listening on port ${PORT}`);
 }

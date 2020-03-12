@@ -211,12 +211,6 @@ nav ul li .current {
 
 }
 
-.login-input:hover {
-
-    border: 3px solid orange;
-
-}
-
 #input-submitBtn:hover {
 
     cursor: pointer;
