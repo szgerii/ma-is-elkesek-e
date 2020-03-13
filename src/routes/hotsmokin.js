@@ -29,14 +29,19 @@ module.exports = () => {
 			res.writeHead(200, {"Content-Type": "application/json"});
 			res.end(router.genResponse("success", null));
 		}).catch(err => {
-			if (err.name === "InformationMissingError" || err.name === "ValidationError") {
-				res.writeHead(422, {"Content-Type": "application/json"});
-				res.end(router.genResponse("fail", err.data));
-			} else {
-				logger.error("Couldn't update a section in the database");
-				logger.xlog(err);
-				res.writeHead(500, {"Content-Type": "application/json"});
-				res.end(router.genResponse("error", "We were unable to update the section in the database"));
+			switch (err.name) {
+				case "InformationMissingError":
+				case "ValidationError":
+					res.writeHead(422, {"Content-Type": "application/json"});
+					res.end(router.genResponse("fail", err.data));
+					break;
+			
+				default:
+					logger.error("Couldn't update a section in the database");
+					logger.xlog(err);
+					res.writeHead(500, {"Content-Type": "application/json"});
+					res.end(router.genResponse("error", "We were unable to update the section in the database"));
+					break;
 			}
 		});
 	});
