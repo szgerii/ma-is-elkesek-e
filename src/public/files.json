@@ -35,6 +35,21 @@
 		"type": "text/javascript"
 	},
 	{
+		"url": "/signup",
+		"path": "signup_page/signup.html",
+		"type": "text/html"
+	},
+	{
+		"url": "/signup.css",
+		"path": "signup_page/signup.css",
+		"type": "text/css"
+	},
+	{
+		"url": "/signup.js",
+		"path": "signup_page/signup.js",
+		"type": "text/javascript"
+	},
+	{
 		"url": "/jQuery.js",
 		"path": "lib/jQuery.js",
 		"type": "text/javascript"

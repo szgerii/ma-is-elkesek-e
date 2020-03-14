@@ -1,5 +1,5 @@
 
-const loginUrl = "/api/login";
+const signupUrl = "/api/users";
 
 window.onload = () => {
 
@@ -17,12 +17,19 @@ window.onload = () => {
             login();
     });
 
+    document.querySelector("#input-password2").addEventListener("keyup", (event) => {
+        if (event.keyCode == 13)
+            login();
+    });
+
 }
 
-function login() {
+function signup() {
 
     let username = document.querySelector("#input-username").value;
     let password = document.querySelector("#input-password").value;
+    let password2 = document.querySelector("#input-password2").value;
+    let isWatchlist = (document.querySelector("#input-dd-watchlist").value=="true");
     let error = document.querySelector(".error-text");
 
     error.innerText = "Kérjük várjon...";
@@ -38,6 +45,13 @@ function login() {
 
     }
 
+    if (password!=password2) {
+
+        error.innerText = "A két megadott jelszó nem eggyezik.";
+        return 0;
+
+    }
+
     switch(checkPasswordFormat(password)) {
 
         case "empty": error.innerText = "Kérjük adja meg jelszavát!";return 0;
@@ -50,10 +64,10 @@ function login() {
     $.ajax({
 
         method: "POST",
-        url: loginUrl,
+        url: signupUrl,
         contentType: "application/json; charset=utf-8",
         dataType: "json",
-        data: JSON.stringify({username: username, password: password}),
+        data: JSON.stringify({username: username, password: password, showWhatchlistByDefault: isWatchlist}),
 
         success: function(r) {
 
@@ -67,25 +81,21 @@ function login() {
 
         error: function(r) {
 
-            if (r.status==401) {
+            if (r.status==409) {
 
-                error.innerText = "A megadott felhasználónév vagy jelszó helytelen!"; 
- 
+                error.innerText = "A megadott felhasználónév már foglalt.";
+
             } else if (r.status==422) {
- 
-                 error.innerText = "A megadott felhasználónév vagy jelszó formátuma nem megfelelő";
-                 if (r.data.username) console.log(r.data.username);
-                 if (r.data.password) console.log(r.data.password);
- 
+
+                error.innerText = "A megadott felhasználónév vagy jelszó nem megfelelő.";
+
             } else {
 
                 error.innerText = "Hiba történt  a bejelentkezés során.";
-                
+
             }
-            
 
         }
-
     });
 
 }
