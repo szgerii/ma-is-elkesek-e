@@ -972,6 +972,10 @@ async function loadLine() {
                 line.id = "BKK_MP533";
                 line.description = "Kőbánya-Kispest M | Lehel tér M";
             }
+            if (line.id == "BKK_3031") {
+                line.id="BKK_3030";
+                line.description="Mexikói út M | Gubacsi út / Határ út";
+            }
 
             if (!line.id || line.id == "BKK_9999") { //check if the returned line is 9999(object for special lines)
                 alert("Nem találtunk járatot");
