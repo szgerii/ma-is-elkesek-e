@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+    <head>    
+
+        <title>Ma is elkések-e?</title>
+
+        <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,900&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" type="text/css" href="account.css" />
+        <link rel="icon" type="image/png" href="assets/images/icon.png" />
+
+        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+        <meta charset="UTF-8" />
+
+    </head>
+
+    <body>
+
+        <nav>
+
+            <div id="navbar-title">Ma is elkések-e?</div>
+
+            <div class="navbar-menu">
+
+                <span class="line"></span>
+                <span class="line"></span>
+                <span class="line"></span>
+
+            </div>
+
+            <ul class="navbar-list">
+
+                <li><a href="/">Főoldal</a></li>
+                <li><a href="#">Lista</a></li>
+                <li><a href="/account" class="current">Fiók</a></li>
+                <li><a href="#" id="logout">Kijelentkezés</a></li>
+
+            </ul>
+
+        </nav>
+
+        <div class="content">
+
+            <div class="accountSettings-box">
+
+                <div class="title">
+                    Fiók beállításai:
+                </div>
+
+                <div class="input-box">
+                    <span class="input-label">Felhasználónév: </span>
+                    <input type="text" id="input-username" maxlength="16" placeholder="Felhasználónév" class="account-input"/>
+                </div>
+
+                <div class="input-box">
+                    <span class="input-label">Új jelszó: </span>
+                    <input type="password" id="input-newPassword" maxlength="16" placeholder="Új jelszó" class="account-input"/>
+                </div>
+
+                <div class="input-box">
+                    <span class="input-label">Új jelszó újra: </span>
+                    <input type="password" id="input-newPassword2" maxlength="16" placeholder="Új jelszó újra" class="account-input"/>
+                </div>
+
+                <div class="input-box">
+                    <span class="input-label">Alapértelmezett oldal: </span>
+                    <select id="input-dd-watchlist" class="account-input">
+                        <option value="true">Saját járatlista</option>
+                        <option value="false">Főoldal</option>
+                    </select>
+                </div>
+
+                <div class="input-box" id="submit-box">
+                    <input type="password" id="input-password" maxlength="16" placeholder="jelszó" class="account-input"/>
+                    <input type="button" id="input-submitBtn" onclick="saveChanges();" value="Változtatások mentése" class="account-input"/>
+                </div>
+
+            </div>
+
+        </div>
+
+        <script type="text/javascript" src="jQuery.js"></script>
+        <script type="text/javascript" src="account.js"></script>
+    </body>
+</html>

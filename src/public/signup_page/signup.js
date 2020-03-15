@@ -9,17 +9,17 @@ window.onload = () => {
 
     document.querySelector("#input-username").addEventListener("keyup", (event) => {
         if (event.keyCode == 13)
-            login();
+            signup();
     });
 
     document.querySelector("#input-password").addEventListener("keyup", (event) => {
         if (event.keyCode == 13)
-            login();
+            signup();
     });
 
     document.querySelector("#input-password2").addEventListener("keyup", (event) => {
         if (event.keyCode == 13)
-            login();
+            signup();
     });
 
 }
@@ -73,7 +73,7 @@ function signup() {
 
             if (r.status=="success") {
 
-                window.location.replace("/");
+                window.location.assign("/");
 
             } 
 

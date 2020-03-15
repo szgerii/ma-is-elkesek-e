@@ -59,7 +59,7 @@ function login() {
 
             if (r.status=="success") {
 
-                window.location.replace("/");
+                window.location.assign("/");
 
             } 
 
