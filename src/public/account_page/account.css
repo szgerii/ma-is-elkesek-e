@@ -175,7 +175,8 @@ nav ul li .current {
     font-size: var(--fontSize-desktop-large);
     width: 40%;
     text-align:center;
-    padding: 0.1em;
+    padding-top: 0.1em;
+    padding-bottom: 0.1em;
     background-color:var(--color-main);
 
 }
@@ -186,6 +187,24 @@ nav ul li .current {
 
 }
 
+#result-box {
+
+    width: 80%;
+    color: var(--color-main);
+    font-size: var(--fontSize-desktop-large);
+    height: 15vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+
+#result {
+
+    text-align: center
+
+}
+
 @media (max-width: 600px) {
 
 
@@ -193,7 +212,7 @@ nav ul li .current {
 
         margin-top: 8vh;
         width: 90%;
-        height: 75vh;
+        height: 85vh;
         justify-content: flex-start;
 
     }
@@ -219,6 +238,12 @@ nav ul li .current {
         width: 90%;
         margin-bottom: 0.5em;
         text-align: center;
+
+    }
+
+    #input-dd-watchlist {
+
+        width: 90%;
 
     }
 
