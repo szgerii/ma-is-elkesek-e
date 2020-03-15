@@ -47,7 +47,7 @@ function signup() {
 
     if (password!=password2) {
 
-        error.innerText = "A két megadott jelszó nem eggyezik.";
+        error.innerText = "A két megadott jelszó nem egyezik.";
         return 0;
 
     }
@@ -67,7 +67,7 @@ function signup() {
         url: signupUrl,
         contentType: "application/json; charset=utf-8",
         dataType: "json",
-        data: JSON.stringify({username: username, password: password, showWhatchlistByDefault: isWatchlist}),
+        data: JSON.stringify({username: username, password: password, showWatchlistByDefault: isWatchlist}),
 
         success: function(r) {
 

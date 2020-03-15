@@ -6,16 +6,22 @@ const jwt_verification = require("../middlewares/jwt_verification");
 module.exports = () => {
 	router.addHandler("/api/login", "POST", (req, res) => {
 		dbManager.login(req.body.username, req.body.password).then(token => {
-			res.writeHead(200, {
-				"Content-Type": "application/json",
-				"Set-Cookie": router.cookieBuilder("auth-token", token, {
+			res.writeHead(200, [
+				["Content-Type", "application/json"],
+				["Set-Cookie", router.cookieBuilder("username", req.body.username, {
+					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
+					path: "/",
+					maxAge: 1800,
+					sameSite: "Strict"
+				})],
+				["Set-Cookie", router.cookieBuilder("auth-token", token, {
 					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
 					path: "/",
 					maxAge: 1800,
 					sameSite: "Strict",
 					httpOnly: true
-				})
-			});
+				})]
+			]);
 			res.end(router.genResponse("success", null));
 		}).catch(err => {
 			switch (err.name) {
@@ -59,9 +65,25 @@ module.exports = () => {
 			username: req.body.username,
 			password: req.body.password,
 			showWatchlistByDefault: req.body.showWatchlistByDefault
-		}).then(() => {
-			logger.xlog(`Successfully registered new user: ${req.body.username}`);
-			res.writeHead(200, {"Content-Type": "application/json"});
+		}).then(async () => {
+			return await dbManager.genToken(req.body.username);
+		}).then(token => {
+			res.writeHead(200, [
+				["Content-Type", "application/json"],
+				["Set-Cookie", router.cookieBuilder("username", req.body.username, {
+					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
+					path: "/",
+					maxAge: 1800,
+					sameSite: "Strict"
+				})],
+				["Set-Cookie", router.cookieBuilder("auth-token", token, {
+					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
+					path: "/",
+					maxAge: 1800,
+					sameSite: "Strict",
+					httpOnly: true
+				})]
+			]);
 			res.end(router.genResponse("success", null));
 		}).catch(err => {
 			switch (err.name) {

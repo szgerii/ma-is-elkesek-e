@@ -14,14 +14,12 @@ window.onload = function() {
     document.querySelector(".navbar-menu").addEventListener("click", ()=> {
 		document.querySelector(".navbar-list").classList.toggle("navbar-active");
     });
-
-    if (logoutLink) {
-        logoutLink.addEventListener("click", () => {
-            $.post("/logout", () => {
-                window.location.assign("/");
-            });
+    
+    logoutLink.addEventListener("click", () => {
+        $.post("/logout", () => {
+            window.location.assign("/");
         });
-    }
+    });
 
     loadOldSettings();
 

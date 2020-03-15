@@ -28,7 +28,7 @@ module.exports = () => {
 				});
 			}
 
-			// Special cases
+			// -- Special cases --
 			
 			// 404
 			const notFoundPage = fs.readFileSync(path.resolve(__dirname, "../public/404_page/404.html"));
@@ -55,16 +55,22 @@ module.exports = () => {
 
 			// Logout
 			router.addHandler("/logout", "POST", (req, res) => {
-				res.writeHead(200, {
-					"Content-Type": "text/html",
-					"Set-Cookie": router.cookieBuilder("auth-token", "", {
+				res.writeHead(200, [
+					["Content-Type", "text/html"],
+					["Set-Cookie", router.cookieBuilder("auth-token", "", {
 						domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
 						path: "/",
 						expires: "Thu, 01 Jan 1970 00:00:00 GMT",
 						sameSite: "Strict",
 						httpOnly: true
-					})
-				});
+					})],
+					["Set-Cookie", router.cookieBuilder("username", "", {
+						domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
+						path: "/",
+						expires: "Thu, 01 Jan 1970 00:00:00 GMT",
+						sameSite: "Strict"
+					})],
+				]);
 				res.end(guestMainPage);
 			});	
 

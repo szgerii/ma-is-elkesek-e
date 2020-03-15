@@ -98,6 +98,7 @@ exports.requestHandler = async (req, res) => {
 						return;
 					}
 					r.handlers[splitResult](req, res);
+					return;
 				} else {
 					req.params = temp;
 					if (r.middlewares.length > 0) {
