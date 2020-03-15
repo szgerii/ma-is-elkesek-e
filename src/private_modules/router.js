@@ -11,6 +11,7 @@ const logger = require("./logger");
  * @type {Route[]}
  */
 const routes = [];
+let fallback;
 
 /**
  * Class for representing the handler of a specific method inside a Route
@@ -27,12 +28,6 @@ class Handler {
 	 * @param {ServerResponse} res - the response object that will be sent to the client
 	 */
 	handle(req, res) {
-		for (let i = 0; i < this.middlewares.length; i++) {
-			const result = this.middlewares[i](req, res);
-			if (result === -1)
-				return;
-		}
-
 		this.requestHandler(req, res);
 	}
 }
@@ -55,7 +50,7 @@ class SplitHandler {
 		if (result >= this.requestHandlers.length) {
 			logger.error("The result of a splitter function pointed to a handler that wasn't provided.");
 			res.writeHead(500, {"Content-Type": "text/html"});
-			res.end("An error occured while processing your request. Please report this problem to ma.is.elkesek.e@gmail.com");
+			res.end("Belső hiba történt. Kérjük jelezd ezt a problémát a következő email címre: ma.is.elkesek.e@gmail.com");
 		}
 
 		this.requestHandlers[result](req, res);
@@ -247,5 +242,157 @@ exports.route = (path, createNew) => {
  * @todo implement function
  */
 exports.requestHandler = (req, res) => {
-	const {pathname} = url.parse(req.url);
+	const splitReqPath = url.parse(req.url).pathname.split("/");
+
+	req.ip = (req.headers["x-forwarded-for"] || "").split(",").pop() ||
+			req.connection.remoteAddress ||
+			req.socket.remoteAddress ||
+			req.connection.socket.remoteAddress;
+
+	logger.xlog(`${req.method} request at ${req.url} from ${req.ip}`);
+		
+	res.on("finish", () => {
+		logger.xlog(`Sending ${res.statusCode} response to ${req.ip}`);
+	});
+
+	for (let i = 0; i < routes.length; i++) {
+		if (!routes[i].handlers.includes(req.method.toUpperCase())) {
+			continue;
+		}
+
+		const splitRoutePath = routes[i].split("/"), temp = {};
+		let result = true;
+
+		for (let j = 0; j < splitReqPath.length; j++) {
+			if (splitRoutePath[j] === "*")
+				break;
+
+			if (splitRoutePath[j][0] === '{' && splitRoutePath[splitRoutePath.length - 1][1] === '}') {
+				temp[splitRoutePath[j].slice(1, splitRoutePath[j].length - 1)] = splitReqPath[j];
+				continue;
+			}
+
+			if (splitReqPath[j] !== splitRoutePath[j]) {
+				result = false;
+				break;
+			}
+		}
+
+		if (result) {
+			req.params = temp;
+
+			for (let j = 0; j < routes[i].middlewares.length; j++) {
+				if (routes[i].middlewares[i](req, res) === -1)
+					return;
+			}
+
+			const handler = routes[i].handlers[req.method.toUpperCase()];
+			for (let j = 0; j < handler.middlewares.length; j++) {
+				if (handler.middlewares[i](req, res) === -1)
+					return;
+			}
+
+			handler.handle(req, res);
+			return;
+		}
+	}
+
+	if (fallback)
+		fallback(req, res);
 };
+
+/**
+ * @param {function} handler - the function which should be called if no other route matches the request's path
+ */
+exports.setFallback = handler => {
+	fallback = handler;
+}
+
+// -------------------
+// |   MIDDLEWARES   |
+// -------------------
+
+/**
+ * Body parsing middleware
+ * @param {IncomingMessage} req - the request object coming from the client
+ * @param {ServerResponse} res - the response object that the server will send back
+ * @returns {?Number} -1 on failure
+ * @todo function implementation
+ */
+exports.bodyParser = (req, res) => {
+
+}
+
+/**
+ * Cookie parsing middleware
+ * @param {IncomingMessage} req - the request object coming from the client
+ * @param {ServerResponse} res - the response object that the server will send back
+ * @returns {?Number} -1 on failure
+ * @todo function implementation
+ */
+exports.cookieParser = (req, res) => {
+
+}
+
+/**
+ * Query parsing middleware
+ * @param {IncomingMessage} req - the request object coming from the client
+ * @param {ServerResponse} res - the response object that the server will send back
+ * @returns {?Number} -1 on failure
+ * @todo function implementation
+ */
+exports.queryParser = (req, res) => {
+
+}
+
+// -----------------
+// |   UTILITIES   |
+// -----------------
+
+/**
+ * Generates a JSend response
+ * @param {String} status - the status property of the message (success, fail, error)
+ * @param {?(Object | String)} data - the data (or message, if the status is error) property of the message
+ * @returns {String} the generated message
+ */
+exports.genResponse = (status, data) => {
+	if (status === "error") {
+		return JSON.stringify({
+			"status": status,
+			"message": data
+		});
+	}
+
+	return JSON.stringify({
+		"status": status,
+		"data": data
+	});
+}
+
+/**
+ * Generates a cookie string
+ * @param {String} key - key/name of the cookie
+ * @param {String} value - value of the cookie
+ * @param {?Object} options - the extra options which the cookie should have
+ * @returns {String} the parsed cookie string
+ */
+exports.cookieBuilder = (key, value, options) => {
+	let c = `${key}=${value};`;
+	
+	if (options.domain !== undefined)
+		c += ` Domain=${options.domain};`
+	if (options.path !== undefined)
+		c += ` Path=${options.path};`
+	if (options.expires !== undefined)
+		c += ` Expires=${options.expires};`
+	if (options.maxAge !== undefined)
+		c += ` Max-Age=${options.maxAge};`
+	if (options.sameSite !== undefined)
+		c += ` SameSite=${options.sameSite};`
+	if (options.httpOnly)
+		c += ` HttpOnly;`
+	if (options.secure)
+		c += ` Secure;`
+	
+	return c.substr(0, c.length - 1);
+}
