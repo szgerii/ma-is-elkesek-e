@@ -1,259 +1,251 @@
+const url = require("url");
 const logger = require("./logger");
 
-let middlewares = [];
-let routes = [];
-let fallback;
+/**
+ * @typedef {Object} IncomingMessage
+ * @typedef {Object} ServerResponse
+ */
 
-class Route {
-    constructor(method, path, handler, middleware) {
-		this.method = method;
-        this.path = path;
-        this.pathParts = path.split("/").filter(el => { return el.length !== 0; });
-		this.handler = handler;
-		this.middlewares = [];
-		if (middleware)
-			this.middlewares.push(middleware);
-    }
-}
+/**
+ * An array for storing every route the server should handle
+ * @type {Route[]}
+ */
+const routes = [];
 
-exports.requestHandler = async (req, res) => {
-	try {
-		await parseReq(req);
-	} catch (err) {
-		if (err.name === "InvalidContentTypeError") {
-			res.writeHead(422, {"Content-Type": "application/json"});
-			res.end(this.genResponse("fail",{
-				header: `Invalid Content-Type in header: ${req.headers["content-type"]}`
-			}));
-			return;
-		} else {
-			res.writeHead(500, {"Content-Type": "application/json"});
-			res.end(this.genResponse(500, "Something went wrong while processing the request"));
-			logger.error("Something went wrong while processing a request");
-			logger.xlog(err);
-			return;
-		}
+/**
+ * Class for representing the handler of a specific method inside a Route
+ */
+class Handler {
+	constructor(requestHandler, ...middlewares) {
+		this.requestHandler = requestHandler;
+		this.middlewares = middlewares;
 	}
 
-	logger.xlog(`${req.method} request at ${req.url} from ${req.ip}`);
-		
-	res.on("finish", () => {
-		logger.xlog(`Sending ${res.statusCode} response to ${req.ip}`);
-	});
-
-    for (const mw of middlewares) {
-		const result = mw(req, res);
-		if (result === -1)
-			return;
-	}
-
-    for (const r of routes) {
-        if (r.method.toUpperCase() === req.method.toUpperCase()) {
-            let result = true, temp = {};
-
-            if (r.pathParts.length !== req.urlParts.length)
-                continue;
-
-            for (let i = 0; i < r.pathParts.length; i++) {
-                if (r.pathParts[i][0] === "{" && r.pathParts[i][r.pathParts[i].length - 1] === "}") {
-                    temp[r.pathParts[i].slice(1, r.pathParts[i].length - 1)] = req.urlParts[i];
-                } else if (r.pathParts[i] !== req.urlParts[i]) {
-                    result = false;
-                    break;
-                }
-            }
-
-            if (result) {
-				req.params = temp;
-				if (r.middlewares.length > 0) {
-					for (const mw of r.middlewares) {
-						const result = await mw(req, res);
-						if (result === -1)
-							return;
-					}
-				}
-                r.handler(req, res);
-                return;
-            }
-        }
-    }
-
-    if (fallback)
-        fallback(req, res);
-};
-
-exports.addMiddleware = middleware => {
-    middlewares.push(middleware);
-};
-
-exports.addHandler = (path, method, requestHandler, mv) => {
-    routes.push(new Route(method, path, requestHandler, mv));
-};
-
-exports.setFallback = requestHandler => {
-    fallback = requestHandler;
-};
-
-exports.genResponse = (status, data) => {
-	if (status === "error") {
-		return JSON.stringify({
-			"status": status,
-			"message": data
-		});
-	}
-
-	return JSON.stringify({
-		"status": status,
-		"data": data
-	});
-}
-
-exports.cookieBuilder = (key, value, options) => {
-	let c = `${key}=${value};`;
-	
-	if (options.domain !== undefined)
-		c += ` Domain=${options.domain};`
-	if (options.path !== undefined)
-		c += ` Path=${options.path};`
-	if (options.expires !== undefined)
-		c += ` Expires=${options.expires};`
-	if (options.maxAge !== undefined)
-		c += ` Max-Age=${options.maxAge};`
-	if (options.sameSite !== undefined)
-		c += ` SameSite=${options.sameSite};`
-	if (options.httpOnly)
-		c += ` HttpOnly;`
-	if (options.secure)
-		c += ` Secure;`
-	
-	return c.substr(0, c.length - 1);
-}
-
-/*
-	Fills up the request object with the base url (without queries) and a separate query object
-	req: request object
-*/
-function parseReq(req) {
-	return new Promise(async (resolve, reject) => {
-		const urlParts = req.url.split("?");
-		req.baseUrl = urlParts[0];
-		req.urlParts = req.baseUrl.split("/").filter(el => { return el.length !== 0; });
-	
-		req.ip = (req.headers["x-forwarded-for"] || "").split(",").pop() ||
-				req.connection.remoteAddress ||
-				req.socket.remoteAddress ||
-				req.connection.socket.remoteAddress;
-		
-		await parseCookies(req);
-		try {
-			await parseBody(req)
-		} catch (err) {
-			reject(err);
-			return;	
-		}
-		
-		if (!urlParts[1]) {
-			resolve();
-			return;
-		}
-		
-		req.query = queryParser(urlParts[1]);
-		resolve();
-	});
-}
-
-/*
-	Parses a query string into a query object
-	rawQuery: the unparsed query string
-	detectType: if true, the function converts the query values, if possible
-*/
-function queryParser(rawQuery, detectType) {
-	const query = {};
-
-	rawQuery.split("&").forEach(data => {
-		const splitData = data.split("=");
-		
-		if (!detectType)
-			query[splitData[0]] = splitData[1];
-		else if (splitData[1] === "true")
-			query[splitData[0]] = true;
-		else if (splitData[1] === "false")
-			query[splitData[0]] = false;
-		else if (!Number.isNaN(Number(splitData[1])))
-			query[splitData[0]] = Number(splitData[1]);
-		else
-			query[splitData[0]] = splitData[1];
-	});
-
-	return query;
-}
-
-/*
-	Returns a promise that parses a requests body
-	Resolves with the body object
-*/
-function parseBody(req) {
-	return new Promise((resolve, reject) => {
-		let data = [];
-		
-		req.on("data", chunk => {
-			data.push(chunk);
-		});
-	
-		req.on("end", () => {
-			let body;
-
-			if (!req.headers["content-type"]) {
-				req.body = {};
-				resolve();
+	/**
+	 * This function is responsible for processing a request and responding to it
+	 * @param {IncomingMessage} req - the request object received from the client
+	 * @param {ServerResponse} res - the response object that will be sent to the client
+	 */
+	handle(req, res) {
+		for (let i = 0; i < this.middlewares.length; i++) {
+			const result = this.middlewares[i](req, res);
+			if (result === -1)
 				return;
-			}
-
-			switch (req.headers["content-type"].split(";")[0]) {
-				case "application/x-www-form-urlencoded":
-					body = queryParser(decodeURIComponent(data.concat().toString()), false);
-					req.body = body;
-					resolve();
-					break;
-
-				case "application/json":
-					body = JSON.parse(data.concat().toString());
-					req.body = body;
-					resolve();
-					break;
-				
-				case null:
-				case undefined:
-					req.body = {};
-					resolve();
-					break;
-				
-				default:
-					const err = new Error(`Invalid Content-Type header: ${req.headers["content-type"]}`);
-					err.name = "InvalidContentTypeError";
-					reject(err);
-					break;
-			}
-		});
-	});
-}
-
-function parseCookies(req) {
-	return new Promise((resolve, reject) => {
-		const cookies = {};
-
-		if (req.headers.cookie) {
-			for (const c of req.headers.cookie.split(";")) {
-				const i = c.indexOf("=");
-	
-				let val = c.substring(i + 1).trim();
-				val = val === "true" ? true : val === "false" ? false : val; // Check if the value is a bool
-				
-				cookies[c.substring(0, i).trim()] = val;
-			}
 		}
 
-		req.cookies = cookies;
-		resolve();
-	});
+		this.requestHandler(req, res);
+	}
 }
+
+class SplitHandler {
+	constructor(splitter, ...requestHandlers) {
+		this.splitter = splitter;
+		this.requestHandlers = requestHandlers;
+		this.middlewares = [];
+	}
+
+	/**
+	 * This function is responsible for processing a request and responding to it
+	 * @param {IncomingMessage} req - the request object received from the client
+	 * @param {ServerResponse} res - the response object that will be sent to the client
+	 */
+	handle(req, res) {
+		const result = this.splitter(req);
+
+		if (result >= this.requestHandlers.length) {
+			logger.error("The result of a splitter function pointed to a handler that wasn't provided.");
+			res.writeHead(500, {"Content-Type": "text/html"});
+			res.end("An error occured while processing your request. Please report this problem to ma.is.elkesek.e@gmail.com");
+		}
+
+		this.requestHandlers[result](req, res);
+	}
+}
+
+/**
+ * Class for representing a route and its handlers
+ */
+class Route {
+	/**
+	 * @constructor
+	 * @param {String} path - path of the route object 
+	 */
+	constructor(path) {
+		this.path = path;
+		
+		/**
+		 * An object containing the handlers, where the request handler of a certain method can be accessed by using the method as the key
+		 * @type {Object.<String, (Handler | SplitHandler)>}
+		 * @example handlers["GET"](req, res)
+		 */
+		this.handlers = {};
+		
+		/**
+		 * An array of middleware functions that should be called before every request, regardless of its method
+		 * @type {function[]}
+		 */
+		this.middlewares = [];
+	}
+
+	/**
+	 * Adds a handler to the route object
+	 * @param {String} method - the method for which this handler is responsible
+	 * @param {function} requestHandler - the function responsible for processing the request and sending a response
+	 * @param  {...function} middlewares - function(s) that should be called before the requestHandler
+	 */
+	addHandler(method, requestHandler, ...middlewares) {
+		this.handlers[method.toUpperCase()] = new Handler(requestHandler, middlewares);
+	}
+	
+	/**
+	 * Shorthand for addHandler("GET", ...)
+	 * @param {function} requestHandler - the function responsible for processing the request and sending a response
+	 * @param {...function} middlewares - function(s) that should be called before the requestHandler
+	 */
+	get(requestHandler, ...middlewares) {
+		this.addHandler("GET", requestHandler, ...middlewares);
+	}
+
+	/**
+	 * Shorthand for addHandler("POST", ...)
+	 * @param {function} requestHandler - the function responsible for processing the request and sending a response
+	 * @param  {...function} middlewares - function(s) that should be called before the requestHandler
+	 */
+	post(requestHandler, ...middlewares) {
+		this.addHandler("POST", requestHandler, ...middlewares);
+	}
+	
+	/**
+	 * Shorthand for addHandler("PUT", ...)
+	 * @param {function} requestHandler - the function responsible for processing the request and sending a response
+	 * @param  {...function} middlewares - function(s) that should be called before the requestHandler
+	 */
+	put(requestHandler, ...middlewares) {
+		this.addHandler("PUT", requestHandler, ...middlewares);
+	}
+
+	/**
+	 * Shorthand for addHandler("DELETE", ...)
+	 * @param {function} requestHandler - the function responsible for processing the request and sending a response
+	 * @param  {...function} middlewares - function(s) that should be called before the requestHandler
+	 */
+	delete(requestHandler, ...middlewares) {
+		this.addHandler("DELETE", requestHandler, ...middlewares);
+	}
+
+	/**
+	 * Adds a handler to the route object, which will handle every request. Shorthand for addHandler("ALL", ...)
+	 * @param {function} requestHandler - the function responsible for processing the request and sending a response
+	 * @param  {...function} middlewares - function(s) that should be called before the requestHandler
+	 */
+	all(requestHandler, ...middlewares) {
+		this.addHandler("ALL", requestHandler, ...middlewares);
+	}
+
+	/**
+	 * Adds middleware function (or multiple middleware functions) to every method
+	 * @param  {...function} middlewares - middleware function(s) that should be added to the route
+	 */
+	addMiddleware(...middlewares) {
+		this.middlewares.push(...middlewares);
+	}
+	
+	/**
+	 * Adds middleware function (or multiple middleware functions) to a specified method
+	 * @param {(String | String[])} method - name of the method which the middleware should be added to or an array of method names
+	 * @param  {...function} middlewares - middleware function(s) that should be added to the method(s)
+	 * @todo check which one's faster: instanceof or constructor.name === "something"
+	 */
+	addMiddlewareToMethod(method, ...middlewares) {
+		if (method instanceof Array) {
+			for (let i = 0; i < method.length; i++) {
+				this.handlers[method[i]].middlewares.push(...middlewares);
+			}
+		} else {
+			this.handlers[method].middlewares.push(...middlewares);
+		}
+	}
+
+	/**
+	 * Adds a splitter to a method
+	 * @param {String} method - name of the method which the splitter should be added to or an array of method names
+	 * @param {function} splitter - the splitter function which decides which requestHandler is called for a specific request
+	 * @param  {...function} requestHandlers - a list of functions which handle the processing of a request in certain scenarios (decided by the splitter function)
+	 */
+	addSplitter(method, splitter, ...requestHandlers) {
+		if (method instanceof Array) {
+			for (let i = 0; i < method.length; i++) {
+				this.handlers[method[i]] = new SplitHandler(splitter, ...requestHandlers);
+			}
+		} else {
+			this.handlers[method] = new SplitHandler(splitter, ...requestHandlers);
+		}
+	}
+
+	/**
+	 * Shorthand for addSplitter("GET", ...)
+	 * @param {function} splitter - the splitter function which decides which requestHandler is called for a specific request
+	 * @param  {...function} requestHandlers - a list of functions which handle the processing of a request in certain scenarios (decided by the splitter function)
+	 */
+	getSplitter(splitter, ...requestHandlers) {
+		this.addSplitter("GET", splitter, ...requestHandlers);
+	}
+	
+	/**
+	 * Shorthand for addSplitter("POST", ...)
+	 * @param {function} splitter - the splitter function which decides which requestHandler is called for a specific request
+	 * @param  {...function} requestHandlers - a list of functions which handle the processing of a request in certain scenarios (decided by the splitter function)
+	 */
+	postSplitter(splitter, ...requestHandlers) {
+		this.addSplitter("POST", splitter, ...requestHandlers);
+	}
+
+	/**
+	 * Shorthand for addSplitter("PUT", ...)
+	 * @param {function} splitter - the splitter function which decides which requestHandler is called for a specific request
+	 * @param  {...function} requestHandlers - a list of functions which handle the processing of a request in certain scenarios (decided by the splitter function)
+	 */
+	putSplitter(splitter, ...requestHandlers) {
+		this.addSplitter("PUT", splitter, ...requestHandlers);
+	}
+
+	/**
+	 * Shorthand for addSplitter("DELETE", ...)
+	 * @param {function} splitter - the splitter function which decides which requestHandler is called for a specific request
+	 * @param  {...function} requestHandlers - a list of functions which handle the processing of a request in certain scenarios (decided by the splitter function)
+	 */
+	deleteSplitter(splitter, ...requestHandlers) {
+		this.addSplitter("DELETE", splitter, ...requestHandlers);
+	}
+}
+
+/**
+ * Finds a route by its path or (optionally) creates a new one if it doesn't exist
+ * @param {String} path - path of the route
+ * @param {Boolean} [createNew=true] - enables creating a new Route object if the search didn't yield any results
+ * @returns {?Route} The route with the specified path, or null if the search was unsuccessful and the createNew argument was set to false
+ * @todo implement alphabetical sorting in the 'routes' array and change this linear search to binary search
+ */
+exports.route = (path, createNew) => {
+	for (let i = 0; i < routes.length; i++) {
+		if (routes[i].url === path)
+			return routes[i];
+	}
+
+	if (createNew === false)
+		return null;
+
+	const route = new Route(path);
+	routes.push(route);
+	return route;
+};
+
+/**
+ * The master request handling function which finds the appropriate route and handler for the specified request
+ * @param {IncomingMessage} req - the request object coming from the client
+ * @param {ServerResponse} res - the response object which will be sent to the client as a response
+ * @todo implement function
+ */
+exports.requestHandler = (req, res) => {
+	const {pathname} = url.parse(req.url);
+};

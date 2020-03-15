@@ -1,4 +1,4 @@
-const router = require("../private_modules/router");
+const router = require("../private_modules/old-router.js");
 const logger = require("../private_modules/logger");
 const dbManager = require("../db_manager");
 

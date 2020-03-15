@@ -1,4 +1,4 @@
-const router = require("../private_modules/router");
+const router = require("../private_modules/old-router.js");
 const dbManager = require("../db_manager");
 const jwt_verification = require("../middlewares/jwt_verification");
 

@@ -2,7 +2,7 @@
 const http = require("http");
 const fs = require("fs");
 const logger = require("./private_modules/logger");
-const router = require("./private_modules/router");
+const router = require("./private_modules/old-router.js");
 const dbManager = require("./db_manager");
 
 // Router files
