@@ -187,16 +187,22 @@ module.exports = () => {
 			showWatchlistByDefault: req.body.showWatchlistByDefault
 		}).then(async () => {
 			const token = await dbManager.genToken(req.body.username);
-			res.writeHead(200, {
-				"Content-Type": "application/json",
-				"Set-Cookie": router.cookieBuilder("auth-token", token, {
+			res.writeHead(200, [
+				["Content-Type", "application/json"],
+				["Set-Cookie", router.cookieBuilder("auth-token", token, {
 					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
 					path: "/",
 					maxAge: 1800,
 					sameSite: "Strict",
 					httpOnly: true
-				})
-			});
+				})],
+				["Set-Cookie", router.cookieBuilder("username", req.body.username, {
+					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
+					path: "/",
+					maxAge: 1800,
+					sameSite: "Strict"
+				})]
+			]);
 			res.end(router.genResponse("success", null));
 		}).catch(err => {
 			switch (err.name) {
