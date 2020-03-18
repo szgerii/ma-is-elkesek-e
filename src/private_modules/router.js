@@ -11,7 +11,21 @@ const logger = require("./logger");
  * @type {Route[]}
  */
 const routes = [];
-let fallback;
+
+/**
+ * An array of functions that are called before every request (to process the request object)
+ * @type {function[]}
+ */
+const middlewares = [];
+
+/**
+ * A request handler that is called when no other route matches the request's path
+ * @type {function}
+ */
+let fallback = (req, res) => {
+	res.writeHead(200, {"Content-Type": "text/html"});
+	res.end("404: Page not found");
+};
 
 /**
  * Class for representing the handler of a specific method inside a Route
@@ -32,6 +46,9 @@ class Handler {
 	}
 }
 
+/**
+ * Class for handling a splitter
+ */
 class SplitHandler {
 	constructor(splitter, ...requestHandlers) {
 		this.splitter = splitter;
@@ -236,6 +253,21 @@ exports.route = (path, createNew) => {
 };
 
 /**
+ * Function used for enabling common middlewares
+ * @param {Boolean} useBodyParser - use the body parsing middleware
+ * @param {Boolean} useCookieParser - use the cookie parsing middleware
+ * @param {Boolean} useQueryParser - use the query parsing middleware
+ */
+exports.init = (useBodyParser, useCookieParser, useQueryParser) => {
+	if (useBodyParser)
+		this.addMiddleware(this.bodyParser);
+	if (useCookieParser)
+		this.addMiddleware(this.cookieParser);
+	if (useQueryParser)
+		this.addMiddleware(this.queryParser);
+};
+
+/**
  * The master request handling function which finds the appropriate route and handler for the specified request
  * @param {IncomingMessage} req - the request object coming from the client
  * @param {ServerResponse} res - the response object which will be sent to the client as a response
@@ -255,10 +287,14 @@ exports.requestHandler = (req, res) => {
 		logger.xlog(`Sending ${res.statusCode} response to ${req.ip}`);
 	});
 
+	for (let i = 0; i < middlewares.length; i++) {
+		if (middlewares[i](req, res) === -1)
+			return;
+	}
+
 	for (let i = 0; i < routes.length; i++) {
-		if (!routes[i].handlers.includes(req.method.toUpperCase())) {
+		if (!routes[i].handlers.includes(req.method.toUpperCase()))
 			continue;
-		}
 
 		const splitRoutePath = routes[i].split("/"), temp = {};
 		let result = true;
@@ -302,6 +338,14 @@ exports.requestHandler = (req, res) => {
 };
 
 /**
+ * Adds middleware function (or multiple middleware functions) to every route
+ * @param  {...function} middlewares - middleware function(s) that should be added to the router
+ */
+exports.addMiddleware = (...middlewares) => {
+	this.middlewares.push(...middlewares);
+}
+
+/**
  * @param {function} handler - the function which should be called if no other route matches the request's path
  */
 exports.setFallback = handler => {
@@ -320,7 +364,7 @@ exports.setFallback = handler => {
  * @todo function implementation
  */
 exports.bodyParser = (req, res) => {
-
+	
 }
 
 /**
@@ -328,10 +372,56 @@ exports.bodyParser = (req, res) => {
  * @param {IncomingMessage} req - the request object coming from the client
  * @param {ServerResponse} res - the response object that the server will send back
  * @returns {?Number} -1 on failure
- * @todo function implementation
+ * @todo test middleware
  */
 exports.cookieParser = (req, res) => {
+	function reportInvalidSyntax() {
+		res.writeHead(400, {"Content-Type": "text/html"});
+		res.end("400 Bad Request: Malformed cookie syntax");
+		return -1;
+	}
 
+	const cookies = {};
+
+	if (!req.headers.cookie) {
+		req.cookies = {};
+		return;
+	}
+
+	const cookieString = req.headers.cookie, keyBuffer = "", valueBuffer = "", readingKey = true;
+	
+	for (let i = 0; i < cookieString.length; i++) {
+		if (cookieString[i] === "=") {
+			if (keyBuffer === "")
+				return reportInvalidSyntax();
+			
+			readingKey = false;
+			continue;
+		}
+
+		if (cookieString[i] === ";") {
+			if (valueBuffer === "")
+				return reportInvalidSyntax();
+
+			cookies[keyBuffer] = Number.isInteger(valueBuffer) ? Number(valueBuffer) : 
+								 valueBuffer === "true" ? true :
+								 valueBuffer === "false" ? false :
+								 valueBuffer;
+			keyBuffer = "";
+			valueBuffer = "";
+			readingKey = true;			
+
+			i++;
+			continue;
+		}
+		
+		if (readingKey)
+			keyBuffer += cookieString[i];
+		else
+			valueBuffer += cookieString[i];
+	}
+
+	req.cookies = cookies;
 }
 
 /**
@@ -339,10 +429,66 @@ exports.cookieParser = (req, res) => {
  * @param {IncomingMessage} req - the request object coming from the client
  * @param {ServerResponse} res - the response object that the server will send back
  * @returns {?Number} -1 on failure
- * @todo function implementation
+ * @todo test middleware
  */
 exports.queryParser = (req, res) => {
+	function reportInvalidSyntax() {
+		res.writeHead(400, {"Content-Type": "text/html"});
+		res.end("400 Bad Request: Malformed query syntax");
+		return -1;
+	}
 
+	const query = {};
+	const queryString = req.url.slice(req.url.indexOf("?") + 1);
+
+	let keyBuffer = "", valueBuffer = "", readingKey = true;
+	for (let i = 0; i < queryString.length; i++) {
+		if (queryString[i] === "=") {
+			if (keyBuffer === "")
+				return reportInvalidSyntax();
+
+			readingKey = false;
+			continue;
+		}
+
+		if (queryString[i] === "&" || queryString[i] === ";") {
+			if (keyBuffer === "")
+				return reportInvalidSyntax();
+
+			query[keyBuffer] = Number.isInteger(valueBuffer) ? Number(valueBuffer) : 
+							   valueBuffer === "true" || valueBuffer === "" ? true :
+							   valueBuffer === "false" ? false :
+							   valueBuffer;
+
+			keyBuffer = "";
+			valueBuffer = "";
+			readingKey = true;
+			continue;
+		}
+
+		if (queryString[i] === "%") {
+			const hex = `${queryString[i + 1]}${queryString[i + 2]}`;
+			if (!(/^([0-9a-fA-F]){2,2}$/.test(hex))) // TODO: check if this works without the additional paranthesis (syntax highlighting break without these)
+				return reportInvalidSyntax();
+
+			const charCode = Number(`0x${hex}`);
+			
+			if (readingKey)
+				keyBuffer += String.fromCharCode(charCode);
+			else
+				valueBuffer += String.fromCharCode(charCode);
+
+			i += 2;
+			continue;
+		}
+		
+		if (readingKey)
+			keyBuffer += queryString[i];
+		else
+			valueBuffer += queryString[i];
+	}
+
+	req.query = query;
 }
 
 // -----------------
@@ -376,7 +522,7 @@ exports.genResponse = (status, data) => {
  * @param {?Object} options - the extra options which the cookie should have
  * @returns {String} the parsed cookie string
  */
-exports.cookieBuilder = (key, value, options) => {
+exports.genCookie = (key, value, options) => {
 	let c = `${key}=${value};`;
 	
 	if (options.domain !== undefined)
