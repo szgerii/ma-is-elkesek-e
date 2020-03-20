@@ -2,10 +2,10 @@
 const http = require("http");
 const fs = require("fs");
 const logger = require("./private_modules/logger");
-const router = require("./private_modules/old-router.js");
+const router = require("./private_modules/router.js");
 const dbManager = require("./db_manager");
 
-// Router files
+// Route files
 const staticRoute = require("./routes/static");
 const hotsmokinRoute = require("./routes/hotsmokin");
 const usersRoute = require("./routes/users");
@@ -66,6 +66,7 @@ async function start() {
 	});
 
 	dbManager.setup();
+	router.setup();
 	
 	await staticRoute().catch(err => {
 		logger.error("Couldn't load static files\nThis might be because the files.json file is missing from the public directory, or because it pointed to a file that doesn't exist.");
@@ -74,12 +75,11 @@ async function start() {
 		logger.close();
 		process.exit(1);
 	});
-
 	hotsmokinRoute();
 	usersRoute();
 	watchlistRoute();
 
-	server = http.createServer(router.requestHandler)
+	server = http.createServer(router.requestHandler);
 	server.listen(PORT);
 	logger.log(`Server listening on port ${PORT}`);
 }

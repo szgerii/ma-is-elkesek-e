@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const router = require("../private_modules/old-router.js");
+const router = require("../private_modules/router.js");
 
 class File {
 	constructor(url, filePath, type) {
@@ -17,7 +17,7 @@ function setup() {
 	});
 	
 	for (const file of fileList) {
-		router.addHandler(file.url, "GET", (req, res) => {
+		router.route(file.url).get((req, res) => {
 			res.writeHead(200, {"Content-Type": file.type});
 			res.end(file.content);
 		});

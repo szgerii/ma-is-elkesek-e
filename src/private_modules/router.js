@@ -253,17 +253,17 @@ exports.route = (path, createNew) => {
 };
 
 /**
- * Function used for enabling common middlewares
- * @param {Boolean} useBodyParser - use the body parsing middleware
- * @param {Boolean} useCookieParser - use the cookie parsing middleware
- * @param {Boolean} useQueryParser - use the query parsing middleware
+ * Enables common middlewares
+ * @param {Boolean} [useBodyParser=true] - use the body parsing middleware
+ * @param {Boolean} [useCookieParser=true] - use the cookie parsing middleware
+ * @param {Boolean} [useQueryParser=true] - use the query parsing middleware
  */
-exports.init = (useBodyParser, useCookieParser, useQueryParser) => {
-	if (useBodyParser)
+exports.setup = (useBodyParser, useCookieParser, useQueryParser) => {
+	if (useBodyParser !== false)
 		this.addMiddleware(this.bodyParser);
-	if (useCookieParser)
+	if (useCookieParser !== false)
 		this.addMiddleware(this.cookieParser);
-	if (useQueryParser)
+	if (useQueryParser !== false)
 		this.addMiddleware(this.queryParser);
 };
 
@@ -361,10 +361,50 @@ exports.setFallback = handler => {
  * @param {IncomingMessage} req - the request object coming from the client
  * @param {ServerResponse} res - the response object that the server will send back
  * @returns {?Number} -1 on failure
- * @todo function implementation
+ * @todo test
  */
 exports.bodyParser = (req, res) => {
+	function reportInvalidSyntax() {
+		res.writeHead(400, {"Content-Type": "text/html"});
+		res.end("400 Hibás kérés: hibás a kérés törzsének szintaxisa");
+		return -1;
+	}
+
+	const data = [];
 	
+	req.on("data", chunk => {
+		data.push(chunk);
+	});
+
+	req.on("end", () => {
+		let body = data.join("");
+		switch (req.headers["content-type"].slice(0, req.headers["content-type"].indexOf(";"))) {
+			case "application/x-www-form-urlencoded":
+				req.body = this.parseQuery(body, true);
+				if (req.body === null)
+					return reportInvalidSyntax();
+				
+				break;
+			
+			case "application/json":
+				try {
+					req.body = JSON.parse(body);
+				} catch (err) {
+					return reportInvalidSyntax();
+				}
+				break;
+			
+			case undefined:
+			case null:
+				req.body = {};
+				break;
+		
+			default:
+				res.writeHead(415, {"Content-Type": "text/html"});
+				res.end("415 Nem támogatott média típus: a szerver nem tudja feldolgozni a Content-Type fejlécben megadott típusú üzeneteket");
+				break;
+		}
+	});
 }
 
 /**
@@ -377,7 +417,7 @@ exports.bodyParser = (req, res) => {
 exports.cookieParser = (req, res) => {
 	function reportInvalidSyntax() {
 		res.writeHead(400, {"Content-Type": "text/html"});
-		res.end("400 Bad Request: Malformed cookie syntax");
+		res.end("400 Rossz kérés: Hibás a kérés sütiket tároló szövegének a szintaxisa");
 		return -1;
 	}
 
@@ -403,7 +443,7 @@ exports.cookieParser = (req, res) => {
 			if (valueBuffer === "")
 				return reportInvalidSyntax();
 
-			cookies[keyBuffer] = Number.isInteger(valueBuffer) ? Number(valueBuffer) : 
+			cookies[keyBuffer] = Number.isInteger(valueBuffer) ? Number(valueBuffer) :
 								 valueBuffer === "true" ? true :
 								 valueBuffer === "false" ? false :
 								 valueBuffer;
@@ -432,20 +472,36 @@ exports.cookieParser = (req, res) => {
  * @todo test middleware
  */
 exports.queryParser = (req, res) => {
-	function reportInvalidSyntax() {
+	const queryString = req.url.slice(req.url.indexOf("?") + 1);
+	const query = parseQuery(queryString, true);
+
+	if (query === null) {
 		res.writeHead(400, {"Content-Type": "text/html"});
-		res.end("400 Bad Request: Malformed query syntax");
+		res.end("400 Rossz kérés: Hibás az URL-ben megadott lekérdési karakterlánc (query)");
 		return -1;
 	}
 
+	req.query = query;
+}
+
+// -----------------
+// |   UTILITIES   |
+// -----------------
+
+/**
+ * Parses a query string into an object
+ * @param {String} queryString - The raw query string the function parses into an object
+ * @param {Boolean} convertValues - Determines if the function should convert numbers and booleans into their respective types or if it should just leave them as a string
+ * @returns the parsed query object, an empty object if queryString is an empty string, or null if there is a syntax problem in queryString
+ */
+function parseQuery(queryString, convertValues) {
 	const query = {};
-	const queryString = req.url.slice(req.url.indexOf("?") + 1);
 
 	let keyBuffer = "", valueBuffer = "", readingKey = true;
 	for (let i = 0; i < queryString.length; i++) {
 		if (queryString[i] === "=") {
 			if (keyBuffer === "")
-				return reportInvalidSyntax();
+				return null;
 
 			readingKey = false;
 			continue;
@@ -453,12 +509,15 @@ exports.queryParser = (req, res) => {
 
 		if (queryString[i] === "&" || queryString[i] === ";") {
 			if (keyBuffer === "")
-				return reportInvalidSyntax();
+				return null;
 
-			query[keyBuffer] = Number.isInteger(valueBuffer) ? Number(valueBuffer) : 
-							   valueBuffer === "true" || valueBuffer === "" ? true :
-							   valueBuffer === "false" ? false :
-							   valueBuffer;
+			if (convertValues)
+				query[keyBuffer] = Number.isInteger(valueBuffer) ? Number(valueBuffer) : 
+								valueBuffer === "true" || valueBuffer === "" ? true :
+								valueBuffer === "false" ? false :
+								valueBuffer;
+			else
+				query[keyBuffer] = valueBuffer;
 
 			keyBuffer = "";
 			valueBuffer = "";
@@ -468,8 +527,8 @@ exports.queryParser = (req, res) => {
 
 		if (queryString[i] === "%") {
 			const hex = `${queryString[i + 1]}${queryString[i + 2]}`;
-			if (!(/^([0-9a-fA-F]){2,2}$/.test(hex))) // TODO: check if this works without the additional paranthesis (syntax highlighting break without these)
-				return reportInvalidSyntax();
+			if (!(/^([0-9a-fA-F]){2,2}$/.test(hex))) // TODO: check if this works without the additional paranthesis (syntax highlighting breaks without these)
+				return null;
 
 			const charCode = Number(`0x${hex}`);
 			
@@ -487,13 +546,7 @@ exports.queryParser = (req, res) => {
 		else
 			valueBuffer += queryString[i];
 	}
-
-	req.query = query;
 }
-
-// -----------------
-// |   UTILITIES   |
-// -----------------
 
 /**
  * Generates a JSend response

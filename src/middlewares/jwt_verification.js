@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const router = require("../private_modules/old-router.js");
+const router = require("../private_modules/router.js");
 const userModel = require("../models/user");
 
 module.exports = (req, res) => {
@@ -26,7 +26,7 @@ module.exports = (req, res) => {
 				res.writeHead(401, {
 					"Content-Type": "application/json",
 					"WWW-Authenticate": `Bearer realm="Access to ${req.baseUrl}"`,
-					"Set-Cookie": router.cookieBuilder("auth-token", "", {
+					"Set-Cookie": router.genCookie("auth-token", "", {
 						domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
 						path: "/",
 						expires: "Thu, 01 Jan 1970 00:00:00 GMT",
@@ -47,7 +47,7 @@ module.exports = (req, res) => {
 			res.writeHead(401, {
 				"Content-Type": "application/json",
 				"WWW-Authenticate": `Bearer realm="Access to ${req.baseUrl}"`,
-				"Set-Cookie": router.cookieBuilder("auth-token", "", {
+				"Set-Cookie": router.genCookie("auth-token", "", {
 					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
 					path: "/",
 					expires: "Thu, 01 Jan 1970 00:00:00 GMT",

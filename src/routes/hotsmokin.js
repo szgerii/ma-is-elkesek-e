@@ -1,4 +1,5 @@
-const router = require("../private_modules/old-router.js");
+const router = require("../private_modules/router.js");
+const route = router.route("/api/hotsmokin");
 const logger = require("../private_modules/logger");
 const dbManager = require("../db_manager");
 
@@ -8,7 +9,7 @@ module.exports = () => {
 		logger.xlog(err);
 	});
 
-	router.addHandler("/api/hotsmokin", "GET", (req, res) => {
+	route.get((req, res) => {
 		dbManager.getHotSmokin().then(hotsmokinList => {
 			res.writeHead(200, {"Content-Type": "application/json"});
 			res.end(router.genResponse("success", hotsmokinList));
@@ -20,7 +21,7 @@ module.exports = () => {
 		});
 	});
 	
-	router.addHandler("/api/hotsmokin", "POST", (req, res) => {
+	route.post((req, res) => {
 		dbManager.updateSection({
 			line: req.body.line,
 			stop1: req.body.stop1,

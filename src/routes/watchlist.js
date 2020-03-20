@@ -1,9 +1,11 @@
-const router = require("../private_modules/old-router.js");
+const router = require("../private_modules/router.js");
 const dbManager = require("../db_manager");
 const jwt_verification = require("../middlewares/jwt_verification");
 
 module.exports = () => {
-	router.addHandler("/api/users/{username}/watchlist", "GET", (req, res) => {
+	const watchlistRoute = router.route("/api/users/{username}/watchlist");
+
+	watchlistRoute.get((req, res) => {
 		if (req.username !== req.params.username) {
 			res.writeHead(403, {"Content-Type": "application/json"});
 			res.end(router.genResponse("fail", {
@@ -32,7 +34,7 @@ module.exports = () => {
 		});
 	}, jwt_verification);
 
-	router.addHandler("/api/users/{username}/watchlist", "POST", (req, res) => {
+	watchlistRoute.post((req, res) => {
 		if (req.username !== req.params.username) {
 			res.writeHead(403, {"Content-Type": "application/json"});
 			res.end(router.genResponse("fail", {
@@ -77,7 +79,7 @@ module.exports = () => {
 		});
 	}, jwt_verification);
 
-	router.addHandler("/api/users/{username}/watchlist", "DELETE", (req, res) => {
+	watchlistRoute.delete((req, res) => {
 		if (req.username !== req.params.username) {
 			res.writeHead(403, {"Content-Type": "application/json"});
 			res.end(router.genResponse("fail", {
