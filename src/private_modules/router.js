@@ -10,13 +10,13 @@ const logger = require("./logger");
  * An array for storing every route the server should handle
  * @type {Route[]}
  */
-const routes = [];
+exports.routes = [];
 
 /**
- * An array of functions that are called before every request (to process the request object)
+ * @description An array of functions that are called before every request (to process the request object)
  * @type {function[]}
  */
-const middlewares = [];
+exports.middlewares = [];
 
 /**
  * A request handler that is called when no other route matches the request's path
@@ -106,7 +106,7 @@ class Route {
 	 * @param  {...function} middlewares - function(s) that should be called before the requestHandler
 	 */
 	addHandler(method, requestHandler, ...middlewares) {
-		this.handlers[method.toUpperCase()] = new Handler(requestHandler, middlewares);
+		this.handlers[method.toUpperCase()] = new Handler(requestHandler, ...middlewares);
 	}
 	
 	/**
@@ -239,16 +239,16 @@ class Route {
  * @todo implement alphabetical sorting in the 'routes' array and change this linear search to binary search
  */
 exports.route = (path, createNew) => {
-	for (let i = 0; i < routes.length; i++) {
-		if (routes[i].url === path)
-			return routes[i];
+	for (let i = 0; i < this.routes.length; i++) {
+		if (this.routes[i].url === path)
+			return this.routes[i];
 	}
 
 	if (createNew === false)
 		return null;
 
 	const route = new Route(path);
-	routes.push(route);
+	this.routes.push(route);
 	return route;
 };
 
@@ -271,9 +271,8 @@ exports.setup = (useBodyParser, useCookieParser, useQueryParser) => {
  * The master request handling function which finds the appropriate route and handler for the specified request
  * @param {IncomingMessage} req - the request object coming from the client
  * @param {ServerResponse} res - the response object which will be sent to the client as a response
- * @todo implement function
  */
-exports.requestHandler = (req, res) => {
+exports.requestHandler = async (req, res) => {
 	const splitReqPath = url.parse(req.url).pathname.split("/");
 
 	req.ip = (req.headers["x-forwarded-for"] || "").split(",").pop() ||
@@ -287,16 +286,13 @@ exports.requestHandler = (req, res) => {
 		logger.xlog(`Sending ${res.statusCode} response to ${req.ip}`);
 	});
 
-	for (let i = 0; i < middlewares.length; i++) {
-		if (middlewares[i](req, res) === -1)
-			return;
-	}
+	await execMiddlewares(this.middlewares, req, res);
 
-	for (let i = 0; i < routes.length; i++) {
-		if (!routes[i].handlers.includes(req.method.toUpperCase()))
+	for (let i = 0; i < this.routes.length; i++) {
+		if (!this.routes[i].handlers[req.method.toUpperCase()] === undefined)
 			continue;
 
-		const splitRoutePath = routes[i].split("/"), temp = {};
+		const splitRoutePath = this.routes[i].path.split("/"), temp = {};
 		let result = true;
 
 		for (let j = 0; j < splitReqPath.length; j++) {
@@ -317,18 +313,10 @@ exports.requestHandler = (req, res) => {
 		if (result) {
 			req.params = temp;
 
-			for (let j = 0; j < routes[i].middlewares.length; j++) {
-				if (routes[i].middlewares[i](req, res) === -1)
-					return;
-			}
+			await execMiddlewares(this.routes[i].middlewares, req, res);
+			await execMiddlewares(this.routes[i].handlers[req.method.toUpperCase()].middlewares, req, res);
 
-			const handler = routes[i].handlers[req.method.toUpperCase()];
-			for (let j = 0; j < handler.middlewares.length; j++) {
-				if (handler.middlewares[i](req, res) === -1)
-					return;
-			}
-
-			handler.handle(req, res);
+			this.routes[i].handlers[req.method.toUpperCase()].handle(req, res);
 			return;
 		}
 	}
@@ -336,6 +324,31 @@ exports.requestHandler = (req, res) => {
 	if (fallback)
 		fallback(req, res);
 };
+
+/**
+ * Executes a list of middlewares
+ * @param {function[]} middlewares - the list of middlewares that should be called
+ * @returns {Promise} - A promise which resolves if the middlewares have finished executing
+ */
+function execMiddlewares(middlewares, req, res) {
+	return new Promise((resolve) => {
+		if (middlewares.length === 0)
+			resolve();
+
+		let i = 0;
+		
+		function callNext() {
+			if (++i === middlewares.length) {
+				resolve();
+				return;
+			}
+
+			middlewares[i](req, res, callNext);	
+		}
+		
+		middlewares[0](req, res, callNext);
+	});
+}
 
 /**
  * Adds middleware function (or multiple middleware functions) to every route
@@ -360,14 +373,12 @@ exports.setFallback = handler => {
  * Body parsing middleware
  * @param {IncomingMessage} req - the request object coming from the client
  * @param {ServerResponse} res - the response object that the server will send back
- * @returns {?Number} -1 on failure
- * @todo test
+ * @param {function} done - the callback function the middleware calls once it's finished processing the request
  */
-exports.bodyParser = (req, res) => {
+exports.bodyParser = (req, res, done) => {
 	function reportInvalidSyntax() {
 		res.writeHead(400, {"Content-Type": "text/html"});
 		res.end("400 Hibás kérés: hibás a kérés törzsének szintaxisa");
-		return -1;
 	}
 
 	const data = [];
@@ -378,7 +389,7 @@ exports.bodyParser = (req, res) => {
 
 	req.on("end", () => {
 		let body = data.join("");
-		switch (req.headers["content-type"].slice(0, req.headers["content-type"].indexOf(";"))) {
+		switch (req.headers["content-type"]) {
 			case "application/x-www-form-urlencoded":
 				req.body = this.parseQuery(body, true);
 				if (req.body === null)
@@ -404,6 +415,9 @@ exports.bodyParser = (req, res) => {
 				res.end("415 Nem támogatott média típus: a szerver nem tudja feldolgozni a Content-Type fejlécben megadott típusú üzeneteket");
 				break;
 		}
+
+		console.dir(req.body);
+		done();
 	});
 }
 
@@ -411,24 +425,24 @@ exports.bodyParser = (req, res) => {
  * Cookie parsing middleware
  * @param {IncomingMessage} req - the request object coming from the client
  * @param {ServerResponse} res - the response object that the server will send back
- * @returns {?Number} -1 on failure
- * @todo test middleware
+ * @param {function} done - the callback function the middleware calls once it's finished processing the request
  */
-exports.cookieParser = (req, res) => {
+exports.cookieParser = (req, res, done) => {
 	function reportInvalidSyntax() {
 		res.writeHead(400, {"Content-Type": "text/html"});
 		res.end("400 Rossz kérés: Hibás a kérés sütiket tároló szövegének a szintaxisa");
-		return -1;
 	}
 
 	const cookies = {};
 
 	if (!req.headers.cookie) {
 		req.cookies = {};
+		done();
 		return;
 	}
 
-	const cookieString = req.headers.cookie, keyBuffer = "", valueBuffer = "", readingKey = true;
+	const cookieString = req.headers.cookie;
+	let keyBuffer = "", valueBuffer = "", readingKey = true;
 	
 	for (let i = 0; i < cookieString.length; i++) {
 		if (cookieString[i] === "=") {
@@ -440,12 +454,14 @@ exports.cookieParser = (req, res) => {
 		}
 
 		if (cookieString[i] === ";") {
-			if (valueBuffer === "")
+			if (keyBuffer === "")
 				return reportInvalidSyntax();
+			
+			const num = Number(valueBuffer);
 
-			cookies[keyBuffer] = Number.isInteger(valueBuffer) ? Number(valueBuffer) :
-								 valueBuffer === "true" ? true :
+			cookies[keyBuffer] = valueBuffer === "true" ? true :
 								 valueBuffer === "false" ? false :
+								 !Number.isNaN(num) ? num :
 								 valueBuffer;
 			keyBuffer = "";
 			valueBuffer = "";
@@ -461,27 +477,47 @@ exports.cookieParser = (req, res) => {
 			valueBuffer += cookieString[i];
 	}
 
+	if (cookieString[cookieString.length - 1] !== ";") {
+		if (valueBuffer === "" || keyBuffer === "")
+			return reportInvalidSyntax();
+	
+		const num = Number(valueBuffer);
+
+		cookies[keyBuffer] = valueBuffer === "true" ? true :
+							 valueBuffer === "false" ? false :
+							 !Number.isNaN(num) ? num :
+							 valueBuffer;
+	}
+
+
 	req.cookies = cookies;
+	done();
 }
 
 /**
  * Query parsing middleware
  * @param {IncomingMessage} req - the request object coming from the client
  * @param {ServerResponse} res - the response object that the server will send back
- * @returns {?Number} -1 on failure
- * @todo test middleware
+ * @param {function} done - the callback function the middleware calls once it's finished processing the request
  */
-exports.queryParser = (req, res) => {
-	const queryString = req.url.slice(req.url.indexOf("?") + 1);
+exports.queryParser = (req, res, done) => {
+	const separatorIndex = req.url.indexOf("?");
+	if (separatorIndex === -1) {
+		done();
+		return;
+	}
+	
+	const queryString = req.url.slice(separatorIndex + 1);
 	const query = parseQuery(queryString, true);
 
 	if (query === null) {
 		res.writeHead(400, {"Content-Type": "text/html"});
 		res.end("400 Rossz kérés: Hibás az URL-ben megadott lekérdési karakterlánc (query)");
-		return -1;
+		return;
 	}
 
 	req.query = query;
+	done();
 }
 
 // -----------------
@@ -492,7 +528,7 @@ exports.queryParser = (req, res) => {
  * Parses a query string into an object
  * @param {String} queryString - The raw query string the function parses into an object
  * @param {Boolean} convertValues - Determines if the function should convert numbers and booleans into their respective types or if it should just leave them as a string
- * @returns the parsed query object, an empty object if queryString is an empty string, or null if there is a syntax problem in queryString
+ * @returns {?Object} the parsed query object, an empty object if queryString is an empty string, or null if there is a syntax problem in queryString
  */
 function parseQuery(queryString, convertValues) {
 	const query = {};
@@ -511,11 +547,14 @@ function parseQuery(queryString, convertValues) {
 			if (keyBuffer === "")
 				return null;
 
-			if (convertValues)
-				query[keyBuffer] = Number.isInteger(valueBuffer) ? Number(valueBuffer) : 
-								valueBuffer === "true" || valueBuffer === "" ? true :
-								valueBuffer === "false" ? false :
-								valueBuffer;
+			if (convertValues) {
+				const num = Number(valueBuffer);
+
+				query[keyBuffer] = valueBuffer === "true" || valueBuffer === "" ? true :
+								   valueBuffer === "false" ? false :
+								   !Number.isNaN(num) ? num : 
+								   valueBuffer;
+			}
 			else
 				query[keyBuffer] = valueBuffer;
 
@@ -546,6 +585,22 @@ function parseQuery(queryString, convertValues) {
 		else
 			valueBuffer += queryString[i];
 	}
+
+	if (keyBuffer === "")
+		return null;
+
+	if (convertValues) {
+		const num = Number(valueBuffer);
+
+		query[keyBuffer] = valueBuffer === "true" || valueBuffer === "" ? true :
+						   valueBuffer === "false" ? false :
+						   !Number.isNaN(num) ? num : 
+						   valueBuffer;
+	}
+	else
+		query[keyBuffer] = valueBuffer;
+
+	return query;
 }
 
 /**
