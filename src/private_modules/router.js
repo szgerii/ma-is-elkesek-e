@@ -416,7 +416,6 @@ exports.bodyParser = (req, res, done) => {
 				break;
 		}
 
-		console.dir(req.body);
 		done();
 	});
 }
