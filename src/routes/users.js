@@ -184,12 +184,19 @@ module.exports = () => {
 					res.writeHead(404, {"Content-Type": "application/json"});
 					res.end(router.genResponse("fail", {
 						username: err.message
-					}));					
+					}));
 					break;
 				
 				case "ValidationError":
 					res.writeHead(422, {"Content-Type": "application/json"});
 					res.end(router.genResponse("fail", err.data));
+					break;
+				
+				case "UserAlreadyExistsError":
+					res.writeHead(409, {"Content-Type": "application/json"});
+					res.end(router.genResponse("fail", {
+						username: err.message
+					}));
 					break;
 
 				default:

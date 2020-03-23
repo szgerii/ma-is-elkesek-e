@@ -343,6 +343,13 @@ exports.modifyUser = (username, modifications) => {
 			return;
 		}
 
+		if (await userModel.findOne({ username: modifications.username })) {
+			const err = new Error(`A user already exists with the following username: ${modifications.username}`);
+			err.name = "UserAlreadyExistsError";
+			reject(err);
+			return;
+		}
+
 		user.save().then(() => {
 			resolve();
 		}).catch(err => {

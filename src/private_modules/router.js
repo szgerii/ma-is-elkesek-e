@@ -1,3 +1,7 @@
+/**
+ * @todo fix route path splitting (there's an additional empty string in the beginning of the route arrays)
+ */
+
 const url = require("url");
 const logger = require("./logger");
 
@@ -273,7 +277,7 @@ exports.setup = (useBodyParser, useCookieParser, useQueryParser) => {
  * @param {ServerResponse} res - the response object which will be sent to the client as a response
  */
 exports.requestHandler = async (req, res) => {
-	const splitReqPath = url.parse(req.url).pathname.split("/");
+	const splitReqPath = splitWithoutEmptyStrings(url.parse(req.url).pathname, "/");
 
 	req.ip = (req.headers["x-forwarded-for"] || "").split(",").pop() ||
 			req.connection.remoteAddress ||
@@ -285,21 +289,21 @@ exports.requestHandler = async (req, res) => {
 	res.on("finish", () => {
 		logger.xlog(`Sending ${res.statusCode} response to ${req.ip}`);
 	});
-
+	
 	await execMiddlewares(this.middlewares, req, res);
 
 	for (let i = 0; i < this.routes.length; i++) {
 		if (!this.routes[i].handlers[req.method.toUpperCase()] === undefined)
 			continue;
 
-		const splitRoutePath = this.routes[i].path.split("/"), temp = {};
+		const splitRoutePath = splitWithoutEmptyStrings(this.routes[i].path, "/"), temp = {};
 		let result = true;
 
 		for (let j = 0; j < splitReqPath.length; j++) {
 			if (splitRoutePath[j] === "*")
 				break;
 
-			if (splitRoutePath[j][0] === '{' && splitRoutePath[splitRoutePath.length - 1][1] === '}') {
+			if (splitRoutePath[j] && splitRoutePath[j][0] === '{' && splitRoutePath[j][splitRoutePath[j].length - 1] === '}') {
 				temp[splitRoutePath[j].slice(1, splitRoutePath[j].length - 1)] = splitReqPath[j];
 				continue;
 			}
@@ -331,7 +335,7 @@ exports.requestHandler = async (req, res) => {
  * @returns {Promise} - A promise which resolves if the middlewares have finished executing
  */
 function execMiddlewares(middlewares, req, res) {
-	return new Promise((resolve) => {
+	return new Promise(resolve => {
 		if (middlewares.length === 0)
 			resolve();
 
@@ -382,14 +386,23 @@ exports.bodyParser = (req, res, done) => {
 	}
 
 	const data = [];
+
+	if (!req.headers["content-type"]) {
+		done();
+		return;
+	}
 	
 	req.on("data", chunk => {
 		data.push(chunk);
 	});
 
 	req.on("end", () => {
-		let body = data.join("");
-		switch (req.headers["content-type"]) {
+		let body = data.join(""), contentType = req.headers["content-type"], separatorIndex = contentType.indexOf(";");
+
+		if (separatorIndex !== -1)
+			contentType = contentType.slice(0, separatorIndex);
+
+		switch (contentType) {
 			case "application/x-www-form-urlencoded":
 				req.body = this.parseQuery(body, true);
 				if (req.body === null)
@@ -413,7 +426,7 @@ exports.bodyParser = (req, res, done) => {
 			default:
 				res.writeHead(415, {"Content-Type": "text/html"});
 				res.end("415 Nem támogatott média típus: a szerver nem tudja feldolgozni a Content-Type fejlécben megadott típusú üzeneteket");
-				break;
+				return;
 		}
 
 		done();
@@ -600,6 +613,37 @@ function parseQuery(queryString, convertValues) {
 		query[keyBuffer] = valueBuffer;
 
 	return query;
+}
+
+/**
+ * Splits a string into an array, separating elements by the specified separator without adding an empty string in the beginning or the end
+ * NOTE: This only works with single-letter separators
+ * @param {String} data - the string that should be parsed into an array
+ * @param {String} separator - the string which separates the elements
+ * @returns {String[]} the array which the string was parsed into
+ */
+function splitWithoutEmptyStrings(data, separator) {
+	const result = [];
+	
+	let buffer = "";
+	for (let i = 0; i < data.length; i++) {
+		if (data[i] === separator) {
+			if (!(buffer === "" && (i === 0  || i === data.length - 1))) {
+				result.push(buffer);
+			}
+			buffer = "";
+		} else {
+			buffer += data[i];
+		}
+	}
+
+	if (buffer !== "")
+		result.push(buffer);
+	
+	if (result.length === 0)
+		result.push(data);
+
+	return result;
 }
 
 /**
