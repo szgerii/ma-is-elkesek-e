@@ -21,7 +21,7 @@ module.exports = () => {
 			});
 			
 			for (const file of fileList) {
-				router.addHandler(file.url, "GET", (req, res) => {
+				router.route(file.url).get((req, res) => {
 					res.writeHead(200, {"Content-Type": file.type});
 					//res.end(file.content);
 					res.end(fs.readFileSync(path.resolve(__dirname, "../public", file.path))); // TODO: Replace this line with the previous one (this is only here so the server doesn't need a restart for showing changes in static files)
@@ -41,7 +41,7 @@ module.exports = () => {
 			const guestMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_guest.html"));
 			const loggedInMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_logged_in.html"));
 			
-			router.addSplitHandler("/", "GET", loginSplitter,
+			router.route("/").getSplitter(loginSplitter,
 				// User isn't logged in
 				(req, res) => {
 					res.writeHead(200, {"Content-Type": "text/html"});
@@ -51,20 +51,20 @@ module.exports = () => {
 				(req, res) => {
 					res.writeHead(200, {"Content-Type": "text/html"});
 					res.end(loggedInMainPage);
-				});
+			});
 
 			// Logout
-			router.addHandler("/logout", "POST", (req, res) => {
+			router.route("/logout").post((req, res) => {
 				res.writeHead(200, [
 					["Content-Type", "text/html"],
-					["Set-Cookie", router.cookieBuilder("auth-token", "", {
+					["Set-Cookie", router.genCookie("auth-token", "", {
 						domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
 						path: "/",
 						expires: "Thu, 01 Jan 1970 00:00:00 GMT",
 						sameSite: "Strict",
 						httpOnly: true
 					})],
-					["Set-Cookie", router.cookieBuilder("username", "", {
+					["Set-Cookie", router.genCookie("username", "", {
 						domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
 						path: "/",
 						expires: "Thu, 01 Jan 1970 00:00:00 GMT",

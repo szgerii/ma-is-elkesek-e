@@ -1,20 +1,20 @@
-const router = require("../private_modules/router");
+const router = require("../private_modules/router.js");
 const logger = require("../private_modules/logger");
 const dbManager = require("../db_manager");
 const jwt_verification = require("../middlewares/jwt_verification");
 
 module.exports = () => {
-	router.addHandler("/api/login", "POST", (req, res) => {
+	router.route("/api/login").post((req, res) => {
 		dbManager.login(req.body.username, req.body.password).then(token => {
 			res.writeHead(200, [
 				["Content-Type", "application/json"],
-				["Set-Cookie", router.cookieBuilder("username", req.body.username, {
+				["Set-Cookie", router.genCookie("username", req.body.username, {
 					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
 					path: "/",
 					maxAge: 1800,
 					sameSite: "Strict"
 				})],
-				["Set-Cookie", router.cookieBuilder("auth-token", token, {
+				["Set-Cookie", router.genCookie("auth-token", token, {
 					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
 					path: "/",
 					maxAge: 1800,
@@ -60,7 +60,7 @@ module.exports = () => {
 		});
 	});
 
-	router.addHandler("/api/users", "POST", (req, res) => {
+	router.route("/api/users").post((req, res) => {
 		dbManager.createUser({
 			username: req.body.username,
 			password: req.body.password,
@@ -70,13 +70,13 @@ module.exports = () => {
 		}).then(token => {
 			res.writeHead(200, [
 				["Content-Type", "application/json"],
-				["Set-Cookie", router.cookieBuilder("username", req.body.username, {
+				["Set-Cookie", router.genCookie("username", req.body.username, {
 					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
 					path: "/",
 					maxAge: 1800,
 					sameSite: "Strict"
 				})],
-				["Set-Cookie", router.cookieBuilder("auth-token", token, {
+				["Set-Cookie", router.genCookie("auth-token", token, {
 					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
 					path: "/",
 					maxAge: 1800,
@@ -114,7 +114,9 @@ module.exports = () => {
 		});
 	});
 
-	router.addHandler("/api/users/{username}", "GET", (req, res) => {
+	const userRoute = router.route("/api/users/{username}");
+
+	userRoute.get((req, res) => {
 		if (req.username !== req.params.username) {
 			res.writeHead(403, {"Content-Type": "application/json"});
 			res.end(router.genResponse("fail", {
@@ -143,7 +145,7 @@ module.exports = () => {
 		});
 	}, jwt_verification);
 
-	router.addHandler("/api/users/{username}", "DELETE", (req, res) => {
+	userRoute.delete((req, res) => {
 		if (req.username !== req.params.username) {
 			res.writeHead(403, {"Content-Type": "application/json"});
 			res.end(router.genResponse("fail", {
@@ -172,7 +174,7 @@ module.exports = () => {
 		});
 	}, jwt_verification);
 
-	router.addHandler("/api/users/{username}", "PUT", (req, res) => {
+	userRoute.put((req, res) => {
 		if (req.username !== req.params.username) {
 			res.writeHead(403, {"Content-Type": "application/json"});
 			res.end(router.genResponse("fail", {
@@ -189,14 +191,14 @@ module.exports = () => {
 			const token = await dbManager.genToken(req.body.username);
 			res.writeHead(200, [
 				["Content-Type", "application/json"],
-				["Set-Cookie", router.cookieBuilder("auth-token", token, {
+				["Set-Cookie", router.genCookie("auth-token", token, {
 					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
 					path: "/",
 					maxAge: 1800,
 					sameSite: "Strict",
 					httpOnly: true
 				})],
-				["Set-Cookie", router.cookieBuilder("username", req.body.username, {
+				["Set-Cookie", router.genCookie("username", req.body.username, {
 					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
 					path: "/",
 					maxAge: 1800,
@@ -210,12 +212,19 @@ module.exports = () => {
 					res.writeHead(404, {"Content-Type": "application/json"});
 					res.end(router.genResponse("fail", {
 						username: err.message
-					}));					
+					}));
 					break;
 				
 				case "ValidationError":
 					res.writeHead(422, {"Content-Type": "application/json"});
 					res.end(router.genResponse("fail", err.data));
+					break;
+				
+				case "UserAlreadyExistsError":
+					res.writeHead(409, {"Content-Type": "application/json"});
+					res.end(router.genResponse("fail", {
+						username: err.message
+					}));
 					break;
 
 				default:
