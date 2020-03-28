@@ -65,6 +65,21 @@
 		"type": "text/javascript"
 	},
 	{
+		"url": "/watchlist",
+		"path": "watchlist_page/watchlist.html",
+		"type": "text/html"
+	},
+	{
+		"url": "/watchlist.css",
+		"path": "watchlist_page/watchlist.css",
+		"type": "text/css"
+	},
+	{
+		"url": "/watchlist.js",
+		"path": "watchlist_page/watchlist.js",
+		"type": "text/javascript"
+	},
+	{
 		"url": "/jQuery.js",
 		"path": "lib/jQuery.js",
 		"type": "text/javascript"
@@ -132,6 +147,41 @@
 	{
 		"url": "/assets/images/stopSign-trolley.png",
 		"path": "assets/images/stopSign-trolley.png",
+		"type": "image/png"
+	},
+	{
+		"url": "/assets/images/icon-bus.png",
+		"path": "assets/images/icon-bus.png",
+		"type": "image/png"
+	},
+	{
+		"url": "/assets/images/icon-hev.png",
+		"path": "assets/images/icon-hev.png",
+		"type": "image/png"
+	},
+	{
+		"url": "/assets/images/icon-metro.png",
+		"path": "assets/images/icon-metro.png",
+		"type": "image/png"
+	},
+	{
+		"url": "/assets/images/icon-ship.png",
+		"path": "assets/images/icon-ship.png",
+		"type": "image/png"
+	},
+	{
+		"url": "/assets/images/icon-tram.png",
+		"path": "assets/images/icon-tram.png",
+		"type": "image/png"
+	},
+	{
+		"url": "/assets/images/icon-trolley.png",
+		"path": "assets/images/icon-trolley.png",
+		"type": "image/png"
+	},
+	{
+		"url": "/assets/images/icon-add.png",
+		"path": "assets/images/icon-add.png",
 		"type": "image/png"
 	}
 ]

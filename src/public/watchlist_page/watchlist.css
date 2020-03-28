@@ -1,0 +1,307 @@
+:root {
+
+    --fontFamily-beautiful: Roboto; /* Beautiful font family used EVERYWHERE */
+
+    --fontSize-desktop-large: 2.5vh;
+    --fontSize-desktop-xlarge: 3.5vh;
+    --fontSize-desktop-gigantic: 5vh;
+    --fontSize-phone-small: 16pt;
+    --fontSize-phone-medium: 20pt;
+
+    --color-main: white; /* Color of main text/inputs */
+    --color-navText: white; /*Color of text in navBar*/
+    --color-box: rgb(20, 30, 100);
+
+    --color-bus: rgb(20,30,100);
+    --color-tram: rgb(180,180,0);
+    --color-metro: rgb(80,80,80);
+    --color-trolley: rgb(160,0,0);
+    --color-hev: rgb(0,140,0);
+    --color-ship: rgb(240,240,240);
+    --color-add: rgb(60,220,60);
+    
+    --background-gradient: linear-gradient(150deg, rgb(60, 77, 110), rgb(47, 143, 103));
+
+}
+
+* {
+    margin:0px;
+    padding:0px;
+}
+
+body {
+    background: var(--background-gradient);
+    background-attachment: fixed;
+	font-family: var(--fontFamily-beautiful);
+    height: 100vh;
+    
+}
+
+nav {
+    position: sticky;
+    top: 0px;
+    width: 100%;
+    font-size: var(--fontSize-desktop-large);
+    color: var(--color-navText);
+    background-color: var(--color-box);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+nav #navbar-title {
+    display: inline-block;
+    margin: 0.5em;
+}
+
+nav ul {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+nav ul li {
+    list-style: none;
+    padding: 0.5em;
+    font-weight: 300;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: var(--color-navText);
+}
+
+nav ul li .current {
+    font-weight: 900;
+}
+
+.navbar-menu {
+   position: absolute;
+   top: 10pt;
+   right: 7pt;
+   display: none;
+   flex-direction: column;
+   justify-content: space-between;
+   width: 30px;
+   height: 21px;
+}
+
+.navbar-menu .line {
+    width: 100%;
+    height: 4px;
+    background-color: var(--color-navText);
+}
+
+
+
+@media (max-width: 992px) {
+    nav {
+        flex-direction: column;
+	}
+	
+}
+
+@media (max-width: 600px) {
+    nav {
+        width: 100%;
+        font-size: var(--fontSize-phone-medium);
+    }
+
+    #navbar-title {
+        text-align: left;
+        width: calc(100% - 0.5em);
+    }
+
+    .navbar-menu {
+        display: flex;
+    }
+
+    nav ul {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    nav ul li a {
+        padding: 0.2em 0.2em;
+    }
+
+    .navbar-active {
+        display: flex;
+	}
+	
+}
+
+.content {
+
+    width: calc(100% - 10em);
+    margin: 5em;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+
+}
+
+.watchlist-element {
+
+    width: 100%;
+    height: 10vh;
+    padding: 1vh;
+    margin-top: 2vh;
+    margin-bottom: 2vh;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+}
+
+.watchlist-text {
+
+    font-size: var(--fontSize-desktop-xlarge);
+
+}
+
+.watchlist-image {
+
+    height: 8vh;
+    width: 8vh;
+    border: 0;
+
+}
+
+.watchlist-delete {
+
+    font-size: var(--fontSize-desktop-xlarge);
+    font-weight: 900;
+    text-decoration: underline;
+    width: 16vh;
+    cursor: pointer;
+
+}
+
+.watchlist-bus {
+
+    background-color: var(--color-bus);
+    color: white;
+
+}
+
+.watchlist-tram {
+
+    background-color: var(--color-tram);
+    color: black;
+
+}
+
+.watchlist-metro {
+
+    background-color: var(--color-metro);
+    color: white;
+
+}
+
+.watchlist-trolley {
+
+    background-color: var(--color-trolley);
+    color: white;
+
+}
+
+.watchlist-hev {
+
+    background-color: var(--color-hev);
+    color: white;
+
+
+}
+
+
+
+.watchlist-ship {
+
+    background-color: var(--color-ship);
+    color: black;
+
+}
+
+.watchlist-add {
+
+    background-color: var(--color-add);
+    color: black;
+
+}
+
+.watchlist-add-content {
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.add-input {
+
+    margin: 0.5em;
+    font-size: var(--fontSize-desktop-large);
+    width: 20vh;
+
+}
+
+.error-text {
+
+    color:red;
+    font-size: var(--fontSize-desktop-xlarge);
+    font-weight: 700;
+
+}
+
+@media (max-width: 600px) {
+
+    .watchlist-element {
+
+        height: 30vh;
+        flex-direction: column;
+
+    }
+
+    .watchlist-text {
+
+        text-align: center;
+        width: 90%;
+        font-size: var(--fontSize-phone-medium);
+
+    }
+
+    .watchlist-delete {
+
+        text-align: center;
+        width: 90%;
+        font-size: var(--fontSize-phone-medium);
+
+    }
+
+    .watchlist-add {
+
+        height: 60vh;
+
+    }
+
+    .watchlist-add-content {
+
+        height: 100%;
+        flex-direction: column;
+
+    }
+
+    .add-input {
+
+        width: 90%;
+        padding: 0;
+        font-size: var(--fontSize-phone-small);
+
+    }
+}

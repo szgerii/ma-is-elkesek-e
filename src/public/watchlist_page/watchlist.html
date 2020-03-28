@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+    <head>    
+
+        <title>Ma is elkések-e?</title>
+
+        <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,900&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" type="text/css" href="watchlist.css" />
+        <link rel="icon" type="image/png" href="assets/images/icon.png" />
+
+        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+        <meta charset="UTF-8" />
+
+    </head>
+
+    <body>
+
+        <nav>
+
+            <div id="navbar-title">Ma is elkések-e?</div>
+
+            <div class="navbar-menu">
+
+                <span class="line"></span>
+                <span class="line"></span>
+                <span class="line"></span>
+
+            </div>
+
+            <ul class="navbar-list">
+
+                <li><a href="/">Főoldal</a></li>
+                <li><a href="/watchlist" class="current">Lista</a></li>
+                <li><a href="/account">Fiók</a></li>
+                <li><a href="#" id="logout">Kijelentkezés</a></li>
+
+            </ul>
+
+        </nav>
+
+        <div class="content">
+
+            <div class="watchlist-element watchlist-add">
+
+                <img class="watchlist-image" src="assets/images/icon-add.png"/>
+                <div class="watchlist-add-content">
+
+                    <select id="dropdown-vehicleType" class="add-input">
+                        <option value="BUS">Busz</option>
+                        <option value="TRAM">Villamos</option>
+                        <option value="SUBWAY">Metró</option>
+                        <option value="TROLLEYBUS">Trolibusz</option>
+                        <option value="RAIL">HÉV</option>
+                        <option value="FERRY">Hajó</option>  
+                    </select>
+
+                    <input type="text" id="pick-line-text" placeholder="járat" maxlength="6" class="add-input"/>
+
+                    <input type="button" id="pick-line-btn" onclick="loadLine();" value="Járat választása"  class="add-input"/>
+
+                    <select id="dropdown-heading" onchange="updateVariant();" class="add-input"></select>
+
+                    <select id="dropdown-stop1" class="add-input"></select>
+
+                    <select id="dropdown-stop2" class="add-input"></select>
+
+                    <button id="add-segment-btn" onclick="addSegment();" class="add-input">Hozzáadás</button>
+
+                </div>
+                <img class="watchlist-image" src="assets/images/icon-add.png"/>
+
+            </div>
+
+            <div class="error-text">
+
+            </div>
+
+        </div>
+
+        <script type="text/javascript" src="jQuery.js"></script>
+        <script type="text/javascript" src="watchlist.js"></script>
+    </body>
+</html>
