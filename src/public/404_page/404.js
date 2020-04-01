@@ -1,9 +1,10 @@
-window.onload = () => {
-	document.querySelector(".navbar-menu").addEventListener("click", ()=> {
-		document.querySelector(".navbar-list").classList.toggle("navbar-active");
-	});
-	
+function setup () {
 	document.querySelector("#content-container button").addEventListener("click", () => {
 		window.location = "/";
 	});
 };
+
+if (window.addEventListener)
+	window.addEventListener("load", setup);
+else if (window.attachEvent)
+	window.attachEvent("onload", setup);

@@ -1,7 +1,3 @@
-/**
- * @todo fix route path splitting (there's an additional empty string in the beginning of the route arrays)
- */
-
 const url = require("url");
 const logger = require("./logger");
 
@@ -66,7 +62,7 @@ class SplitHandler {
 	 * @param {ServerResponse} res - the response object that will be sent to the client
 	 */
 	async handle(req, res) {
-		const result = await this.splitter(req);
+		const result = await this.splitter(req, res);
 
 		if (result >= this.requestHandlers.length) {
 			logger.error("The result of a splitter function pointed to a handler that wasn't provided.");
@@ -170,10 +166,9 @@ class Route {
 	 * Adds middleware function (or multiple middleware functions) to a specified method
 	 * @param {(String | String[])} method - name of the method which the middleware should be added to or an array of method names
 	 * @param  {...function} middlewares - middleware function(s) that should be added to the method(s)
-	 * @todo check which one's faster: instanceof or constructor.name === "something"
 	 */
 	addMiddlewareToMethod(method, ...middlewares) {
-		if (method instanceof Array) {
+		if (method.constructor.name === "Array") {
 			for (let i = 0; i < method.length; i++) {
 				this.handlers[method[i]].middlewares.push(...middlewares);
 			}
@@ -285,7 +280,7 @@ exports.requestHandler = async (req, res) => {
 			req.connection.socket.remoteAddress;
 
 	logger.xlog(`${req.method} request at ${req.url} from ${req.ip}`);
-		
+	
 	res.on("finish", () => {
 		logger.xlog(`Sending ${res.statusCode} response to ${req.ip}`);
 	});
@@ -578,7 +573,7 @@ function parseQuery(queryString, convertValues) {
 
 		if (queryString[i] === "%") {
 			const hex = `${queryString[i + 1]}${queryString[i + 2]}`;
-			if (!(/^([0-9a-fA-F]){2,2}$/.test(hex))) // TODO: check if this works without the additional paranthesis (syntax highlighting breaks without these)
+			if (!(/^([0-9a-fA-F]){2,2}$/.test(hex)))
 				return null;
 
 			const charCode = Number(`0x${hex}`);

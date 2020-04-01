@@ -4,7 +4,7 @@ const hotSmokinUrl = "/api/hotsmokin";
 const bus = "BUS";
 const tram = "TRAM";
 const metro = "SUBWAY";
-const trolley = "TROLLEYBUS"
+const trolley = "TROLLEYBUS";
 const hev = "RAIL";
 const ship = "FERRY";
 
@@ -30,18 +30,12 @@ let currentHot = 0; //Global variable of the loaded hot smokin' top 4 segments
 let colorScheme = bus;
 
 //Set up slow and quick update ticks and set eventListeners
-window.onload = function() {
+function setup() {
     
     let pickLineText = document.getElementById("pick-line-text");
-    let menuButton = document.getElementsByClassName("navbar-menu")[0];
-    let navList = document.getElementsByClassName("navbar-list")[0];
     let hotSmokeMenu = document.getElementsByClassName("hot-smoke-menu")[0];
     let hotSmokeItems = document.getElementsByClassName("hot-smoke");
     const logoutLink = document.querySelector("#logout");
-
-    menuButton.addEventListener("click", ()=> {
-        navList.classList.toggle("navbar-active");
-    });
 
     hotSmokeMenu.addEventListener("click", ()=> {
         for (let i=0; i<hotSmokeItems.length; i++) 
@@ -65,6 +59,11 @@ window.onload = function() {
     setInterval(slowUpdate,10000);
 
 }
+
+if (window.addEventListener)
+	window.addEventListener("load", setup);
+else if (window.attachEvent)
+	window.attachEvent("onload", setup);
 
 //Function for updating the current colorScheme
 function updateScheme() {

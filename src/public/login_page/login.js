@@ -1,11 +1,7 @@
 
 const loginUrl = "/api/login";
 
-window.onload = () => {
-
-	document.querySelector(".navbar-menu").addEventListener("click", ()=> {
-		document.querySelector(".navbar-list").classList.toggle("navbar-active");
-    });
+function setup() {
 
     document.querySelector("#input-username").addEventListener("keyup", (event) => {
         if (event.keyCode == 13)
@@ -18,6 +14,11 @@ window.onload = () => {
     });
 
 }
+
+if (window.addEventListener)
+	window.addEventListener("load", setup);
+else if (window.attachEvent)
+	window.attachEvent("onload", setup);
 
 function login() {
 

@@ -19,13 +19,9 @@ let currentVariant = variant1; //Global variable of the chosen variant
 
 let watchlist = 0;
 
-window.onload = function() {
+function setup() {
 
     const logoutLink = document.querySelector("#logout");
-
-    document.querySelector(".navbar-menu").addEventListener("click", ()=> {
-		document.querySelector(".navbar-list").classList.toggle("navbar-active");
-    });
     
     logoutLink.addEventListener("click", () => {
         $.post("/logout", () => {
@@ -39,13 +35,10 @@ window.onload = function() {
 
 }
 
-function getUsername() {
-
-    let cookies = document.cookie.split("; ");
-
-    for (let i=0; i<cookies.length; i++) if (cookies[i].split("=")[0]=="username") return cookies[i].split("=")[1];
-
-}
+if (window.addEventListener)
+	window.addEventListener("load", setup);
+else if (window.attachEvent)
+	window.attachEvent("onload", setup);
 
 function deleteSegment(index) {
 

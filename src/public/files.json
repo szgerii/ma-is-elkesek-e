@@ -1,5 +1,15 @@
 [
 	{
+		"url": "/master.css",
+		"path": "shared/master.css",
+		"type": "text/css"
+	},
+	{
+		"url": "/master.js",
+		"path": "shared/master.js",
+		"type": "text/javascript"
+	},
+	{
 		"url": "/style.css",
 		"path": "main_page/style.css",
 		"type": "text/css"
