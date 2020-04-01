@@ -276,14 +276,18 @@ function hotSmokeClick(hotSmoke) {
 }
 
 //Function for updating the stops when the time-dropdown is changed
-function updateTime() {
+async function updateTime() {
 
     let dd = document.querySelector("#dropdown-time");
 
     time = Number(dd.options[dd.selectedIndex].value);
 
     if (currentVariant !== 0) {
-        updateStops();
+        if (isUpdatingSegment) {
+            document.getElementById("result").innerHTML = "Számolás...";
+            let trips = await downloadSegment();
+            showSegmentInformation(trips);
+        }
     }
 
 }
@@ -389,8 +393,14 @@ function checkSegment() {
 
     if (stop1==0||stop2==0) {
 
-        document.getElementById("result").innerHTML = "Nincs járat!";
-        return 0;
+        if (variant1==0||variant2==0) {
+            document.getElementById("result").innerHTML = "Nincs járat!";
+            return 0;
+        } else {
+            document.getElementById("result").innerHTML = "Nincsenek kiválasztva megállók!!";
+            return 0;
+        }
+        
 
     }
 
@@ -834,6 +844,8 @@ function fillVariants() {
 
     let dropdown = document.getElementById("dropdown-heading");
 
+    dropdown.innerHTML = '<option value="" disabled="" selected="" hidden="">Irány</option>';
+
     let o1 = document.createElement("option");
     o1.innerHTML = variant1.name;
     o1.value = variant1.name;
@@ -857,7 +869,8 @@ function resetStops() {
     variant2 = 0;
     
     let dropdown = document.getElementById("dropdown-heading");
-    dropdown.innerHTML = "";
+    
+    dropdown.innerHTML = '<option value="" disabled="" selected="" hidden="">Kérjük válasszon egy járatot</option>';
 
     clearStops();
 
@@ -868,9 +881,15 @@ function clearStops() {
 
     let dd1 = document.getElementById("dropdown-stop1");
     let dd2 = document.getElementById("dropdown-stop2");
-
-    dd1.innerHTML = "";
-    dd2.innerHTML = "";
+    
+    if (currentVariant!=0) {
+        dd1.innerHTML = '<option value="" disabled="" selected="" hidden="">Első megálló</option>';
+        dd2.innerHTML = '<option value="" disabled="" selected="" hidden="">Második megálló</option>';
+    } else {
+        dd1.innerHTML = '<option value="" disabled="" selected="" hidden="">Kérjük válasszon egy járatot</option>';
+        dd2.innerHTML = '<option value="" disabled="" selected="" hidden="">Kérjük válasszon egy járatot</option>';
+    }
+    
 
     stop1 = 0;
     stop2 = 0;
