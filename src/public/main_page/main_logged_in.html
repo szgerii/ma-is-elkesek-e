@@ -21,13 +21,7 @@
 
             <div id="navbar-title">Ma is elkések-e?</div>
 
-            <div class="navbar-menu">
-
-                <span class="line"></span>
-                <span class="line"></span>
-                <span class="line"></span>
-
-            </div>
+            <div class="navbar-menu">&#9776</div>
 
             <ul class="navbar-list">
 
@@ -55,17 +49,23 @@
                             <option value="FERRY">Hajó</option>  
                         </select>
 
-                        <input type="text" id="pick-line-text" placeholder="járat" maxlength="6" class="settings-input"/>
+                        <input type="text" id="pick-line-text" placeholder="Járat" maxlength="6" class="settings-input"/>
 
-                        <input type="button" id="pick-line-btn" onclick="loadLine();" value="Járat választása"  class="settings-input"/>
+                        <input type="button" id="pick-line-btn" onclick="loadLine();" value="Kiválaszt"  class="settings-input"/>
 
                     </div>
 
-                    <div class="input-wrapper"><select id="dropdown-heading" onchange="updateVariant();" class="settings-input"></select></div>
+                    <div class="input-wrapper">
+                        <select id="dropdown-heading" onchange="updateVariant();" class="settings-input"></select>
+                    </div>
 
-                    <div class="input-wrapper"><select id="dropdown-stop1" onchange="updateStops();"  class="settings-input"></select></div>
+                    <div class="input-wrapper">
+                        <select id="dropdown-stop1" onchange="updateStops();"  class="settings-input"></select>
+                    </div>
 
-                    <div class="input-wrapper"><select id="dropdown-stop2" onchange="updateStops();"  class="settings-input"></select></div>
+                    <div class="input-wrapper">
+                        <select id="dropdown-stop2" onchange="updateStops();"  class="settings-input"></select>
+                    </div>
 
                     <div class="input-wrapper">
                         <select id="dropdown-time" onchange="updateTime();"  class="settings-input">
@@ -82,8 +82,12 @@
 
                 <div class="hotSmoke-box">
 
-                    <div class="hot-smoke-menu"> <div>˅</div>  <div>HOT</div>  <div>˅</div> </div>
-
+                    <div class="hot-smoke-menu">
+                        <div class="hotsmokin-arrow">&#9660</div>
+                        <div>HOT</div>
+                        <div class="hotsmokin-arrow">&#9660</div>
+                    </div>
+                    
                     <div class="hot-smoke" id="hot-smoke-1" title="Betöltés..." onclick="hotSmokeClick(1);">Betöltés...</div>
                     <div class="hot-smoke" id="hot-smoke-2" title="Betöltés..." onclick="hotSmokeClick(2);">Betöltés...</div>
                     <div class="hot-smoke" id="hot-smoke-3" title="Betöltés..." onclick="hotSmokeClick(3);">Betöltés...</div>

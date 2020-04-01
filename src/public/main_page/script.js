@@ -37,7 +37,11 @@ function setup() {
     let hotSmokeItems = document.getElementsByClassName("hot-smoke");
     const logoutLink = document.querySelector("#logout");
 
-    hotSmokeMenu.addEventListener("click", ()=> {
+    hotSmokeMenu.addEventListener("click", () => {
+        for(const arrow of document.querySelectorAll(".hotsmokin-arrow")) {
+            arrow.innerHTML = arrow.innerHTML.charCodeAt(0) === 9660 ? "&#9650" : "&#9660";
+        }
+
         for (let i=0; i<hotSmokeItems.length; i++) 
             hotSmokeItems[i].classList.toggle("hot-smoke-active");
     });

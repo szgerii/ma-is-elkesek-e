@@ -7,8 +7,12 @@ const getUsername = () => {
 }
 
 function setup() {
-	document.querySelector(".navbar-menu").addEventListener("click", ()=> {
+	const navbarMenu = document.querySelector(".navbar-menu");
+	
+	navbarMenu.addEventListener("click", ()=> {
 		document.querySelector(".navbar-list").classList.toggle("navbar-active");
+
+		navbarMenu.innerHTML = navbarMenu.innerHTML.charCodeAt(0) === 9776 ? "&#10005" : "&#9776";
 	});
 }
 

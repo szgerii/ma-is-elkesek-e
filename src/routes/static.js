@@ -38,17 +38,17 @@ module.exports = () => {
 			});
 
 			// Landing page
-			const guestMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_guest.html"));
-			const loggedInMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_logged_in.html"));
-			
+			// TODO: move webpage loading outside of the handler functions (development only)
 			router.route("/").getSplitter(loginSplitter,
 				// User isn't logged in
 				(req, res) => {
+					const guestMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_guest.html"));
 					res.writeHead(200, {"Content-Type": "text/html"});
 					res.end(guestMainPage);
 				},
 				// User is logged in
 				(req, res) => {
+					const loggedInMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_logged_in.html"));
 					res.writeHead(200, {"Content-Type": "text/html"});
 					res.end(loggedInMainPage);
 			});
@@ -71,6 +71,7 @@ module.exports = () => {
 						sameSite: "Strict"
 					})],
 				]);
+				const guestMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_guest.html"));
 				res.end(guestMainPage);
 			});	
 
