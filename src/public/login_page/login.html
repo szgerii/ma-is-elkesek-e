@@ -15,46 +15,43 @@
 
     </head>
     <body>
-
         <nav>
-            <div id="navbar-title">Ma is elkések-e?</div>
-                    
-            <div class="navbar-menu">
-                <span class="line"></span>
-                <span class="line"></span>
-                <span class="line"></span>
+
+            <div id="navbar-title">
+                <a href="/">Ma is elkések-e?</a>
             </div>
-                    
+
+            <span class="navbar-menu">&#9776</span>
+
             <ul class="navbar-list">
+
                 <li><a href="/">Főoldal</a></li>
                 <li><a href="/login" class="current">Belépés</a></li>
                 <li><a href="/signup">Regisztráció</a></li>
+
             </ul>
+
         </nav>
 
         <div class="content">
             
-            <div class="title">
-                Bejelentkezés
-            </div>
-
-            <div class="error-box">
-                <span class="error-text"></span>
-            </div>
+            <h1 id="title">Bejelentkezés</h1>
 
             <div class="login-box">
 
                 <div class="input-box">
                     <span class="input-label">Felhasználónév: </span>
                     <input type="text" id="input-username" maxlength="16" placeholder="Felhasználónév" class="login-input"/>
+                    <p class="error" id="username-error"></p>
                 </div>
 
                 <div class="input-box">
                     <span class="input-label">Jelszó: </span>
                     <input type="password" id="input-password" placeholder="Jelszó"  class="login-input"/>
+                    <p class="error" id="password-error"></p>
                 </div>
 
-                <input type="button" id="input-submitBtn" onclick="login();" value="Bejelentkezés"  class="login-input"/>
+                <input disabled type="button" id="input-submitBtn" onclick="login();" value="Bejelentkezés"  class="login-input"/>
 
             </div>
 

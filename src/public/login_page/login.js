@@ -3,14 +3,31 @@ const loginUrl = "/api/login";
 
 function setup() {
 
-    document.querySelector("#input-username").addEventListener("keyup", (event) => {
+    const usernameInput = document.querySelector("#input-username");
+    const passwordInput = document.querySelector("#input-password");
+    const submitButton = document.querySelector("#input-submitBtn");
+    let usernameCorrect = passwordCorrect = false;
+
+    usernameInput.addEventListener("keyup", (event) => {
         if (event.keyCode == 13)
             login();
     });
 
-    document.querySelector("#input-password").addEventListener("keyup", (event) => {
+    passwordInput.addEventListener("keyup", (event) => {
         if (event.keyCode == 13)
             login();
+    });
+
+    usernameInput.addEventListener("input", e => {
+        usernameCorrect = checkUsernameFormat(e.target.value) === "correct";
+        
+        submitButton.disabled = !(usernameCorrect && passwordCorrect);
+    });
+    
+    passwordInput.addEventListener("input", e => {
+        passwordCorrect = checkPasswordFormat(e.target.value) === "correct";
+        
+        submitButton.disabled = !(usernameCorrect && passwordCorrect);
     });
 
 }
@@ -22,31 +39,21 @@ else if (window.attachEvent)
 
 function login() {
 
-    let username = document.querySelector("#input-username").value;
-    let password = document.querySelector("#input-password").value;
-    let error = document.querySelector(".error-text");
+    const usernameInput = document.querySelector("#input-username");
+    const passwordInput = document.querySelector("#input-password");
+    const submitButton = document.querySelector("#input-submitBtn");
+    const usernameError = document.querySelector("#username-error");
+    const passwordError = document.querySelector("#password-error");
 
-    error.innerText = "Kérjük várjon...";
+    usernameError.innerText = "";
+    passwordError.innerText = "";
+    usernameInput.style.border = "";
+    passwordInput.style.border = "";
 
-    switch(checkUsernameFormat(username)) {
+    submitButton.value = "Kérjük várjon...";
+    submitButton.disabled = true;
 
-        case "empty": error.innerText = "Kérjük adja meg felhasználónevét!";return 0;
-        case "short": error.innerText = "A megadott felhasználónév rövidebb, mint 3 karakter."; return 0;
-        case "long": error.innerText = "A megadott felhasználónév hosszabb, mint 16 karakter.";return 0;
-        case "incorrect": error.innerText = "A felhasználónév csak az ABC kis és nagy betűit, számokat, aláhúzást és kötőjelet tartalmazhat.";return 0;
-        case "correct": break;
-        default: return 0;
-
-    }
-
-    switch(checkPasswordFormat(password)) {
-
-        case "empty": error.innerText = "Kérjük adja meg jelszavát!";return 0;
-        case "short": error.innerText = "A megadott jelszó rövidebb, mint 6 karakter."; return 0;
-        case "correct": break;
-        default: return 0;
-
-    }
+    let error = "";
 
     $.ajax({
 
@@ -54,7 +61,7 @@ function login() {
         url: loginUrl,
         contentType: "application/json; charset=utf-8",
         dataType: "json",
-        data: JSON.stringify({username: username, password: password}),
+        data: JSON.stringify({username: usernameInput.value, password: passwordInput.value}),
 
         success: function(r) {
 
@@ -68,19 +75,43 @@ function login() {
 
         error: function(r) {
 
+            submitButton.value = "Bejelentkezés";
+            submitButton.disabled = false;
+
             if (r.status==401) {
 
-                error.innerText = "A megadott felhasználónév vagy jelszó helytelen!"; 
- 
+                if (r.responseJSON.data.username) {
+                    usernameError.innerText = "A megadott felhasználónévvel nem található fiók";
+                    usernameInput.style.border = ".07em solid rgb(255, 78, 78)";
+                } else if (r.responseJSON.data.password) {
+                    passwordError.innerText = "A megadott jelszó helytelen";
+                    passwordInput.style.border = ".07em solid rgb(255, 78, 78)";
+                } else {
+                    usernameError.innerText = "A bejelentkezési adatok helytelenek";
+                    passwordError.innerText = "A bejelentkezési adatok helytelenek";
+                    usernameInput.style.border = ".07em solid rgb(255, 78, 78)";
+                    passwordInput.style.border = ".07em solid rgb(255, 78, 78)";
+                }
+                
+                
             } else if (r.status==422) {
- 
-                 error.innerText = "A megadott felhasználónév vagy jelszó formátuma nem megfelelő";
-                 if (r.data.username) console.log(r.data.username);
-                 if (r.data.password) console.log(r.data.password);
+                
+                if (r.responseJSON.data.username) {
+                    usernameError.innerText = "A megadott felhasználónév formátuma nem megfelelő";
+                    usernameInput.style.border = ".07em solid rgb(255, 78, 78)";
+                } else if (r.responseJSON.data.password) {
+                    passwordError.innerText = "A megadott jelszó formátuma nem megfelelő";
+                    passwordInput.style.border = ".07em solid rgb(255, 78, 78)";
+                } else {
+                    usernameError.innerText = "A bejelentkezési adatok formátuma nem megfelelő";
+                    passwordError.innerText = "A bejelentkezési adatok formátuma nem megfelelő";
+                    usernameInput.style.border = ".07em solid rgb(255, 78, 78)";
+                    passwordInput.style.border = ".07em solid rgb(255, 78, 78)";
+                }
  
             } else {
 
-                error.innerText = "Hiba történt  a bejelentkezés során.";
+                passwordError.innerText = "Ismeretlen hiba történt a bejelentkezés során, kérjük probálkozz újra később.";
                 
             }
             

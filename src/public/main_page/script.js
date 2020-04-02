@@ -96,7 +96,7 @@ function updateScheme() {
         }
         case tram: {
            
-            document.documentElement.style.setProperty('--color-box','rgb(180,180,0)');
+            document.documentElement.style.setProperty('--color-box','rgb(180,160,0)');
             document.documentElement.style.setProperty('--color-box-transparent','rgba(180,180,0,0.5)');
             document.documentElement.style.setProperty('--color-main','white');
             document.documentElement.style.setProperty('--color-text','black');

@@ -129,7 +129,7 @@ select {
 
 #time-label {
     color: var(--color-main);
-    font-size: var(--fontSize-desktop-small);
+    font-size: var(--fontSize-desktop-medium);
     display: inline-block;
     margin-bottom: 1.2vh;
 }
@@ -214,7 +214,7 @@ select {
 
         margin: 0.4em 0.2em;
         width: 90%;
-        font-size: var(--fontSize-phone-small);
+        font-size: var(--fontSize-phone-medium);
 
     }
 
@@ -250,7 +250,7 @@ select {
     }
 
     #time-label {
-        font-size: var(--fontSize-phone-small);
+        font-size: var(--fontSize-phone-medium);
         margin-bottom: 0;
     }
 
@@ -271,7 +271,7 @@ select {
 
         margin: 0.4em;
         display: none;
-        font-size: var(--fontSize-phone-small); 
+        font-size: var(--fontSize-phone-medium); 
     
     }
 
@@ -282,7 +282,7 @@ select {
     .hot-smoke-menu {
 
         display: flex;
-        font-size: var(--fontSize-phone-small); 
+        font-size: var(--fontSize-phone-medium); 
 
     }
 
@@ -365,7 +365,7 @@ select {
         align-self: center;
         text-align: center;
         margin: 0.2em;
-        font-size: var(--fontSize-phone-large);
+        font-size: var(--fontSize-phone-gigantic);
 
     }
 }

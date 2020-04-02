@@ -19,9 +19,11 @@
 
         <nav>
 
-            <div id="navbar-title">Ma is elkések-e?</div>
+            <div id="navbar-title">
+                <a href="/">Ma is elkések-e?</a>
+            </div>
 
-            <div class="navbar-menu">&#9776</div>
+            <span class="navbar-menu">&#9776</span>
 
             <ul class="navbar-list">
 
@@ -56,18 +58,26 @@
                     </div>
 
                     <div class="input-wrapper">
-                        <select id="dropdown-heading" onchange="updateVariant();" class="settings-input"></select>
+                        <select id="dropdown-heading" onchange="updateVariant();" class="settings-input">
+                            <option value="" disabled selected hidden>Kérjük válasszon egy járatot</option>
+                        </select>
                     </div>
 
                     <div class="input-wrapper">
-                        <select id="dropdown-stop1" onchange="updateStops();"  class="settings-input"></select>
+                        <select id="dropdown-stop1" onchange="updateStops();"  class="settings-input">
+                            <option value="" disabled selected hidden>Kérjük válasszon egy járatot</option>
+                        </select>
                     </div>
 
                     <div class="input-wrapper">
-                        <select id="dropdown-stop2" onchange="updateStops();"  class="settings-input"></select>
+                        <select id="dropdown-stop2" onchange="updateStops();"  class="settings-input">
+                            <option value="" disabled selected hidden>Kérjük válasszon egy járatot</option>
+                        </select>
                     </div>
 
                     <div class="input-wrapper">
+                        <label id="time-label">Vizsgálandó időtartam:</label>
+                        <br>
                         <select id="dropdown-time" onchange="updateTime();"  class="settings-input">
                             <option value="10">10 perc</option>
                             <option value="20">20 perc</option>
@@ -84,10 +94,10 @@
 
                     <div class="hot-smoke-menu">
                         <div class="hotsmokin-arrow">&#9660</div>
-                        <div>HOT</div>
+                        <div>Top 4</div>
                         <div class="hotsmokin-arrow">&#9660</div>
                     </div>
-                    
+
                     <div class="hot-smoke" id="hot-smoke-1" title="Betöltés..." onclick="hotSmokeClick(1);">Betöltés...</div>
                     <div class="hot-smoke" id="hot-smoke-2" title="Betöltés..." onclick="hotSmokeClick(2);">Betöltés...</div>
                     <div class="hot-smoke" id="hot-smoke-3" title="Betöltés..." onclick="hotSmokeClick(3);">Betöltés...</div>

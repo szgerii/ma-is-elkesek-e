@@ -5,9 +5,10 @@
     --fontSize-desktop-medium: calc(0.8em + 0.5vw); /* Medium fontSize used for smaller things */
     --fontSize-desktop-large: calc(1em + .6vw); /* Large fontSize used for larger things */
     --fontSize-desktop-gigantic: calc(1.65em + 1vw); /* Largest fontSize only used on dekstop for the result*/
-    --fontSize-phone-small: calc(0.85em + 1.1vw);
-    --fontSize-phone-medium: calc(1.4em + 1vw);
-    --fontSize-phone-large: calc(2em + 1vw);
+    --fontSize-phone-small: calc(0.55em + 1.1vw);
+    --fontSize-phone-medium: calc(0.85em + 1.1vw);
+    --fontSize-phone-large: calc(1.4em + 1vw);
+    --fontSize-phone-gigantic: calc(2em + 1vw);
 
     --color-main: white; /* Color of main text/inputs */ /* DYNAMIC */
     --color-text: black; /*Color of text in inputs */ /* DYNAMIC */
@@ -49,6 +50,11 @@ nav #navbar-title {
     display: inline-block;
     margin: 0.75rem;
 
+}
+
+nav #navbar-title a {
+    text-decoration: none;
+    color: var(--color-navText);
 }
 
 nav ul {
@@ -100,7 +106,7 @@ nav ul li .current {
 
     nav {
         width: 100%;
-        font-size: var(--fontSize-phone-medium);
+        font-size: var(--fontSize-phone-large);
         justify-content: space-between;
         flex-direction: row;
         flex-wrap: wrap;
@@ -114,7 +120,7 @@ nav ul li .current {
 
     .navbar-menu {
         display: inline-block;
-        font-size: var(--fontSize-phone-medium);
+        font-size: var(--fontSize-phone-large);
         margin-right: 0.75rem;
         flex-shrink: 0;
         
