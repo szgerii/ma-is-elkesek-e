@@ -80,6 +80,11 @@ body {
 
 }
 
+#button-wrapper {
+    width: 100%;
+    text-align: center;
+}
+
 #input-submitBtn {
 
     margin-top: 2vh;
@@ -87,10 +92,14 @@ body {
 
 }
 
-#input-submitBtn:hover:not(:disabled) {
+#input-submitBtn:hover {
 
     cursor: pointer;
 
+}
+
+#input-submitBtn:disabled {
+    pointer-events: none;
 }
 
 @media (max-width: 992px) {

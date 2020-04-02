@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 
     <head>    
@@ -16,58 +17,59 @@
     <body>
 
         <nav>
-            <div id="navbar-title">Ma is elkések-e?</div>
-                    
-            <div class="navbar-menu">
-                <span class="line"></span>
-                <span class="line"></span>
-                <span class="line"></span>
+
+            <div id="navbar-title">
+                <a href="/">Ma is elkések-e?</a>
             </div>
-                    
+
+            <span class="navbar-menu">&#9776</span>
+
             <ul class="navbar-list">
+
                 <li><a href="/">Főoldal</a></li>
                 <li><a href="/login">Belépés</a></li>
                 <li><a href="/signup" class="current">Regisztráció</a></li>
+
             </ul>
+
         </nav>
 
         <div class="content">
 
-            <div class="title">
-                Regisztráció
-            </div>
-
-            <div class="error-box">
-                <span class="error-text"></span>
-            </div>
+            <h1 id="title">Regisztráció</h1>
 
             <div class="signup-box">
 
                 <div class="input-box">
-                    <span class="input-label">Felhasználónév: </span>
+                    <span class="input-label">Felhasználónév</span>
                     <input type="text" id="input-username" maxlength="16" placeholder="Felhasználónév" class="signup-input"/>
+                    <p id="username-error" class="error"></p>
                 </div>
-
+                
                 <div class="input-box">
-                    <span class="input-label">Jelszó: </span>
+                    <span class="input-label">Jelszó</span>
                     <input type="password" id="input-password" placeholder="Jelszó"  class="signup-input"/>
+                    <p id="password-error" class="error"></p>
 
+                </div>
+                
+                <div class="input-box">
+                    <span class="input-label">Jelszó újra</span>
+                    <input type="password" id="input-password2" placeholder="Jelszó újra"  class="signup-input"/>
+                    <p id="password-again-error" class="error"></p>
                 </div>
 
                 <div class="input-box">
-                    <span class="input-label">Jelszó újra: </span>
-                    <input type="password" id="input-password2" placeholder="Jelszó"  class="signup-input"/>
-                </div>
-
-                <div class="input-box">
-                    <span class="input-label">Alapértelmezett oldal: </span>
+                    <span class="input-label">Alapértelmezett oldal</span>
                     <select id="input-dd-watchlist" class="signup-input">
                         <option value="true">Saját járatlista</option>
                         <option value="false">Főoldal</option>
                     </select>
                 </div>
 
-                <input type="button" id="input-submitBtn" onclick="signup();" value="Regisztráció" class="signup-input"/>
+                <span id="button-wrapper">
+                    <input type="button" id="input-submitBtn" value="Regisztráció" class="signup-input" disabled/>
+                </span>
         
             </div>
         </div>

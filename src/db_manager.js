@@ -7,8 +7,8 @@ const sectionModel = require("./models/section");
 const userModel = require("./models/user");
 
 const DB_REFRESH_INTERVAL = 30000; // milliseconds
-let hotsmokinList = {}; // Top 5 section list (hotsmokin)
-let lastDBCheck; // Last time the top 5 list was refreshed from the database
+let hotsmokinList = {}; // Top 4 section list (hotsmokin)
+let lastDBCheck; // Last time the top 4 list was refreshed from the database
 
 exports.setup = () => {
 	mongoose.connect(process.env.databaseUrl, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true })

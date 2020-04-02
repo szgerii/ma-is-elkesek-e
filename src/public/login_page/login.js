@@ -30,6 +30,8 @@ function setup() {
         submitButton.disabled = !(usernameCorrect && passwordCorrect);
     });
 
+    document.querySelector("#button-wrapper").addEventListener("click", login);
+
 }
 
 if (window.addEventListener)
@@ -44,16 +46,64 @@ function login() {
     const submitButton = document.querySelector("#input-submitBtn");
     const usernameError = document.querySelector("#username-error");
     const passwordError = document.querySelector("#password-error");
+    let hasFormattingError = false;
 
     usernameError.innerText = "";
     passwordError.innerText = "";
     usernameInput.style.border = "";
     passwordInput.style.border = "";
 
+    switch (checkUsernameFormat(usernameInput.value)) {
+        case "empty":
+            usernameError.innerText = "Kérjük adjon meg egy felhasználónevet";
+            usernameInput.style.border = ".07em solid rgb(255, 78, 78)";
+            hasFormattingError = true;
+            break;
+
+        case "short":
+            usernameError.innerText = "A felhasználónévnek legalább 3 karakterből kell állnia";
+            usernameInput.style.border = ".07em solid rgb(255, 78, 78)";
+            hasFormattingError = true;
+            break;
+        
+        case "long":
+            usernameError.innerText = "A felhasználónév legfeljebb 16 karakterből állhat";
+            usernameInput.style.border = ".07em solid rgb(255, 78, 78)";
+            hasFormattingError = true;
+            break;
+
+        case "incorrect":
+            usernameError.innerText = "A felhasználónév csak az angol ABC betűit, számokat, kötőjelet és aláhúzást tartalmazhat";
+            usernameInput.style.border = ".07em solid rgb(255, 78, 78)";
+            hasFormattingError = true;
+            break;
+    
+        default:
+            break;
+    }
+
+    switch (checkPasswordFormat(passwordInput.value)) {
+        case "empty":
+            passwordError.innerText = "Kérjük adjon meg egy jelszót";
+            passwordInput.style.border = ".07em solid rgb(255, 78, 78)";
+            hasFormattingError = true;
+            break;
+
+        case "short":
+            passwordError.innerText = "A jelszónak legalább 6 karakterből kell állnia";
+            passwordInput.style.border = ".07em solid rgb(255, 78, 78)";
+            hasFormattingError = true;
+            break;
+    
+        default:
+            break;
+    }
+
+    if (hasFormattingError)
+        return;
+
     submitButton.value = "Kérjük várjon...";
     submitButton.disabled = true;
-
-    let error = "";
 
     $.ajax({
 

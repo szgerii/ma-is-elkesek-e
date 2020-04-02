@@ -21,57 +21,45 @@ body {
 
 }
 
-.title {
+#title {
 
-    margin-top: 7vh;
-    height: 5vh;
+    margin: 8vh 0;
     font-size: var(--fontSize-desktop-gigantic);
-    color: var(--color-main);
-
-}
-
-.error-box {
-
-    margin-top: 5vh;
-    height: 8vh;
-    width: 60%;
-    margin-bottom: 5vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-
-}
-
-.error-text {
-
-    width: 100%;
-    text-align: center;
-    font-size: var(--fontSize-desktop-large);
     color: var(--color-main);
 
 }
 
 .signup-box {
 
-    height: 30vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-evenly;
-    width: 40%;
+    width: 45%;
+    padding: 4vh 0;
     background-color: var(--color-box);
 
 }
 
 .input-box {
 
-    width: 80%;
+    width: 90%;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 5vh;
 
+}
 
+.error {
+    display: block;
+    width: 100%;
+    text-align: right;
+    color: rgb(255, 78, 78);
+    font-size: calc(var(--fontSize-desktop-small) - 0.1em);
+    margin-top: 1vh;
 }
 
 .input-label {
@@ -79,6 +67,7 @@ body {
     text-align: left;
     font-size: var(--fontSize-desktop-large);
     color: var(--color-main);
+    margin-right: 1vh;
 
 }
 
@@ -86,7 +75,7 @@ body {
 
     font-size: var(--fontSize-desktop-large);
     padding: 0.1em;
-    width: 60%;
+    width: 55%;
     text-align: center;
     background-color:var(--color-main);
 
@@ -94,13 +83,21 @@ body {
 
 #input-dd-watchlist {
 
+    box-sizing: content-box;
+    border-width: 2px;
     text-align-last: center;
 
 }
 
+#button-wrapper {
+    width: 100%;
+    text-align: center;
+}
+
 #input-submitBtn {
 
-    width: 80%;
+    margin-top: 2vh;
+    width: 40%;
 
 }
 
@@ -110,13 +107,32 @@ body {
 
 }
 
+#input-submitBtn:disabled {
+    pointer-events: none;
+}
+
+@media (max-width: 1024px) {
+    #title {
+        margin: 0;
+        padding: 7vh 0;
+    }
+
+    .signup-box {
+        width: 80%;
+        margin-bottom: 8vh;
+    }
+
+    .error {
+        font-size: var(--fontSize-phone-small);
+    }
+}
+
 @media (max-width: 600px) {
 
 
     .signup-box {
 
         width: 90%;
-        height: 50vh;
 
     }
 
@@ -124,7 +140,9 @@ body {
 
         flex-direction: column;
         align-items: center;
+        align-content: center;
         justify-content: space-between;
+        margin-bottom: 5vh;
 
     }
 
@@ -140,6 +158,10 @@ body {
 
         width: 100%;
 
+    }
+
+    .error {
+        font-size: var(--fontSize-phone-small);
     }
 
 }
