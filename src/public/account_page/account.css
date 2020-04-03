@@ -26,7 +26,7 @@ body {
     background-color: var(--color-box);
     color: var(--color-main);
     width: 55%;
-    height: 60vh;
+    padding: 3vh 0;
     margin-top: 15vh;
     display: flex;
     flex-direction: column;
@@ -35,19 +35,22 @@ body {
 
 }
 
-.title {
+#title {
 
     font-size: var(--fontSize-desktop-large);
+    margin-bottom: 3vh;
 
 }
 
 .input-box {
 
-    width: 80%;
+    width: 90%;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 1vh 0;
 
 }
 
@@ -60,7 +63,7 @@ body {
 .account-input {
 
     font-size: var(--fontSize-desktop-large);
-    width: 40%;
+    width: 42%;
     text-align:center;
     padding-top: 0.1em;
     padding-bottom: 0.1em;
@@ -68,51 +71,67 @@ body {
 
 }
 
+.error {
+    display: block;
+    width: 100%;
+    text-align: right;
+    color: rgb(255, 78, 78);
+    font-size: calc(var(--fontSize-desktop-small) - 0.1em);
+    margin-top: 1vh;
+}
+
 #input-dd-watchlist {
 
     text-align-last: center;
+    border-width: 2px;
+    box-sizing: content-box;
 
 }
 
-#result-box {
-
-    width: 80%;
-    color: var(--color-main);
-    font-size: var(--fontSize-desktop-large);
-    height: 15vh;
-    display: flex;
-    align-items: center;
+#submit-box {
     justify-content: center;
-
 }
 
-#result {
+#input-submitBtn:hover {
+    cursor: pointer;
+}
 
-    text-align: center
+@media (max-width: 992px) {
+    .accountSettings-box {
+        width: 90%;
+        margin: 7.5vh 0;
+    }
 
+    .error {
+        font-size: calc(var(--fontSize-phone-small) - 0.05em);
+    }
 }
 
 @media (max-width: 600px) {
 
+    .content {
+        max-height: none;
+    }
 
     .accountSettings-box {
 
-        margin-top: 8vh;
+        margin-top: 5vh;
+        padding-bottom: 2vh;
         width: 90%;
-        height: 85vh;
         justify-content: flex-start;
 
     }
 
-    .title {
+    #title {
 
-        margin-top: 0.5em;
+        margin: 0.25em 0;
+        font-size: calc(var(--fontSize-phone-large) - 0.3em);
 
     }
 
     .input-box {
 
-        margin-top: 1.5em;
+        margin-top: 0.75em;
         flex-direction: column;
         justify-content: flex-start;
         align-items: center;
@@ -146,5 +165,10 @@ body {
         margin-top: 1.5em;
         margin-bottom: 0em;
 
+    }
+
+    .error {
+        font-size: var(--fontSize-phone-small);
+        width: 90%;
     }
 }

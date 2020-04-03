@@ -1,4 +1,3 @@
-
 const loginUrl = "/api/login";
 
 let currentUsername = null;
@@ -39,7 +38,7 @@ function loadOldSettings() {
     button.setAttribute("onclick","");
     button.value = "Kérjük várjon...";
 
-    let url = "/api/users/"+currentUsername;
+    let url = "/api/users/" + currentUsername;
 
     $.ajax({
 
@@ -52,8 +51,8 @@ function loadOldSettings() {
             oldSettings.username = r.data.username;
             oldSettings.isWatchlist = r.data.showWatchlistByDefault;
 
-            document.querySelector("#input-username").value = oldSettings.username;
-            if (oldSettings.isWatchlist) document.querySelector("#input-dd-watchlist").value="true";
+            document.querySelector("#input-username").placeholder = oldSettings.username;
+            if (oldSettings.isWatchlist) document.querySelector("#input-dd-watchlist").value = "true";
             else document.querySelector("#input-dd-watchlist").value="false";
 
             button.setAttribute("onclick","saveChanges();");
@@ -73,23 +72,37 @@ function loadOldSettings() {
 
 function saveChanges() {
 
-    let result = document.querySelector("#result");
-    result.innerText = "Kérjük várjon...";
+    const button = document.querySelector("#input-submitBtn");
+    const usernameInput = document.querySelector("#input-username");
+    const passwordInput = document.querySelector("#input-password");
+    const newPasswordInput = document.querySelector("#input-newPassword");
+    const newPassword2Input = document.querySelector("#input-newPassword2");
+    const isWatchlist = (document.querySelector("#input-dd-watchlist").value=="true");
 
-    let username = document.querySelector("#input-username").value;
-    let isWatchlist = (document.querySelector("#input-dd-watchlist").value=="true");
-    let password = document.querySelector("#input-newPassword").value;
-    let password2 = document.querySelector("#input-newPassword2").value;
+    const usernameError = document.querySelector("#username-error");
+    const passwordError = document.querySelector("#password-error");
+    const newPasswordError = document.querySelector("#new-password-error");
+    const newPasswordAgainError = document.querySelector("#new-password-again-error");
+    
+    usernameError.innerText = "";
+    passwordError.innerText = "";
+    newPasswordError.innerText = "";
+    newPasswordAgainError.innerText = "";
+
+    usernameInput.style.border = "";
+    passwordInput.style.border = "";
+    newPasswordInput.style.border = "";
+    newPassword2Input.style.border = "";
 
     //Check which settings were changed.
-    let usernameChanged = (username!=oldSettings.username);
-    let watchlistChanged = (isWatchlist!=oldSettings.isWatchlist);
-    let passwordChanged = (password!="");
+    let usernameChanged = (usernameInput.value !== "" && usernameInput.value !== oldSettings.username);
+    let watchlistChanged = (isWatchlist !== oldSettings.isWatchlist);
+    let passwordChanged = (newPasswordInput.value !== "");
 
     //Quit if none of them were changed.
-    if (!usernameChanged&&!watchlistChanged&&!passwordChanged) {
+    if (!usernameChanged && !watchlistChanged && !passwordChanged) {
 
-        result.innerText = "";
+        passwordError.innerText = "Egyik beállítás sem lett megváltoztatva";
         return;
 
     }
@@ -99,177 +112,146 @@ function saveChanges() {
     //Check username format and add it to the data
     if (usernameChanged) {
 
-        switch(checkUsernameFormat(username)) {
+        let hasError = true;
 
-            case "empty": result.innerText = "Kérjük adja meg felhasználónevét!";return 0;
-            case "short": result.innerText = "A megadott felhasználónév rövidebb, mint 3 karakter."; return 0;
-            case "long": result.innerText = "A megadott felhasználónév hosszabb, mint 16 karakter.";return 0;
-            case "incorrect": result.innerText = "A felhasználónév csak az ABC kis és nagy betűit, számokat, aláhúzást és kötőjelet tartalmazhat.";return 0;
-            case "correct": break;
-            default: return 0;
+        switch(checkUsernameFormat(usernameInput.value)) {
+
+            case "short": 
+                usernameError.innerText = "A megadott felhasználónév rövidebb, mint 3 karakter.";
+                break;
+
+            case "long":
+                usernameError.innerText = "A megadott felhasználónév hosszabb, mint 16 karakter.";
+                break;
+            
+            case "incorrect":
+                usernameError.innerText = "A felhasználónév csak az ABC kis és nagy betűit, számokat, aláhúzást és kötőjelet tartalmazhat.";
+                break;
+            
+            case "correct":
+                hasError = false;
+                break;
+
+            default:
+                break;
     
         }
 
-        data.username = username;
+        if (hasError) {
+            usernameInput.style.border = ".07em solid rgb(255, 78, 78)";
+            return;
+        }
+
+        data.username = usernameInput.value;
 
     }
 
     //Check password format and add it to the data
     if (passwordChanged) {
 
-        if (password!=password2) {
+        let hasError = true;
 
-            result.innerText = "A két megadott jelszó nem egyezik.";
-            return 0;
+        switch(checkPasswordFormat(newPasswordInput.value)) {
+
+            case "short":
+                newPasswordError.innerText = "A megadott jelszó rövidebb, mint 6 karakter.";
+                return 0;
+
+            case "correct":
+                hasError = false;
+                break;
+
+            default:
+                return 0;
     
         }
 
-        switch(checkPasswordFormat(password)) {
+        if (hasError)
+            newPasswordInput.style.border = ".07em solid rgb(255, 78, 78)";
 
-            case "short": result.innerText = "A megadott új jelszó rövidebb, mint 6 karakter."; return 0;
-            case "correct": break;
-            default: return 0;
+        if (newPasswordInput.value !== newPassword2Input.value) {
+
+            newPasswordAgainError.innerText = "A két megadott jelszó nem egyezik.";
+            return;
     
         }
 
-        data.password = password;
+        if (hasError)
+            return;
+
+        data.newPassword = newPasswordInput.value;
 
     }
 
     //Add watchlist to the data
     if (watchlistChanged) {
         data.showWatchlistByDefault = isWatchlist;
+    }
+
+    switch(checkPasswordFormat(passwordInput.value)) {
+
+        case "empty":
+            passwordError.innerText = "Kérjük adja meg a jelenlegi jelszavát az igazoláshoz!";
+            passwordInput.style.border = ".07em solid rgb(255, 78, 78)";
+            return;
+            
+        case "short":
+            passwordError.innerText = "A megadott jelszó rövidebb, mint 6 karakter.";
+            passwordInput.style.border = ".07em solid rgb(255, 78, 78)";
+            return;
+
+        case "correct":
+            data.password = passwordInput.value;
+            break;
+
+        default:
+            return;
 
     }
 
-    let realPassword = document.querySelector("#input-password").value;
+    button.innerText = "Kérjük várjon...";
+    let url = "/api/users/" + currentUsername;
 
-    switch(checkPasswordFormat(realPassword)) {
-
-        case "empty": result.innerText = "Kérjük adja meg jelszavát!";return 0;
-        case "short": result.innerText = "A megadott jelszó rövidebb, mint 6 karakter."; return 0;
-        case "correct": break;
-        default: return 0;
-
-    }
-
-
-    //Attempt logging in with the current user and the given password
     $.ajax({
 
-        method: "POST",
-        url: loginUrl,
+        method: "PUT",
+        url: url,
         contentType: "application/json; charset=utf-8",
         dataType: "json",
-        data: JSON.stringify({username: currentUsername, password: realPassword}),
+        data: JSON.stringify(data),
 
         success: function(r) {
 
             if (r.status=="success") {
 
-                //Attempt changing the user's settings
-                let url = "/api/users/"+currentUsername;
+                window.location.assign("/");
 
-                $.ajax({
+            }
 
-                    method: "PUT",
-                    url: url,
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "json",
-                    data: JSON.stringify(data),
-
-                    success: function(r) {
-
-                        if (r.status=="success") {
-
-                            //Refreshing login
-
-                            let loginData = {};
-                            if (data.username) loginData.username = data.username;
-                            else loginData.username = currentUsername;
-
-                            if (data.password) loginData.password = data.password;
-                            else loginData.password = realPassword;
-
-                            $.ajax({
-
-                                method: "POST",
-                                url: loginUrl,
-                                contentType: "application/json; charset=utf-8",
-                                dataType: "json",
-                                data: JSON.stringify(loginData),
-
-                                success: function(r) {
-
-                                    if (r.status=="success") {
-
-                                        window.location.assign("/");
-                        
-                                    } 
-
-                                },
-
-                                error: function(r) {
-
-                                    window.location.assign("/login");    
-
-                                } 
-
-                            });
-
-                        }
-
-                    }, 
-
-                    error: function(r) {
-
-                        if (r.status==403) {
-
-                            result.innerText = "A megadott felhasználónév foglalt.";
-
-                        } else if (r.status==404) {
-
-                            result.innerText = "A kért felhasználó nem létezik.";
-
-                        } else if (r.status==422) {
-
-                            result.innerText = "A megadott adatok formátuma nem megfelelő.";
-                            if (r.data.username) console.log(r.data.username);
-                            if (r.data.password) console.log(r.data.password);
-                            if (r.data.showWatchlistByDefault) console.log(r.data.showWatchlistByDefault);
-
-                        } else {
-
-                            result.innerText = "Hiba történt a beállítások megváltoztatása során.";
-
-                        }
-
-                    }
-
-                });
-
-            } 
-
-        },
+        }, 
 
         error: function(r) {
 
-            if (r.status==401) {
+            switch (r.status) {
+                case 401:
+                    passwordError.innerText = "A megadott jelszó helytelen";
+                    passwordInput.style.border = ".07em solid rgb(255, 78, 78)";
+                    break;
 
-                result.innerText = "A megadott jelszó téves!"; 
- 
-            } else if (r.status==422) {
- 
-                result.innerText = "A megadott jelszó formátuma nem megfelelő";
-                if (r.data.username) console.log(r.data.username);
-                if (r.data.password) console.log(r.data.password);
- 
-            } else {
+                case 403:
+                    passwordError.innerText = "Hiba történt az azonosítás során. Kérjük próbáljon meg kilépni és újra bejelentkezni";
+                    break;
 
-                result.innerText = "Hiba történt a bejelentkezés során.";
-                
-            }
+                case 422:
+                    passwordError.innerText = "A megadott adatok formátuma helytelen";
+                    break;
             
+                default:
+                    alert("Hiba történt a bejelentkezés során. Kérjük próbálkozzon újra később");
+                    break;
+            }
+
+            button.innerText = "Változtatások mentése";
 
         }
 

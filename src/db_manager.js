@@ -218,6 +218,21 @@ exports.createUser = userData => {
 	});
 };
 
+exports.checkPassword = (username, password) => {
+	return new Promise(async (resolve, reject) => {
+		const user = await userModel.findOne({ username: username });
+
+		if (!user) {
+			const err = new Error("Couldn't find a user with that username");
+			err.name = "UserNotFoundError";
+			reject(err);
+			return;
+		}
+
+		resolve(await user.checkPassword(password));
+	});
+}
+
 exports.login = (username, password) => {
 	return new Promise(async (resolve, reject) => {
 		const dataCheck = {};

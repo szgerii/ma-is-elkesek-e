@@ -19,15 +19,11 @@
 
         <nav>
 
-            <div id="navbar-title">Ma is elkések-e?</div>
-
-            <div class="navbar-menu">
-
-                <span class="line"></span>
-                <span class="line"></span>
-                <span class="line"></span>
-
+            <div id="navbar-title">
+                <a href="/">Ma is elkések-e?</a>
             </div>
+
+            <span class="navbar-menu">&#9776</span>
 
             <ul class="navbar-list">
 
@@ -44,41 +40,44 @@
 
             <div class="accountSettings-box">
 
-                <div class="title">
-                    Fiók beállításai:
-                </div>
-
-                <div id="result-box"><span id="result"></span></div>
+                <h1 id="title">Fiók beállításai:</h1>
 
                 <div class="input-box">
-                    <span class="input-label">Felhasználónév: </span>
+                    <span class="input-label">Felhasználónév:</span>
                     <input type="text" id="input-username" maxlength="16" placeholder="Felhasználónév" class="account-input"/>
+                    <p class="error" id="username-error"></p>
                 </div>
 
                 <div class="input-box">
-                    <span class="input-label">Új jelszó: </span>
-                    <input type="password" id="input-newPassword" maxlength="16" placeholder="Új jelszó" class="account-input"/>
+                    <span class="input-label">Új jelszó:</span>
+                    <input type="password" id="input-newPassword" placeholder="Új jelszó" class="account-input"/>
+                    <p class="error" id="new-password-error"></p>
                 </div>
 
                 <div class="input-box">
-                    <span class="input-label">Új jelszó újra: </span>
-                    <input type="password" id="input-newPassword2" maxlength="16" placeholder="Új jelszó újra" class="account-input"/>
+                    <span class="input-label">Új jelszó újra:</span>
+                    <input type="password" id="input-newPassword2" placeholder="Új jelszó újra" class="account-input"/>
+                    <p class="error" id="new-password-again-error"></p>
                 </div>
-
+                
                 <div class="input-box">
-                    <span class="input-label">Alapértelmezett oldal: </span>
+                    <span class="input-label">Alapértelmezett oldal:</span>
                     <select id="input-dd-watchlist" class="account-input">
                         <option value="true">Saját járatlista</option>
                         <option value="false">Főoldal</option>
                     </select>
+                    <p class="error" id="watchlist-error"></p>
+                </div>
+
+                <div class="input-box">
+                    <span class="input-label">Jelenlegi jelszó:</span>
+                    <input type="password" id="input-password" placeholder="Jelenlegi jelszó" class="account-input"/>
+                    <p class="error" id="password-error"></p>
                 </div>
 
                 <div class="input-box" id="submit-box">
-                    <input type="password" id="input-password" maxlength="16" placeholder="jelszó" class="account-input"/>
                     <input type="button" id="input-submitBtn" onclick="saveChanges();" value="Változtatások mentése" class="account-input"/>
                 </div>
-
-                
 
             </div>
 

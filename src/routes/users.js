@@ -183,55 +183,78 @@ module.exports = () => {
 			return;
 		}
 
-		dbManager.modifyUser(req.params.username, {
-			username: req.body.username,
-			password: req.body.password,
-			showWatchlistByDefault: req.body.showWatchlistByDefault
-		}).then(async () => {
-			const token = await dbManager.genToken(req.body.username);
-			res.writeHead(200, [
-				["Content-Type", "application/json"],
-				["Set-Cookie", router.genCookie("auth-token", token, {
-					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
-					path: "/",
-					maxAge: 1800,
-					sameSite: "Strict",
-					httpOnly: true
-				})],
-				["Set-Cookie", router.genCookie("username", req.body.username, {
-					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
-					path: "/",
-					maxAge: 1800,
-					sameSite: "Strict"
-				})]
-			]);
-			res.end(router.genResponse("success", null));
-		}).catch(err => {
-			switch (err.name) {
-				case "InvalidUsernameError":
-					res.writeHead(404, {"Content-Type": "application/json"});
-					res.end(router.genResponse("fail", {
-						username: err.message
-					}));
-					break;
-				
-				case "ValidationError":
-					res.writeHead(422, {"Content-Type": "application/json"});
-					res.end(router.genResponse("fail", err.data));
-					break;
-				
-				case "UserAlreadyExistsError":
-					res.writeHead(409, {"Content-Type": "application/json"});
-					res.end(router.genResponse("fail", {
-						username: err.message
-					}));
-					break;
-
-				default:
-					res.writeHead(500, {"Content-Type": "application/json"});
-					res.end(router.genResponse("error", "Couldn't modify user in the database"));
-					break;
+		dbManager.checkPassword(req.params.username, req.body.password).then(isPasswordCorrect => {
+			if (!isPasswordCorrect) {
+				res.writeHead(401, {
+					"Content-Type": "application/json",
+					"WWW-Authenticate": `Bearer realm="Access to ${req.baseUrl}"`
+				});
+				res.end(router.genResponse("fail", {
+					password: "The specified verification password is incorrect"
+				}));
+				return;
 			}
-		});
+
+			dbManager.modifyUser(req.params.username, {
+				username: req.body.username,
+				password: req.body.newPassword,
+				showWatchlistByDefault: req.body.showWatchlistByDefault
+			}).then(async () => {
+				const token = await dbManager.genToken(req.body.username || req.params.username);
+				res.writeHead(200, [
+					["Content-Type", "application/json"],
+					["Set-Cookie", router.genCookie("auth-token", token, {
+						domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
+						path: "/",
+						maxAge: 1800,
+						sameSite: "Strict",
+						httpOnly: true
+					})],
+					["Set-Cookie", router.genCookie("username", req.body.username || req.params.username, {
+						domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
+						path: "/",
+						maxAge: 1800,
+						sameSite: "Strict"
+					})]
+				]);
+				res.end(router.genResponse("success", null));
+			}).catch(err => {
+				switch (err.name) {
+					case "InvalidUsernameError":
+						res.writeHead(404, {"Content-Type": "application/json"});
+						res.end(router.genResponse("fail", {
+							username: err.message
+						}));
+						break;
+					
+					case "ValidationError":
+						res.writeHead(422, {"Content-Type": "application/json"});
+						res.end(router.genResponse("fail", err.data));
+						break;
+					
+					case "UserAlreadyExistsError":
+						res.writeHead(409, {"Content-Type": "application/json"});
+						res.end(router.genResponse("fail", {
+							username: err.message
+						}));
+						break;
+	
+					default:
+						res.writeHead(500, {"Content-Type": "application/json"});
+						res.end(router.genResponse("error", "Couldn't modify user in the database"));
+						break;
+				}
+			});
+		}).catch(err => {
+			if (err.name === "UserNotFoundError") {
+				res.writeHead(404, {"Content-Type": "application/json"});
+				res.end(router.genResponse("fail", {
+					username: "Couldn't find a user with the specified username"
+				}));
+			} else {
+				res.writeHead(500, {"Content-Type": "application/json"});
+				res.end(router.genResponse("error", "Couldn't modify user in the database"));
+			}
+	});
 	}, jwt_verification);
 };
