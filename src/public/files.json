@@ -25,11 +25,6 @@
 		"type": "text/css"
 	},
 	{
-		"url": "/404.js",
-		"path": "404_page/404.js",
-		"type": "text/javascript"
-	},
-	{
 		"url": "/login",
 		"path": "login_page/login.html",
 		"type": "text/html"

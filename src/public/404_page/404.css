@@ -18,6 +18,7 @@ body {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
+	align-items: center;
 	align-content: center;
 	margin: 0 auto;
 }
@@ -29,88 +30,57 @@ body {
 }
 
 #content-container h1 {
-	font-size: 58px;
+	font-size: calc(var(--fontSize-desktop-gigantic) + 0.35em);
 }
 
 #content-container p {
-	font-size: 28px;
+	font-size: var(--fontSize-desktop-large);
 }
 
-#content-container button {
-	background-color: var(--color-box);
-	color: var(--color-main);
-	font-size: 24px;
-	padding: 15px;
-	border: 0;
-	margin: 0 auto;
-	outline: none;
-}
-
-#content-container button:hover {
-	background-color: var(--color-main);
-	color: var(--color-box);
-	cursor: pointer;
-}
-
-#content-container button:active,
-#content-container button::-moz-focus-inner,
-#content-container button:focus {
-	outline: none;
-	border: 0;
+#content-container a {
+	font-size: var(--fontSize-desktop-large);
+	text-decoration: none;
+	background-color: lightgray;
+	color: black;
+	width: fit-content;
+	height: 5%;
+	padding: 0 3%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 1px solid gray;
 }
 
 @media (max-width: 992px) {
-    nav {
-        flex-direction: column;
-	}
-	
 	#content-container {
 		width: 75%;
 	}
 
 	#content-container h1 {
-		font-size: 48px;
+		font-size: var(--fontSize-phone-large);
 	}
 	
 	#content-container p {
-		font-size: 24px;
+		font-size: calc(var(--fontSize-phone-small) + 0.15em);
 	}
 	
-	#content-container button {
-		font-size: 21px;
+	#content-container a {
+		font-size: var(--fontSize-phone-small);
+		height: 8%;
 	}
 }
 
 @media (max-width: 600px) {
-    nav {
-        width: 100%;
-        font-size: var(--fontSize-phone-medium);
-    }
+	#content-container h1 {
+		font-size: var(--fontSize-phone-gigantic);
+	}
 
-    #navbar-title {
-        text-align: left;
-        width: calc(100% - 0.5em);
-    }
-
-    .navbar-menu {
-        display: flex;
-    }
-
-    nav ul {
-        display: none;
-        flex-direction: column;
-        width: 100%;
-    }
-
-    nav ul li a {
-        padding: 0.2em 0.2em;
-    }
-
-    .navbar-active {
-        display: flex;
+	#content-container p {
+		font-size: calc(var(--fontSize-phone-medium) + 0.2em);
 	}
 	
-	#content-container h1 {
-		font-size: 44px;
+	#content-container a {
+		font-size: var(--fontSize-phone-medium);
+		height: 5%;
 	}
 }

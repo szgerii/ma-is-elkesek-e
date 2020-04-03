@@ -31,8 +31,9 @@ module.exports = () => {
 			// -- Special cases --
 			
 			// 404
-			const notFoundPage = fs.readFileSync(path.resolve(__dirname, "../public/404_page/404.html"));
+			// TODO: move notfoundpage declaration back here
 			router.setFallback((req, res) => {
+				const notFoundPage = fs.readFileSync(path.resolve(__dirname, "../public/404_page/404.html"));
 				res.writeHead(404, {"Content-Type": "text/html"});
 				res.end(notFoundPage);
 			});
@@ -48,7 +49,7 @@ module.exports = () => {
 				},
 				// User is logged in
 				(req, res) => {
-					const loggedInMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_logged_in.html"));
+					const loggedInMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_user.html"));
 					res.writeHead(200, {"Content-Type": "text/html"});
 					res.end(loggedInMainPage);
 			});
