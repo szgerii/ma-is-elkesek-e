@@ -41,17 +41,53 @@ module.exports = () => {
 			// Landing page
 			// TODO: move webpage loading outside of the handler functions (development only)
 			router.route("/").getSplitter(loginSplitter,
-				// User isn't logged in
-				(req, res) => {
-					const guestMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_guest.html"));
-					res.writeHead(200, {"Content-Type": "text/html"});
-					res.end(guestMainPage);
-				},
-				// User is logged in
-				(req, res) => {
+			// User isn't logged in
+			(req, res) => {
+				const guestMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_guest.html"));
+				res.writeHead(200, {"Content-Type": "text/html"});
+				res.end(guestMainPage);
+			},
+			// User is logged in
+			async (req, res) => {
+				if (!req.showWatchlistByDefault) {
 					const loggedInMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_user.html"));
 					res.writeHead(200, {"Content-Type": "text/html"});
 					res.end(loggedInMainPage);
+				} else {
+					res.redirect("/watchlist");
+				}
+			});
+
+			router.route("/home").getSplitter(loginSplitter,
+			(req, res) => {
+				const guestMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_guest.html"));
+				res.writeHead(200, {"Content-Type": "text/html"});
+				res.end(guestMainPage);
+			}, (req, res) => {
+				const loggedInMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_user.html"));
+				res.writeHead(200, {"Content-Type": "text/html"});
+				res.end(loggedInMainPage);
+			});
+
+			// Account settings page
+			router.route("/account").getSplitter(loginSplitter, (req, res) => {
+				res.redirect("/login");
+			}, (req, res) => {
+				// TODO: move page read outside this function
+				const accountSettingsPage = fs.readFileSync(path.resolve(__dirname, "../public/account_page/account.html"));
+				res.writeHead(200, {"Content-Type": "text/html"});
+				res.end(accountSettingsPage);
+			});
+			
+			// Watchlist settings page
+			router.route("/watchlist").getSplitter(loginSplitter,
+			(req, res) => {
+				res.redirect("/login");
+			}, (req, res) => {
+				// TODO: move page read outside this function
+				const watchlistPage = fs.readFileSync(path.resolve(__dirname, "../public/watchlist_page/watchlist.html"));
+				res.writeHead(200, {"Content-Type": "text/html"});
+				res.end(watchlistPage);
 			});
 
 			// Logout

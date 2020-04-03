@@ -55,11 +55,6 @@
 		"type": "text/javascript"
 	},
 	{
-		"url": "/account",
-		"path": "account_page/account.html",
-		"type": "text/html"
-	},
-	{
 		"url": "/account.css",
 		"path": "account_page/account.css",
 		"type": "text/css"
@@ -68,11 +63,6 @@
 		"url": "/account.js",
 		"path": "account_page/account.js",
 		"type": "text/javascript"
-	},
-	{
-		"url": "/watchlist",
-		"path": "watchlist_page/watchlist.html",
-		"type": "text/html"
 	},
 	{
 		"url": "/watchlist.css",

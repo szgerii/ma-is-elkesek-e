@@ -25,10 +25,10 @@ module.exports = async (req, res) => {
 				httpOnly: true
 			}));
 			return 0;
-			return;
 		}
 
 		req.username = user.username;
+		req.showWatchlistByDefault = user.showWatchlistByDefault;
 		return 1;
 	} catch (err) {
 		res.setHeader("Set-Cookie", router.genCookie("auth-token", "", {

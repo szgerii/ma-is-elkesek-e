@@ -252,12 +252,15 @@ exports.route = (path, createNew) => {
 };
 
 /**
- * Enables common middlewares
+ * Enables common middlewares and other functionality
  * @param {Boolean} [useBodyParser=true] - use the body parsing middleware
  * @param {Boolean} [useCookieParser=true] - use the cookie parsing middleware
  * @param {Boolean} [useQueryParser=true] - use the query parsing middleware
+ * @param {Boolean} [addRedirectToResponse=true] - add a redirect function to a response
  */
-exports.setup = (useBodyParser, useCookieParser, useQueryParser) => {
+exports.setup = (useBodyParser, useCookieParser, useQueryParser, addRedirectToResponse) => {
+	if (addRedirectToResponse !== false)
+		this.addMiddleware(this.addRedirect);
 	if (useBodyParser !== false)
 		this.addMiddleware(this.bodyParser);
 	if (useCookieParser !== false)
@@ -524,6 +527,21 @@ exports.queryParser = (req, res, done) => {
 	}
 
 	req.query = query;
+	done();
+}
+
+/**
+ * Adds a redirect function to the response object
+ * @param {IncomingMessage} req - the request object coming from the client
+ * @param {ServerResponse} res - the response object that the server will send back
+ * @param {function} done - the callback function the middleware calls once it's finished processing the request
+ */
+exports.addRedirect = (req, res, done) => {
+	res.redirect = path => {
+		res.writeHead(302, {"Location": path});
+		res.end();
+	}
+	
 	done();
 }
 

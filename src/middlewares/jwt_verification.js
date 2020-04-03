@@ -4,7 +4,7 @@ const userModel = require("../models/user");
 
 module.exports = async (req, res, done) => {
 	const token = req.cookies["auth-token"];
-
+	
 	if (!token) {
 		res.writeHead(401, {
 			"Content-Type": "application/json",
