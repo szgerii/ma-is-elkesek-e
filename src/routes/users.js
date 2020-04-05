@@ -9,13 +9,13 @@ module.exports = () => {
 			res.writeHead(200, [
 				["Content-Type", "application/json"],
 				["Set-Cookie", router.genCookie("username", req.body.username, {
-					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
+					domain: process.env.domain,
 					path: "/",
 					maxAge: process.env.authTokenMaxAge,
 					sameSite: "Strict"
 				})],
 				["Set-Cookie", router.genCookie("auth-token", token, {
-					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
+					domain: process.env.domain,
 					path: "/",
 					maxAge: process.env.authTokenMaxAge,
 					sameSite: "Strict",
@@ -71,13 +71,13 @@ module.exports = () => {
 			res.writeHead(200, [
 				["Content-Type", "application/json"],
 				["Set-Cookie", router.genCookie("username", req.body.username, {
-					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
+					domain: process.env.domain,
 					path: "/",
 					maxAge: process.env.authTokenMaxAge,
 					sameSite: "Strict"
 				})],
 				["Set-Cookie", router.genCookie("auth-token", token, {
-					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
+					domain: process.env.domain,
 					path: "/",
 					maxAge: process.env.authTokenMaxAge,
 					sameSite: "Strict",
@@ -204,14 +204,14 @@ module.exports = () => {
 				res.writeHead(200, [
 					["Content-Type", "application/json"],
 					["Set-Cookie", router.genCookie("auth-token", token, {
-						domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
+						domain: process.env.domain,
 						path: "/",
 						maxAge: process.env.authTokenMaxAge,
 						sameSite: "Strict",
 						httpOnly: true
 					})],
 					["Set-Cookie", router.genCookie("username", req.body.username || req.params.username, {
-						domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
+						domain: process.env.domain,
 						path: "/",
 						maxAge: process.env.authTokenMaxAge,
 						sameSite: "Strict"

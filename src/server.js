@@ -30,9 +30,16 @@ if (fs.existsSync("./config.js")) {
 	}
 	
 	if (config.authTokenMaxAge) {
-		process.env.authTokenMaxAge = config.authTokenMaxAge || 3600;
+		process.env.authTokenMaxAge = config.authTokenMaxAge;
 	} else {
 		logger.error("Missing property 'authTokenMaxAge' in config.js. Shutting down...");
+		process.exit(3);
+	}
+	
+	if (config.domain !== undefined) {
+		process.env.domain = config.domain;
+	} else {
+		logger.error("Missing property 'domain' in config.js. Shutting down...");
 		process.exit(3);
 	}
 } else {

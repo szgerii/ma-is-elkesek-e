@@ -95,14 +95,14 @@ module.exports = () => {
 				res.writeHead(200, [
 					["Content-Type", "text/html"],
 					["Set-Cookie", router.genCookie("auth-token", "", {
-						domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
+						domain: process.env.domain,
 						path: "/",
 						expires: "Thu, 01 Jan 1970 00:00:00 GMT",
 						sameSite: "Strict",
 						httpOnly: true
 					})],
 					["Set-Cookie", router.genCookie("username", "", {
-						domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
+						domain: process.env.domain,
 						path: "/",
 						expires: "Thu, 01 Jan 1970 00:00:00 GMT",
 						sameSite: "Strict"

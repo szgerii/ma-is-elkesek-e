@@ -25,7 +25,7 @@ module.exports = async (req, res, done) => {
 				"Content-Type": "application/json",
 				"WWW-Authenticate": `Bearer realm="Access to ${req.baseUrl}"`,
 				"Set-Cookie": router.genCookie("auth-token", "", {
-					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
+					domain: process.env.domain,
 					path: "/",
 					expires: "Thu, 01 Jan 1970 00:00:00 GMT",
 					sameSite: "Strict",
@@ -45,7 +45,7 @@ module.exports = async (req, res, done) => {
 			"Content-Type": "application/json",
 			"WWW-Authenticate": `Bearer realm="Access to ${req.baseUrl}"`,
 			"Set-Cookie": router.genCookie("auth-token", "", {
-				domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
+				domain: process.env.domain,
 				path: "/",
 				expires: "Thu, 01 Jan 1970 00:00:00 GMT",
 				sameSite: "Strict",
