@@ -28,6 +28,13 @@ if (fs.existsSync("./config.js")) {
 		logger.error("Missing property 'jwtKey' in config.js. Shutting down...");
 		process.exit(3);
 	}
+	
+	if (config.authTokenMaxAge) {
+		process.env.authTokenMaxAge = config.authTokenMaxAge || 3600;
+	} else {
+		logger.error("Missing property 'authTokenMaxAge' in config.js. Shutting down...");
+		process.exit(3);
+	}
 } else {
 	logger.error("Couldn't find config.js file. Shutting down...");
 	process.exit(3);

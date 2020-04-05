@@ -165,12 +165,12 @@ async function drawWatchlist() {
 
         let text = document.createElement("div");
         text.classList.add("watchlist-text");
-        text.innerText = watchlist[i].line.name+": "+watchlist[i].stop1.name+" - " + watchlist[i].stop2.name+" -> ? perc";
+        text.innerHTML = watchlist[i].line.name+": "+watchlist[i].stop1.name+" - " + watchlist[i].stop2.name+" &#187 ? perc";
         
-        let del = document.createElement("div");
+        let del = document.createElement("p");
         del.classList.add("watchlist-delete");
         del.setAttribute("onclick",'deleteSegment('+i+');');
-        del.innerText = "TÖRLÉS";
+        del.innerHTML = "&#10005";
 
         element.appendChild(image);
         element.appendChild(text);
@@ -336,9 +336,9 @@ async function loadPredefinedSegment(prefLine, prefStop1, prefStop2, output) {
     let travelTime = calculateResult(trips);
 
     if (travelTime==null) {
-        output.innerText = line.shortName+": "+stop1.name+" - " + stop2.name+" -> nincs adat";
+        output.innerHTML = line.shortName+": "+stop1.name+" - " + stop2.name+" &#187 nincs adat";
     } else {
-        output.innerText = line.shortName+": "+stop1.name+" - " + stop2.name+" -> " + travelTime + " perc";
+        output.innerHTML = line.shortName+": "+stop1.name+" - " + stop2.name+" &#187 " + travelTime + " perc";
     }
 
 }

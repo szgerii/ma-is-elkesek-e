@@ -281,7 +281,7 @@ exports.login = (username, password) => {
 }
 
 exports.genToken = username => {
-	return Promise.resolve(jwt.sign({ sub: username }, process.env.jwtKey, { expiresIn: "30m" }));
+	return Promise.resolve(jwt.sign({ sub: username }, process.env.jwtKey, { expiresIn: `${process.env.authTokenMaxAge}s` }));
 };
 
 exports.deleteUser = username => {

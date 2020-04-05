@@ -11,13 +11,13 @@ module.exports = () => {
 				["Set-Cookie", router.genCookie("username", req.body.username, {
 					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
 					path: "/",
-					maxAge: 1800,
+					maxAge: process.env.authTokenMaxAge,
 					sameSite: "Strict"
 				})],
 				["Set-Cookie", router.genCookie("auth-token", token, {
 					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
 					path: "/",
-					maxAge: 1800,
+					maxAge: process.env.authTokenMaxAge,
 					sameSite: "Strict",
 					httpOnly: true
 				})]
@@ -73,13 +73,13 @@ module.exports = () => {
 				["Set-Cookie", router.genCookie("username", req.body.username, {
 					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
 					path: "/",
-					maxAge: 1800,
+					maxAge: process.env.authTokenMaxAge,
 					sameSite: "Strict"
 				})],
 				["Set-Cookie", router.genCookie("auth-token", token, {
 					domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
 					path: "/",
-					maxAge: 1800,
+					maxAge: process.env.authTokenMaxAge,
 					sameSite: "Strict",
 					httpOnly: true
 				})]
@@ -206,14 +206,14 @@ module.exports = () => {
 					["Set-Cookie", router.genCookie("auth-token", token, {
 						domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
 						path: "/",
-						maxAge: 1800,
+						maxAge: process.env.authTokenMaxAge,
 						sameSite: "Strict",
 						httpOnly: true
 					})],
 					["Set-Cookie", router.genCookie("username", req.body.username || req.params.username, {
 						domain: "localhost", // TODO: replace localhost after domain and hosting has been set up
 						path: "/",
-						maxAge: 1800,
+						maxAge: process.env.authTokenMaxAge,
 						sameSite: "Strict"
 					})]
 				]);

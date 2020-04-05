@@ -14,7 +14,7 @@ body {
 .content {
 
     width: calc(100% - 10em);
-    margin: 5em;
+    margin: 2em 5em;
     display: flex;
     flex-direction: column;
     justify-content: start;
@@ -25,20 +25,22 @@ body {
 .watchlist-element {
 
     width: 100%;
-    height: 10vh;
     padding: 1vh;
-    margin-top: 2vh;
-    margin-bottom: 2vh;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 2vh;
+    
+}
 
+.watchlist-element:not(:first-child) {
+    margin-top: 2vh;
 }
 
 .watchlist-text {
 
-    font-size: var(--fontSize-desktop-xlarge);
+    font-size: var(--fontSize-desktop-large);
 
 }
 
@@ -52,10 +54,9 @@ body {
 
 .watchlist-delete {
 
-    font-size: var(--fontSize-desktop-xlarge);
+    font-size: calc(var(--fontSize-desktop-gigantic) - 0.5em);
     font-weight: 900;
-    text-decoration: underline;
-    width: 16vh;
+    margin-right: 2vw;
     cursor: pointer;
 
 }
@@ -96,8 +97,6 @@ body {
 
 }
 
-
-
 .watchlist-ship {
 
     background-color: var(--color-ship);
@@ -125,39 +124,69 @@ body {
 
     margin: 0.5em;
     font-size: var(--fontSize-desktop-large);
-    width: 20vh;
+    width: 20%;
 
 }
 
 .error-text {
 
     color:red;
-    font-size: var(--fontSize-desktop-xlarge);
+    font-size: var(--fontSize-desktop-large);
     font-weight: 700;
 
 }
 
+@media (max-width: 992px) {
+    .content {
+        width: 90%;
+        margin: 3.5vh auto;
+    }
+    
+    .watchlist-element {
+        height: 10vh;
+    }
+
+    .watchlist-delete {
+        font-size: var(--fontSize-phone-medium);
+    }
+    
+    .watchlist-text {
+        font-size: var(--fontSize-phone-small);
+    }
+}
+
 @media (max-width: 600px) {
+
+    .content {
+        margin: 0 auto;
+        width: 80%;
+    }
 
     .watchlist-element {
 
-        height: 30vh;
         flex-direction: column;
+        padding: 1vh 0;
+        height: auto;
 
+    }
+
+    .watchlist-element:first-child {
+        margin-top: 3.5vh;
     }
 
     .watchlist-text {
 
         text-align: center;
         width: 90%;
+        margin-top: 4vh;
         font-size: var(--fontSize-phone-medium);
 
     }
 
     .watchlist-delete {
 
+        margin-top: 4vh;
         text-align: center;
-        width: 90%;
         font-size: var(--fontSize-phone-medium);
 
     }
@@ -166,6 +195,11 @@ body {
 
         height: 60vh;
 
+    }
+
+    .watchlist-delete {
+        font-size: var(--fontSize-phone-large);
+        margin-right: 0;
     }
 
     .watchlist-add-content {
