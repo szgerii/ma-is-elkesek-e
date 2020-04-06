@@ -239,6 +239,24 @@ async function loadPredefinedSegment(prefLine, prefStop1, prefStop2) {
         }
     }
 
+    //Check special case for final stops
+    stops = currentVariant.stops;
+    isFinalStop = false;
+    stop2ForFinalStop = 0;
+    for (let i = 0; i < stops.length; i++) {
+        if (stops[i].id==stop2.id) {
+            
+            isFinalStop=false;
+            stop2ForFinalStop = 0;
+            if (i==stops.length-1) {
+                isFinalStop = true;
+                stop2ForFinalStop = stops[i-1];
+            } 
+            
+            break;
+        }
+    }
+
     document.getElementById("dropdown-vehicleType").value = stop1.type;
     colorScheme = stop1.type;
     updateScheme();
