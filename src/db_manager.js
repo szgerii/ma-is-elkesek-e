@@ -506,6 +506,105 @@ exports.addToWatchlist = (username, sectionData) => {
 	});
 };
 
+exports.moveSectionInWatchlist = (username, sectionData, moveUp) => {
+	return new Promise(async (resolve, reject) => {
+		const user = await userModel.findOne({ username: username });
+		
+		if (!user) {
+			const err = new Error(`Couldn't find user with the following username: ${username}`);
+			err.name = "InvalidUsernameError";
+			reject(err);
+			return;
+		}
+
+		const dataCheck = {};
+
+		if (!sectionData.lineId) {
+			dataCheck.lineId = "line id was missing from the request body";
+		}
+		
+		if (!sectionData.stop1Id) {
+			dataCheck.stop1Id = "stop1 id was missing from the request body";
+		}
+		
+		if(!sectionData.stop2Id) {
+			dataCheck.stop2Id = "stop2 id was missing from the request body";
+		}
+
+		if (typeof moveUp !== "boolean") {
+			dataCheck.moveUp = "moveUp was either missing from the request body or was not a boolean"
+		}
+		
+		if (dataCheck.lineId || dataCheck.stop1Id || dataCheck.stop2Id || dataCheck.moveUp) {
+			const err = new Error("A field from the request body was missing or had invalid formatting");
+			err.name = "ValidationError";
+			err.data = dataCheck;
+			reject(err);
+			return;
+		}
+
+		const sec = await sectionModel.findOne({ lineId: sectionData.lineId, stop1Id: sectionData.stop1Id, stop2Id: sectionData.stop2Id });
+		
+		if (!sec) {
+			const err = new Error("That section is not in the user's watchlist");
+			err.name = "NotInWatchlistError";
+			reject(err);
+			return;
+		}
+
+		user.watchlist.sort((a, b) =>
+			a.orderIndex < b.orderIndex ? -1 :
+			a.orderIndex > b.orderIndex ? 1 : 0
+		);
+
+		let sectionIndex = -1;
+
+		for (let i = 0; i < user.watchlist.length; i++) {
+			if (user.watchlist[i].section.equals(sec._id)) {
+				sectionIndex = i;
+				break;
+			}
+		}
+
+		if (sectionIndex === -1) {
+			const err = new Error("That section is not in the user's watchlist");
+			err.name = "NotInWatchlistError";
+			reject(err);
+			return;
+		}
+
+		if (moveUp) {
+			if (sectionIndex === 0) {
+				const err = new Error("The section is already the first one in the list");
+				err.name = "AlreadyFirstError";
+				reject(err);
+				return;
+			}
+
+			user.watchlist[sectionIndex].orderIndex--;
+			user.watchlist[sectionIndex - 1].orderIndex++;
+		} else {
+			if (sectionIndex === user.watchlist.length - 1) {
+				const err = new Error("The section is already the last one in the list");
+				err.name = "AlreadyLastError";
+				reject(err);
+				return;
+			}
+
+			user.watchlist[sectionIndex].orderIndex++;
+			user.watchlist[sectionIndex + 1].orderIndex--;
+		}
+
+		user.save().then(() => {
+			resolve();
+		}).catch(err => {
+			logger.error("Couldn't modify watchlist in the database");
+			logger.xlog(err);
+			reject(err);
+		});
+	});
+};
+
 exports.removeFromWatchlist = (username, sectionData) => {
 	return new Promise(async (resolve, reject) => {
 		const user = await userModel.findOne({ username: username });
@@ -520,15 +619,15 @@ exports.removeFromWatchlist = (username, sectionData) => {
 		const dataCheck = {};
 
 		if (!sectionData.lineId) {
-			dataCheck.lineId = "line object was missing from the request body";
+			dataCheck.lineId = "line id was missing from the request body";
 		}
 		
 		if (!sectionData.stop1Id) {
-			dataCheck.stop1Id = "stop1 object was missing from the request body";
+			dataCheck.stop1Id = "stop1 id was missing from the request body";
 		}
 		
 		if(!sectionData.stop2Id) {
-			dataCheck.stop2Id = "stop2 object was missing from the request body";
+			dataCheck.stop2Id = "stop2 id was missing from the request body";
 		}
 		
 		if (dataCheck.lineId || dataCheck.stop1Id || dataCheck.stop2Id) {
@@ -539,11 +638,6 @@ exports.removeFromWatchlist = (username, sectionData) => {
 			return;
 		}
 
-		user.watchlist.sort((a, b) =>
-			a.orderIndex < b.orderIndex ? -1 :
-			a.orderIndex > b.orderIndex ? 1 : 0
-		);
-
 		const sec = await sectionModel.findOne({ lineId: sectionData.lineId, stop1Id: sectionData.stop1Id, stop2Id: sectionData.stop2Id });
 		
 		if (!sec) {
@@ -552,6 +646,11 @@ exports.removeFromWatchlist = (username, sectionData) => {
 			reject(err);
 			return;
 		}
+
+		user.watchlist.sort((a, b) =>
+			a.orderIndex < b.orderIndex ? -1 :
+			a.orderIndex > b.orderIndex ? 1 : 0
+		);
 
 		let sectionIndex = -1;
 
@@ -578,7 +677,7 @@ exports.removeFromWatchlist = (username, sectionData) => {
 		user.save().then(() => {
 			resolve();
 		}).catch(err => {
-			logger.error("Couldn't modify user in the database");
+			logger.error("Couldn't modify watchlist in the database");
 			logger.xlog(err);
 			reject(err);
 		});

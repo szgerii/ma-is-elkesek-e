@@ -135,6 +135,15 @@ class Route {
 	put(requestHandler, ...middlewares) {
 		this.addHandler("PUT", requestHandler, ...middlewares);
 	}
+	
+	/**
+	 * Shorthand for addHandler("PATCH", ...)
+	 * @param {function} requestHandler - the function responsible for processing the request and sending a response
+	 * @param  {...function} middlewares - function(s) that should be called before the requestHandler
+	 */
+	patch(requestHandler, ...middlewares) {
+		this.addHandler("PATCH", requestHandler, ...middlewares);
+	}
 
 	/**
 	 * Shorthand for addHandler("DELETE", ...)
@@ -218,6 +227,15 @@ class Route {
 	 */
 	putSplitter(splitter, ...requestHandlers) {
 		this.addSplitter("PUT", splitter, ...requestHandlers);
+	}
+	
+	/**
+	 * Shorthand for addSplitter("PATCH", ...)
+	 * @param {function} splitter - the splitter function which decides which requestHandler is called for a specific request
+	 * @param  {...function} requestHandlers - a list of functions which handle the processing of a request in certain scenarios (decided by the splitter function)
+	 */
+	patchSplitter(splitter, ...requestHandlers) {
+		this.addSplitter("PATCH", splitter, ...requestHandlers);
 	}
 
 	/**

@@ -79,6 +79,59 @@ module.exports = () => {
 		});
 	}, jwt_verification);
 
+	watchlistRoute.patch((req, res) => {
+		if (req.username !== req.params.username) {
+			res.writeHead(403, {"Content-Type": "application/json"});
+			res.end(router.genResponse("fail", {
+				username: `The following user doesn't have access to this resource: ${req.username}`
+			}));
+			return;
+		}
+
+		dbManager.moveSectionInWatchlist(req.username, {
+			lineId: req.body.lineId,
+			stop1Id: req.body.stop1Id,
+			stop2Id: req.body.stop2Id
+		}, req.body.moveUp).then(() => {
+			res.writeHead(200, {"Content-Type": "application/json"});
+			res.end(router.genResponse("success", null));
+		}).catch(err => {
+			switch (err.name) {
+				case "NotInWatchlistError":
+					res.writeHead(404, {"Content-Type": "application/json"});
+					res.end(router.genResponse("fail", {
+						section: err.message
+					}));
+					break;
+				
+				case "InvalidUsernameError":
+					res.writeHead(404, {"Content-Type": "application/json"});
+					res.end(router.genResponse("fail", {
+						username: err.message
+					}));
+					break;
+				
+				case "ValidationError":
+					res.writeHead(422, {"Content-Type": "application/json"});
+					res.end(router.genResponse("fail", err.data));
+					break;
+				
+				case "AlreadyFirstError":
+				case "AlreadyLastError":
+					res.writeHead(422, {"Content-Type": "application/json"});
+					res.end(router.genResponse("fail", {
+						section: err.message
+					}));
+					break;
+
+				default:
+					res.writeHead(500, {"Content-Type": "application/json"});
+					res.end(router.genResponse("error", `Couldn't move section ${moveUp ? "up" : "down"} in the user's watchlist`));
+					break;
+			}
+		});
+	}, jwt_verification);
+
 	watchlistRoute.delete((req, res) => {
 		if (req.username !== req.params.username) {
 			res.writeHead(403, {"Content-Type": "application/json"});
@@ -98,6 +151,12 @@ module.exports = () => {
 		}).catch(err => {
 			switch (err.name) {
 				case "NotInWatchlistError":
+					res.writeHead(404, {"Content-Type": "application/json"});
+					res.end(router.genResponse("fail", {
+						section: err.message
+					}));
+					break;
+				
 				case "InvalidUsernameError":
 					res.writeHead(404, {"Content-Type": "application/json"});
 					res.end(router.genResponse("fail", {
