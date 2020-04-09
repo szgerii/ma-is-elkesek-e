@@ -3,6 +3,16 @@ const bcrypt = require("bcrypt");
 
 const SALT_ROUNDS = 10;
 
+const watchlistSectionSchema = new mongoose.Schema({
+	section: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: "Section"
+	},
+	orderIndex: {
+		type: Number
+	}
+});
+
 const userSchema = new mongoose.Schema({
 	username: {
 		type: String,
@@ -18,8 +28,7 @@ const userSchema = new mongoose.Schema({
 		default: Date.now()
 	},
 	watchlist: {
-		type: [mongoose.Schema.Types.ObjectId],
-		ref: "Section"
+		type: [watchlistSectionSchema]
 	},
 	showWatchlistByDefault: {
 		type: Boolean,

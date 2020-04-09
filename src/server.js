@@ -11,6 +11,9 @@ const hotsmokinRoute = require("./routes/hotsmokin");
 const usersRoute = require("./routes/users");
 const watchlistRoute = require("./routes/watchlist");
 
+const userModel = require("./models/user");
+const sectionModel = require("./models/section");
+
 // Config file content
 let config;
 if (fs.existsSync("./config.js")) {
@@ -74,13 +77,23 @@ async function start() {
 		process.exit(0);
 	});
 	
-	process.once('SIGUSR2', function () {
+	process.once('SIGUSR2', () => {
 		logger.log("Restarting...");
 		logger.close();
 	});
 
 	dbManager.setup();
 	router.setup();
+
+	router.route("/test").get(async (req, res) => {
+		const sec = await sectionModel.findOne({});
+		const user = new userModel();
+		
+		user.username = "asd";
+		user.password = "asdasd";
+		user.hash = true;
+		user.save();
+	});
 	
 	await staticRoute().catch(err => {
 		logger.error("Couldn't load static files\nThis might be because the files.json file is missing from the public directory, or because it pointed to a file that doesn't exist.");

@@ -389,8 +389,9 @@ exports.getWatchlist = username => {
 			return;
 		}
 
-		sectionModel.populate(user, "watchlist").then(popUser => {
-			resolve(popUser.watchlist.map(sec => {
+		sectionModel.populate(user.watchlist, "section").then(populatedList => {
+			resolve(populatedList.map(item => {
+				const sec = item.section;
 				return {
 					line: {
 						id: sec.lineId,
@@ -403,7 +404,8 @@ exports.getWatchlist = username => {
 					stop2: {
 						id: sec.stop2Id,
 						name: sec.stop2Name
-					}
+					},
+					orderIndex: item.orderIndex
 				};
 			}));
 		}).catch(err => {
@@ -474,13 +476,25 @@ exports.addToWatchlist = (username, sectionData) => {
 			logger.xlog(`Adding the following section to the database -> ${sec.lineName}: ${sec.stop1Name} - ${sec.stop2Name}`);
 		}
 
-		if (user.watchlist.includes(sec._id)) {
+		let includesSection = false;
+
+		for (let i = 0; i < user.watchlist.length; i++) {
+			if (user.watchlist[i].section.equals(sec._id)) {
+				includesSection = true;
+				break;
+			}
+		}
+
+		if (includesSection) {
 			const err = new Error("That section is already in the user's watchlist");
 			err.name = "AlreadyInWatchlistError";
 			reject(err);
 			return;
 		} else {
-			user.watchlist.push(sec._id);
+			user.watchlist.push({
+				section: sec._id,
+				orderIndex: user.watchlist.length
+			});
 			user.save().then(() => {
 				resolve();
 			}).catch(err => {
@@ -525,24 +539,48 @@ exports.removeFromWatchlist = (username, sectionData) => {
 			return;
 		}
 
-		let sec = await sectionModel.findOne({ lineId: sectionData.lineId, stop1Id: sectionData.stop1Id, stop2Id: sectionData.stop2Id });
-		const i = sec ? user.watchlist.indexOf(sec._id) : -1;
+		user.watchlist.sort((a, b) =>
+			a.orderIndex < b.orderIndex ? -1 :
+			a.orderIndex > b.orderIndex ? 1 : 0
+		);
 
-		if (!sec || i === -1) {
+		const sec = await sectionModel.findOne({ lineId: sectionData.lineId, stop1Id: sectionData.stop1Id, stop2Id: sectionData.stop2Id });
+		
+		if (!sec) {
 			const err = new Error("That section is not in the user's watchlist");
 			err.name = "NotInWatchlistError";
 			reject(err);
 			return;
 		}
 
-		user.watchlist.splice(i, 1);
+		let sectionIndex = -1;
+
+		for (let i = 0; i < user.watchlist.length; i++) {
+			if (user.watchlist[i].section.equals(sec._id)) {
+				sectionIndex = i;
+				break;
+			}
+		}
+
+		if (sectionIndex === -1) {
+			const err = new Error("That section is not in the user's watchlist");
+			err.name = "NotInWatchlistError";
+			reject(err);
+			return;
+		}
+
+		user.watchlist.splice(sectionIndex, 1);
 		
+		for (let i = sectionIndex; i < user.watchlist.length; i++) {
+			user.watchlist[i].orderIndex = i;
+		}
+
 		user.save().then(() => {
 			resolve();
 		}).catch(err => {
 			logger.error("Couldn't modify user in the database");
 			logger.xlog(err);
 			reject(err);
-		});		
+		});
 	});
 };
