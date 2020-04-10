@@ -40,24 +40,38 @@ body {
 
 .watchlist-text {
 
+    width: 87.5%;
+    text-align: center;
     font-size: var(--fontSize-desktop-large);
 
 }
 
 .watchlist-image {
-
-    height: 8vh;
-    width: 8vh;
+    
+    width: 4.5%;
     border: 0;
 
+}
+
+.button-container {
+    width: 8%;
+    margin-right: 2vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.watchlist-move {
+    font-size: calc(var(--fontSize-desktop-gigantic) - 0.5em);
+    cursor: pointer;
 }
 
 .watchlist-delete {
 
     font-size: calc(var(--fontSize-desktop-gigantic) - 0.5em);
     font-weight: 900;
-    margin-right: 2vw;
     cursor: pointer;
+    transform: rotate(180deg);
 
 }
 
@@ -141,13 +155,20 @@ body {
     .watchlist-element {
 
         flex-direction: column;
-        padding: 1vh 0;
+        padding: 2.5vh 0;
         height: auto;
 
     }
 
     .watchlist-element:first-child {
         margin-top: 3.5vh;
+    }
+
+    .watchlist-image {
+    
+        height: 6vh;
+        width: auto;
+    
     }
 
     .watchlist-text {
@@ -159,11 +180,21 @@ body {
 
     }
 
-    .watchlist-delete {
+    .button-container {
+        width: 35%;
+    }
 
+    .watchlist-move {
         margin-top: 4vh;
         text-align: center;
-        font-size: var(--fontSize-phone-medium);
+        font-size: var(--fontSize-phone-large);
+    }
+    
+    .watchlist-delete {
+        
+        margin-top: 4vh;
+        text-align: center;
+        font-size: var(--fontSize-phone-large);
 
     }
 

@@ -420,7 +420,7 @@ exports.bodyParser = (req, res, done) => {
 
 		switch (contentType) {
 			case "application/x-www-form-urlencoded":
-				req.body = this.parseQuery(body, true);
+				req.body = parseQuery(body, true);
 				if (req.body === null)
 					return reportInvalidSyntax();
 				

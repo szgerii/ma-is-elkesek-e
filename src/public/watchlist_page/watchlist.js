@@ -1,4 +1,3 @@
-
 const bkk = "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/";
 
 let username = null;
@@ -18,6 +17,7 @@ let variant2 = 0; //Global variable of the 2nd variant of the chosen line
 let currentVariant = variant1; //Global variable of the chosen variant
 
 let watchlist = 0;
+let refreshInProgress = false; // Indicates whether or not the watchlist is currently being redrawn to the screen
 
 function setup() {
 
@@ -146,41 +146,131 @@ async function getLineType(line) {
 
 }
 
-async function drawWatchlist() {
+async function drawWatchlist(skipFetch) {
 
-    watchlist = await loadWatchlist();
-    
+    if (refreshInProgress)
+        return;
 
-    for (let i=0; i<watchlist.length; i++) {
+    refreshInProgress = true;
 
-        let type = await getLineType(watchlist[i].line);
+    if (!skipFetch)
+        watchlist = await loadWatchlist();
 
-        let element = document.createElement("div");
+    watchlist.sort((a, b) =>
+        a.orderIndex < b.orderIndex ? -1 :
+        a.orderIndex > b.orderIndex ? 1 : 0
+    );
+
+    const content = document.querySelector(".content");
+
+    for (let i = content.children.length - 1; i >= 0; i--) {
+        console.log(content.children[i]);
+
+        if (content.children[i].classList.contains("watchlist-element")) {
+            console.log(content.children[i]);
+            content.children[i].remove();
+        }
+    }
+
+    for (let i = 0; i < watchlist.length; i++) {
+
+        const type = await getLineType(watchlist[i].line);
+
+        const element = document.createElement("div");
         element.classList.add("watchlist-element");
         element.classList.add("watchlist-"+type);
 
-        let image = document.createElement("img");
+        const image = document.createElement("img");
         image.classList.add("watchlist-image");
         image.setAttribute("src","assets/images/icon-"+type+".png");
 
-        let text = document.createElement("div");
+        const text = document.createElement("div");
         text.classList.add("watchlist-text");
         text.innerHTML = watchlist[i].line.name+": "+watchlist[i].stop1.name+" - " + watchlist[i].stop2.name+" &#187 ? perc";
         
-        let del = document.createElement("p");
+        const buttonContainer = document.createElement("div");
+        buttonContainer.classList.add("button-container");
+        
+        const upArrow = document.createElement("p");
+        upArrow.classList.add("watchlist-move");
+        upArrow.addEventListener("click", () => {
+            $.ajax({
+
+                method: "PATCH",
+                url: `/api/users/${username}/watchlist`,
+                dataType: "json",
+                data: {
+                    lineId: watchlist[i].line.id,
+                    stop1Id: watchlist[i].stop1.id,
+                    stop2Id: watchlist[i].stop2.id,
+                    moveUp: true
+                },
+        
+                success: function (r) {
+                    watchlist[i].orderIndex--;
+			        watchlist[i - 1].orderIndex++;
+                    drawWatchlist(true);
+                },
+        
+                error: function (r) {
+                    if (r.status === 500) {
+                        alert("Belső hiba történt a szakasz léptetése során, kérjük próbálkozzon újra később");
+                    }
+                },
+        
+            });
+        });
+        upArrow.innerHTML = "&#9650;";
+        buttonContainer.appendChild(upArrow);
+        
+        const downArrow = document.createElement("p");
+        downArrow.classList.add("watchlist-move");
+        downArrow.addEventListener("click", () => {
+            $.ajax({
+
+                method: "PATCH",
+                url: `/api/users/${username}/watchlist`,
+                dataType: "json",
+                data: {
+                    lineId: watchlist[i].line.id,
+                    stop1Id: watchlist[i].stop1.id,
+                    stop2Id: watchlist[i].stop2.id,
+                    moveUp: false
+                },
+        
+                success: function (r) {
+                    watchlist[i].orderIndex++;
+			        watchlist[i + 1].orderIndex--;
+                    drawWatchlist(true);
+                },
+        
+                error: function (r) {
+                    if (r.status === 500) {
+                        alert("Belső hiba történt a szakasz léptetése során, kérjük próbálkozzon újra később");
+                    }
+                },
+        
+            });
+        });
+        downArrow.innerHTML = "&#9660;";
+        buttonContainer.appendChild(downArrow);
+
+        const del = document.createElement("p");
         del.classList.add("watchlist-delete");
         del.setAttribute("onclick",'deleteSegment('+i+');');
         del.innerHTML = "&#10005";
-
+        buttonContainer.appendChild(del);
+        
         element.appendChild(image);
         element.appendChild(text);
-        element.appendChild(del);
+        element.appendChild(buttonContainer);
         document.querySelector(".content").insertBefore(element, document.querySelector(".error-text"));
-
     }
 
     updateWatchlist(watchlist);
     setInterval(function () {updateWatchlist(watchlist);}, 10000);
+
+    refreshInProgress = false;
 
 }
 
@@ -234,9 +324,6 @@ function calculateResult(trips) {
         return null;
 
     } else {
-
-        console.log("Calculation successfull, avg travel time: "+avgTravelTime+", avg gained latency: "+avgLatency+". Trips used:");
-        console.log(usefulTrips);
 
         return avgTravelTime;
         
@@ -459,16 +546,12 @@ async function downloadSegment(line, stops, stop1, stop2, isFinalStop, stop2ForF
                 //no difference between predicted and normal
                 currentTrip = new CalculatedTrip();
                 currentTrip.setOnlyTime2(departures[i].arrivalTime);
-                console.log("Set stop2 time of a trip based on:");
-                console.log(departures[i]);
 
             } else {
 
                 //there is difference between predicted and normal
                 currentTrip = new CalculatedTrip();
                 currentTrip.setTime2(departures[i].predictedArrivalTime, departures[i].arrivalTime);
-                console.log("Set stop2 time of a trip based on:");
-                console.log(departures[i]);
 
             }
 
@@ -499,14 +582,10 @@ async function downloadSegment(line, stops, stop1, stop2, isFinalStop, stop2ForF
                         if (stopTimes[i].predictedDepartureTime==undefined) {
                             //no difference between predicted and normal
                             currentTrip.setOnlyTime1(stopTimes[i].departureTime);
-                            console.log("Set stop1 time of a trip based on:");
-                            console.log(stopTimes[i]);
 
                         } else {
                             //there is difference between predicted and normal
                             currentTrip.setTime1(stopTimes[i].predictedDepartureTime, stopTimes[i].departureTime);
-                            console.log("Set stop1 time of a trip based on:");
-                            console.log(stopTimes[i]);
                         }
 
                         break;
