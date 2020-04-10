@@ -69,6 +69,165 @@ if (window.addEventListener)
 else if (window.attachEvent)
 	window.attachEvent("onload", setup);
 
+//Function for adding the current segment to user watchlist
+async function watchlist_add() {
+
+    if (!isUpdatingSegment) {
+        return;
+    }
+    let username = getUsername();
+    let url = "/api/users/"+username+"/watchlist";
+    let data = {
+        line: {
+            id: line.id,
+            name: line.shortName
+        },
+        stop1: {
+            id: stop1.id,
+            name: stop1.name
+        },
+        stop2: {
+            id: stop2.id,
+            name: stop2.name
+        }
+    }
+    $.ajax({
+
+        method:"POST",
+        url: url,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        data: JSON.stringify(data),
+        
+        success:function() {
+            updateWatchlistButton();
+        },
+
+        error: function(r) {
+
+            if (r.status==401) {
+                window.location.replace("/");
+            } else {
+                console.log("Failed to add segment to user watchloist");
+            }
+
+        }
+
+    });
+
+}
+
+async function watchlist_remove() {
+
+    if (!isUpdatingSegment) {
+        return;
+    }
+    let username = getUsername();
+    let url = "/api/users/"+username+"/watchlist";
+    let data = {
+        lineId: line.id,
+        stop1Id: stop1.id,
+        stop2Id: stop2.id,
+    };
+
+    $.ajax({
+
+        method: "DELETE",
+        url: url,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        data: JSON.stringify(data),
+
+        success: function(r) {
+            updateWatchlistButton();
+        },
+
+        error: function(r) {
+
+            if (r.status==401) {
+                window.location.replace("/");
+            } else {
+                console.log("Failed to remove segment from user watchlist");
+            }
+
+        }
+
+    });
+
+}
+
+//Function for updating the state of wl-btn
+async function updateWatchlistButton() {
+
+    let wl_btn = document.querySelector("#wl-btn");
+    if (!wl_btn) {
+        return;
+    }
+    if (!isUpdatingSegment) {
+
+        wl_btn.setAttribute("class","wl-btn-none");
+        wl_btn.setAttribute("onclick","");
+        wl_btn.innerText = "Nincs szakasz";
+
+    } else {
+
+        let username = getUsername();
+        let url = "/api/users/"+username+"/watchlist";
+        let result = null;
+
+        await $.ajax({
+
+            method: "GET",
+            url: url,
+            dataType: "json",
+
+            success: function(r) {
+                result = r.data;
+            },
+            error: function(r) {
+
+                if (r.status==401) {
+                    window.location.replace("/");
+                } else {
+                    result = null;
+                }
+
+            }
+        });
+
+        if (result==null) {
+            console.log("An error occured while loading user watchlist.");
+            return;
+        }
+
+        let segmentExists = false;
+        for (let i=0; i<result.length; i++) {
+
+            if (result[i].line.id==line.id&&result[i].stop1.id==stop1.id&&result[i].stop2.id==stop2.id) {
+                segmentExists = true;
+                break;
+            }
+
+        }
+
+        if (segmentExists) {
+
+            wl_btn.setAttribute("class","wl-btn-remove");
+            wl_btn.setAttribute("onclick","watchlist_remove()");
+            wl_btn.innerText = "Listából eltávolítás";
+
+        } else {
+
+            wl_btn.setAttribute("class","wl-btn-add");
+            wl_btn.setAttribute("onclick","watchlist_add()");
+            wl_btn.innerText = "Listához adás";
+
+        }
+
+    }
+
+}
+
 //Function for updating the current colorScheme
 function updateScheme() {
 
@@ -276,9 +435,11 @@ async function loadPredefinedSegment(prefLine, prefStop1, prefStop2) {
         showSegmentInformation(trips);
 
         isUpdatingSegment = true;
+        updateWatchlistButton();
 
     } else {
         isUpdatingSegment = false;
+        updateWatchlistButton();
     }
 
 
@@ -833,9 +994,11 @@ async function updateStops() {
         showSegmentInformation(trips);
 
         isUpdatingSegment = true;
+        updateWatchlistButton();
 
     } else {
         isUpdatingSegment = false;
+        updateWatchlistButton();
     }
 
 }
@@ -913,6 +1076,7 @@ function clearStops() {
     stop2 = 0;
     
     isUpdatingSegment = false;
+    updateWatchlistButton();
 
     checkSegment();
     

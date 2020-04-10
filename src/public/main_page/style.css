@@ -140,6 +140,44 @@ select {
 
 }
 
+#wl-btn {
+
+    width: 30%;
+    font-size: var(--fontSize-desktop-medium);
+    margin-left: 1em;
+    border: none;
+    padding: 0.1em;
+    
+
+}
+
+#wl-btn:hover {
+
+    cursor: pointer;
+
+}
+
+.wl-btn-add {
+
+    background-color: greenyellow;
+    color: black;
+
+}
+
+.wl-btn-remove {
+
+    background-color: red;
+    color: white;
+
+}
+
+.wl-btn-none {
+
+    background-color: rgba(100,100,100,0.3);
+    color: white;
+
+}
+
 .hotSmoke-box {
 
     background-color: var(--color-box-transparent);
@@ -258,6 +296,14 @@ select {
 
         width: 50%;
 
+    }
+
+    #wl-btn {
+        display: inline-block;
+        width: 50%;
+        font-size: var(--fontSize-phone-medium);
+        margin-left: 0;
+        margin-top: 0.1em;
     }
 
     .hotSmoke-box {

@@ -104,30 +104,6 @@ body {
 
 }
 
-.watchlist-add {
-
-    background-color: var(--color-add);
-    color: black;
-
-}
-
-.watchlist-add-content {
-
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-
-}
-
-.add-input {
-
-    margin: 0.5em;
-    font-size: var(--fontSize-desktop-large);
-    width: 20%;
-
-}
-
 .error-text {
 
     color:red;
@@ -191,29 +167,9 @@ body {
 
     }
 
-    .watchlist-add {
-
-        height: 60vh;
-
-    }
-
     .watchlist-delete {
         font-size: var(--fontSize-phone-large);
         margin-right: 0;
     }
 
-    .watchlist-add-content {
-
-        height: 100%;
-        flex-direction: column;
-
-    }
-
-    .add-input {
-
-        width: 90%;
-        padding: 0;
-        font-size: var(--fontSize-phone-small);
-
-    }
 }
