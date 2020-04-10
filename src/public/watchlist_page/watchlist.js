@@ -66,7 +66,7 @@ function deleteSegment(index) {
             if (r.status==401) {
                 window.location.replace("/");
             } else {
-                document.querySelector(".error-text").innerText = "Hiba történt a szakasz eltávolítása során..";
+                alert("Hiba történt a szakasz eltávolítása során. Kérjük próbálkozzon újra később.");
             }
 
         }
@@ -94,7 +94,7 @@ async function loadWatchlist() {
             if (r.status==401) {
                 window.location.replace("/");
             } else {
-                document.querySelector(".error-text").innerText = "Hiba történt a járatlista betöltése során..";
+                alert("Hiba történt a járatlista betöltése során. Kérjük próbálkozzon újra később.");
                 result = null;
             }
 
@@ -156,20 +156,27 @@ async function drawWatchlist(skipFetch) {
     if (!skipFetch)
         watchlist = await loadWatchlist();
 
+    const content = document.querySelector(".content");
+
+    if (watchlist.length === 0) {
+        const infoContainer = document.createElement("div");
+        infoContainer.id = "info-container";
+        const info = document.createElement("p");
+        info.id = "empty-info";
+        info.innerText = "Még nincsenek szakaszok a listádon. Új szakaszokat a főoldalról menthetsz el, egy szakasz kiválasztása után.";
+        infoContainer.appendChild(info);
+        content.appendChild(infoContainer);
+        refreshInProgress = false;
+        return;
+    }
+
     watchlist.sort((a, b) =>
         a.orderIndex < b.orderIndex ? -1 :
         a.orderIndex > b.orderIndex ? 1 : 0
     );
 
-    const content = document.querySelector(".content");
-
     for (let i = content.children.length - 1; i >= 0; i--) {
-        console.log(content.children[i]);
-
-        if (content.children[i].classList.contains("watchlist-element")) {
-            console.log(content.children[i]);
-            content.children[i].remove();
-        }
+        content.children[i].remove();
     }
 
     for (let i = 0; i < watchlist.length; i++) {
@@ -264,7 +271,7 @@ async function drawWatchlist(skipFetch) {
         element.appendChild(image);
         element.appendChild(text);
         element.appendChild(buttonContainer);
-        document.querySelector(".content").insertBefore(element, document.querySelector(".error-text"));
+        content.appendChild(element);
     }
 
     updateWatchlist(watchlist);
