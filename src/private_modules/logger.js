@@ -3,6 +3,10 @@ const fs = require('fs');
 const options = {};
 let fileOutputStream, fileOutputReady = false;
 
+/**
+ * Gets the current date and time in a specific format
+ * @param {Boolean} space - use spaces to format the string
+ */
 function getCurrentTime(space) {
 	const d = new Date();
 	let day = d.getDate() < 10 ? `0${d.getDate()}` : d.getDate();
@@ -16,6 +20,11 @@ function getCurrentTime(space) {
 		return `${d.getFullYear()}.${month}.${day}_${hours}:${minutes}:${seconds}`;
 }
 
+/**
+ * Sets a logger property
+ * @param {String} key - the key of the property
+ * @param {String} value - the value of the property
+ */
 exports.set = (key, value) => {
 	options[key] = value;
 
@@ -47,10 +56,19 @@ exports.set = (key, value) => {
 	}
 };
 
+/**
+ * Gets the value of a logger property
+ * @param {String} key - key of the property
+ * @returns {String} - the value of the property
+ */
 exports.get = key => {
 	return options[key];
 };
 
+/**
+ * Forces a message to the console (the message will be displayed no matter what)
+ * @param {String} message - the message that should be logged
+ */
 exports.force = (message) => {
 	const msg = `[${getCurrentTime(true)}] ${message}`;
 	console.log(msg);
@@ -58,6 +76,10 @@ exports.force = (message) => {
 		fileOutputStream.write(msg + "\n");
 };
 
+/**
+ * Writes a message to the console (every mode, except silent)
+ * @param {String} message - the message that should be logged
+ */
 exports.write = (message) => {
 	const msg = `[${getCurrentTime(true)}] ${message}`;
 	if (!options["silent"])
@@ -66,6 +88,10 @@ exports.write = (message) => {
 		fileOutputStream.write(msg + "\n");
 };
 
+/**
+ * Logs a message to the console (verbose or x-verbose mode)
+ * @param {String} message - the message that should be logged
+ */
 exports.log = (message) => {
 	const msg = `[${getCurrentTime(true)}] ${message}`;
 	if (options["verbose"] || options["x-verbose"])
@@ -74,6 +100,10 @@ exports.log = (message) => {
 		fileOutputStream.write(msg + "\n");
 };
 
+/**
+ * X-logs a message to the console (x-verbose mode only)
+ * @param {String} message - the message that should be logged
+ */
 exports.xlog = (message) => {
 	const msg = `[${getCurrentTime(true)}] ${message}`;
 	if (options["x-verbose"])
@@ -82,6 +112,10 @@ exports.xlog = (message) => {
 		fileOutputStream.write(msg + "\n");
 };
 
+/**
+ * Errors a message to the console (the message will be displayed no matter what)
+ * @param {String} message - the message that should be logged
+ */
 exports.error = (message) => {
 	const msg = `[${getCurrentTime(true)}] ${message}`;
 	console.error(msg);
@@ -89,6 +123,11 @@ exports.error = (message) => {
 		fileOutputStream.write(msg + "\n");
 };
 
+/**
+ * Prints an object to the console (verbose or x-verbose mode)
+ * @param {Object} obj - the object that should be printed
+ * @param {?String} message - a message that should be logged before the object
+ */
 exports.dir = (obj, message) => {
 	if (options["verbose"] || options["x-verbose"]) {
 		if (message) {
@@ -101,6 +140,11 @@ exports.dir = (obj, message) => {
 	}
 };
 
+/**
+ * Prints an object to the console (x-verbose mode only)
+ * @param {Object} obj - the object that should be printed
+ * @param {?String} message - a message that should be logged before the object
+ */
 exports.xdir = (obj, message) => {
 	if (options["x-verbose"]) {
 		if (message) {
@@ -114,6 +158,9 @@ exports.xdir = (obj, message) => {
 	}
 };
 
+/**
+ * Closes the logger (turns off file output)
+ */
 exports.close = () => {
 	if (fileOutputReady) {
 		exports.log("LOGGER: Closing file stream...");

@@ -7,9 +7,13 @@ const sectionModel = require("./models/section");
 const userModel = require("./models/user");
 
 const DB_REFRESH_INTERVAL = 30000; // milliseconds
+let hotsmokinFetchInProgress = false; // Indicates whether or not the hotsmokin list is currently being updated
 let hotsmokinList = {}; // Top 4 section list (hotsmokin)
 let lastDBCheck; // Last time the top 4 list was refreshed from the database
 
+/**
+ * Connects to the database specified by process.env.databaseUrl
+ */
 exports.setup = () => {
 	mongoose.connect(process.env.databaseUrl, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true })
 	.catch(err => {
@@ -29,6 +33,11 @@ exports.setup = () => {
 	});
 }
 
+/**
+ * Increases a section's count in the database
+ * @param {Object} sectionData - data of the section that should be modified (line-stop1-stop2 id/name)
+ * @return {Promise} - A promise that resolves if the update was successful
+ */
 exports.updateSection = sectionData => {
 	return new Promise(async (resolve, reject) => {
 		const dataCheck = {};
@@ -92,9 +101,15 @@ exports.updateSection = sectionData => {
 	});
 };
 
+/**
+ * Gets the hotsmokin list either from cache or from the database if the cached data is outdated
+ * @return {Promise} - A promise that resolves with the hotsmokin list if no error occured
+ */
 exports.getHotSmokin = () => {
 	return new Promise((resolve, reject) => {
-		if (!lastDBCheck || Date.now() - lastDBCheck > DB_REFRESH_INTERVAL || hotsmokinList.length !== 5) {
+		if (!hotsmokinFetchInProgress && (!lastDBCheck || Date.now() - lastDBCheck > DB_REFRESH_INTERVAL || hotsmokinList.length !== 4)) {
+			hotsmokinFetchInProgress = true;
+			
 			updateHotSmokin().then(() => {
 				logger.xlog("Successfully refreshed hotsmokin list from database");
 				resolve(hotsmokinList);
@@ -102,6 +117,7 @@ exports.getHotSmokin = () => {
 				reject(err);
 			});
 			
+			hotsmokinFetchInProgress = false;
 			lastDBCheck = Date.now();
 		} else {
 			logger.xlog(`Responding with cached hotsmokin list, ${DB_REFRESH_INTERVAL - (Date.now() - lastDBCheck)} ms before next update`);
@@ -110,17 +126,21 @@ exports.getHotSmokin = () => {
 	});
 };
 
+/**
+ * Fetches the hotsmokin list from the database
+ * @return {Promise} - A promise that resolves if no error occured
+ */
 function updateHotSmokin() {
 	return new Promise((resolve, reject) => {
 		hotsmokinList = [];
 		
-		sectionModel.find({}).sort("-count").limit(5).exec((err, secs) => {
+		sectionModel.find({}).sort("-count").limit(4).exec((err, secs) => {
 			if (err) {
 				reject(err);
 				return;
 			}
 
-			for (let i = 0; i < 5; i++) {
+			for (let i = 0; i < 4; i++) {
 				if (!secs[i])
 					break;
 				
@@ -145,18 +165,39 @@ function updateHotSmokin() {
 	});
 }
 
+/**
+ * Checks if the format of a username is valid or not
+ * @param {String} username - the username that should be validated
+ * @return {Boolean} - true if the username is valid, false otherwise 
+ */
 function validateUsername(username) {
 	return /^([a-zA-Z0-9_-]){3,16}$/.test(username);
 }
 
+/**
+ * Checks if the format of a password is valid or not
+ * @param {String} password - the password that should be validated
+ * @return {Boolean} - true if the password is valid, false otherwise 
+ */
 function validatePassword(password) {
 	return password.length >= 6;
 }
 
+/**
+ * Checks if the format of a BKK id is valid or not
+ * NOTE: this only checks if the id starts with 'BKK_', the use of this function is discouraged if you need 100% verification that an object exists with that id in the BKK database 
+ * @param {String} id - the id that should be validated
+ * @return {Boolean} - true if the id is valid, false otherwise 
+ */
 function validateBKKId(id) {
 	return id.startsWith("BKK_");
 }
 
+/**
+ * Creates a user in the database
+ * @param {Object} userData - data of the user that should be created (username, password, showWatchlistByDefault)
+ * @return {Promise} - A promise that resolves if the user was successfully created
+ */
 exports.createUser = userData => {
 	return new Promise(async (resolve, reject) => {
 		const dataCheck = {};
@@ -218,6 +259,12 @@ exports.createUser = userData => {
 	});
 };
 
+/**
+ * Checks if the password matches the account of username
+ * @param {String} username - username of the user
+ * @param {String} password - password that should be checked
+ * @return {Promise} - A promise that resolves with true if the password is correct, or with false otherwise
+ */
 exports.checkPassword = (username, password) => {
 	return new Promise(async (resolve, reject) => {
 		const user = await userModel.findOne({ username: username });
@@ -233,6 +280,12 @@ exports.checkPassword = (username, password) => {
 	});
 }
 
+/**
+ * Gets an authentication token for a user
+ * @param {String} username - username of the user
+ * @param {String} password - password of the user
+ * @return {Promise} - A promise that resolves with the token if the authentication was successful
+ */
 exports.login = (username, password) => {
 	return new Promise(async (resolve, reject) => {
 		const dataCheck = {};
@@ -280,10 +333,20 @@ exports.login = (username, password) => {
 	});
 }
 
+/**
+ * Generates an authentication JWT for a user
+ * @param {String} username - username of the user
+ * @return {String} - the token
+ */
 exports.genToken = username => {
 	return Promise.resolve(jwt.sign({ sub: username }, process.env.jwtKey, { expiresIn: `${process.env.authTokenMaxAge}s` }));
 };
 
+/**
+ * Deletes a user from the database
+ * @param {String} username - username of the user
+ * @return {Promise} - A promise that resolves if the deletion was successful
+ */
 exports.deleteUser = username => {
 	return new Promise(async (resolve, reject) => {
 		const user = await userModel.findOne({ username: username });
@@ -299,6 +362,11 @@ exports.deleteUser = username => {
 	});
 };
 
+/**
+ * Gets the account settings of a user
+ * @param {String} username - username of the user
+ * @return {Promise} - A promise that resolves with a settings object (username, showWatchlistByDefault) if no error occured
+ */
 exports.getUserSettings = username => {
 	return new Promise(async (resolve, reject) => {
 		const user = await userModel.findOne({ username: username });
@@ -317,6 +385,12 @@ exports.getUserSettings = username => {
 	});
 };
 
+/**
+ * Changes a user's settings in the database
+ * @param {String} username - username of the user
+ * @param {Object} modifications - properties that should be modified (username, password, showWatchlistByDefault)
+ * @return {Promise} - A promise that resolves if the update was successful
+ */
 exports.modifyUser = (username, modifications) => {
 	return new Promise(async (resolve, reject) => {
 		const user = await userModel.findOne({ username: username });
@@ -378,6 +452,11 @@ exports.modifyUser = (username, modifications) => {
 	});
 };
 
+/**
+ * Fetches the watchlist of a user
+ * @param {String} username - username of the user
+ * @return {Promise} - A promise that resolves with the watchlist if no error occured
+ */
 exports.getWatchlist = username => {
 	return new Promise(async (resolve, reject) => {
 		const user = await userModel.findOne({ username: username });
@@ -417,6 +496,12 @@ exports.getWatchlist = username => {
 	});
 };
 
+/**
+ * Adds a section to a user's watchlist
+ * @param {String} username - username of the user
+ * @param {Object} sectionData - data of the section that should be added to the watchlist (line-stop1-stop2 id/name)
+ * @return {Promise} - A promise that resolves if the addition was successful
+ */
 exports.addToWatchlist = (username, sectionData) => {
 	return new Promise(async (resolve, reject) => {
 		const user = await userModel.findOne({ username: username });
@@ -506,6 +591,13 @@ exports.addToWatchlist = (username, sectionData) => {
 	});
 };
 
+/**
+ * Moves a section up or down in a user's watchlist
+ * @param {String} username - username of the user
+ * @param {Object} sectionData - data of the section that should be moved (line-stop1-stop2 id)
+ * @param {Boolean} moveUp - if true, the section will be moved higher, it will be moved lower otherwise
+ * @return {Promise} - A promise that resolves if moving the section was successful
+ */
 exports.moveSectionInWatchlist = (username, sectionData, moveUp) => {
 	return new Promise(async (resolve, reject) => {
 		const user = await userModel.findOne({ username: username });
@@ -605,6 +697,12 @@ exports.moveSectionInWatchlist = (username, sectionData, moveUp) => {
 	});
 };
 
+/**
+ * Removes a section from a user's watchlist
+ * @param {String} username - username of the user
+ * @param {Object} sectionData - data of the section that should be removed (line-stop1-stop2 id)
+ * @return {Promise} - A promise that resolves if the deletion was successful
+ */
 exports.removeFromWatchlist = (username, sectionData) => {
 	return new Promise(async (resolve, reject) => {
 		const user = await userModel.findOne({ username: username });

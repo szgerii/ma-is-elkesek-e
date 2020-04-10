@@ -3,15 +3,45 @@ const path = require("path");
 const router = require("../private_modules/router");
 const loginSplitter = require("../splitters/loginSplitter");
 
+/**
+ * Represents a file and its handling properties
+ */
 class File {
+	/**
+	 * @constructor
+	 * @param {String} url - the url which points to the file
+	 * @param {String} filePath - the path of the file
+	 * @param {String} type - the MIME type of the file
+	 */
 	constructor(url, filePath, type) {
+		/**
+		 * The static URL of the file
+		 * @type {String}
+		 */
 		this.url = url;
+		/**
+		 * The local path of the file
+		 * @type {String}
+		 */
 		this.path = filePath;
+		/**
+		 * The MIME type of the file
+		 * @type {String}
+		 * @example "text/html"
+		 */
 		this.type = type;
+		/**
+		 * The content of the file
+		 * @type {String}
+		 */
 		this.content = fs.readFileSync(path.resolve(__dirname, "../public", filePath));
 	}
 }
 
+/**
+ * Sets up the static routes
+ * @return {Promise} - A promise that resolves after everything has been set up
+ */
 module.exports = () => {
 	return new Promise((resolve, reject) => {
 		try {
@@ -59,11 +89,14 @@ module.exports = () => {
 			});
 
 			router.route("/home").getSplitter(loginSplitter,
+			// User isn't logged in
 			(req, res) => {
 				const guestMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_guest.html"));
 				res.writeHead(200, {"Content-Type": "text/html"});
 				res.end(guestMainPage);
-			}, (req, res) => {
+			},
+			// User is logged in
+			(req, res) => {
 				const loggedInMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_user.html"));
 				res.writeHead(200, {"Content-Type": "text/html"});
 				res.end(loggedInMainPage);

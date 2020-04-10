@@ -2,6 +2,17 @@ const jwt = require("jsonwebtoken");
 const router = require("../private_modules/router.js");
 const userModel = require("../models/user");
 
+/**
+ * @typedef {Object} IncomingMessage
+ * @typedef {Object} ServerResponse
+ */
+
+/**
+ * JSON Web Token verifying middleware (it checks if the token is present/correct and responds accordingly, if there's something wrong with the request)
+ * @param {IncomingMessage} req - the request object coming from the client
+ * @param {ServerResponse} res - the response object that the server will send back
+ * @param {function} done - the callback function the middleware calls once it's finished processing the request
+ */
 module.exports = async (req, res, done) => {
 	const token = req.cookies["auth-token"];
 	

@@ -3,7 +3,8 @@ const router = require("../private_modules/router");
 const userModel = require("../models/user");
 
 /**
- * @returns 0 if the user isn't logged in, 1 if they are
+ * Splits based on the login status of the user
+ * @returns {Number} - 0 if the user isn't logged in, 1 if they are
  */
 module.exports = async (req, res) => {
 	const token = req.cookies["auth-token"];

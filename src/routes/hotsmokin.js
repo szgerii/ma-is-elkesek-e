@@ -3,6 +3,9 @@ const route = router.route("/api/hotsmokin");
 const logger = require("../private_modules/logger");
 const dbManager = require("../db_manager");
 
+/**
+ * Sets up the hotsmokin routes
+ */
 module.exports = () => {
 	dbManager.getHotSmokin().catch(err => {
 		logger.error("Couldn't get top 3 list from database");

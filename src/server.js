@@ -14,17 +14,20 @@ const watchlistRoute = require("./routes/watchlist");
 const userModel = require("./models/user");
 const sectionModel = require("./models/section");
 
-// Config file content
+// Fill up process.env with the config file's values
 let config;
 if (fs.existsSync("./config.js")) {
 	config = require("./config");
+
+	// The url that is used to connect to the database
 	if (config.databaseUrl) {
 		process.env.databaseUrl = config.databaseUrl;
 	} else {
 		logger.error("Missing property 'databaseUrl' in config.js. Shutting down...");
 		process.exit(3);
 	}
-	
+
+	// The key that is used to sign JSON Web Tokens
 	if (config.jwtKey) {
 		process.env.jwtKey = config.jwtKey;
 	} else {
@@ -32,6 +35,7 @@ if (fs.existsSync("./config.js")) {
 		process.exit(3);
 	}
 	
+	// The maximum age of authentication cookies
 	if (config.authTokenMaxAge) {
 		process.env.authTokenMaxAge = config.authTokenMaxAge;
 	} else {
@@ -39,6 +43,7 @@ if (fs.existsSync("./config.js")) {
 		process.exit(3);
 	}
 	
+	// The domain field of the sent cookies
 	if (config.domain !== undefined) {
 		process.env.domain = config.domain;
 	} else {
@@ -56,7 +61,9 @@ const PORT = process.env.PORT || config.PORT || 1104;
 // Other variables
 let server;
 
-// Sets up everything needed for the server
+/**
+ * Sets up everything needed for the server and starts it
+ */
 async function start() {
 	// Logger setup
 	logger.set("verbose", process.argv.includes("-v") || process.argv.includes("--verbose"));
@@ -70,31 +77,25 @@ async function start() {
 		logger.set("file-output", true);
 	}
 
-	// Ctrl+C
+	// Ctrl+C exit
 	process.on("SIGINT", () => {
 		logger.log("Shutting down...");
 		logger.close();
 		process.exit(0);
 	});
 	
+	// Nodemon restart
 	process.once('SIGUSR2', () => {
 		logger.log("Restarting...");
 		logger.close();
 	});
 
+	// Connect to the database
 	dbManager.setup();
+	// Set up the router module (use every default middleware)
 	router.setup();
-
-	router.route("/test").get(async (req, res) => {
-		const sec = await sectionModel.findOne({});
-		const user = new userModel();
-		
-		user.username = "asd";
-		user.password = "asdasd";
-		user.hash = true;
-		user.save();
-	});
 	
+	// Set up routes
 	await staticRoute().catch(err => {
 		logger.error("Couldn't load static files\nThis might be because the files.json file is missing from the public directory, or because it pointed to a file that doesn't exist.");
 		logger.xlog(err);
@@ -106,6 +107,7 @@ async function start() {
 	usersRoute();
 	watchlistRoute();
 
+	// Start the server
 	server = http.createServer(router.requestHandler);
 	server.listen(PORT);
 	logger.log(`Server listening on port ${PORT}`);

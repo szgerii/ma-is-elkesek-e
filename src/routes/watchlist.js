@@ -2,6 +2,9 @@ const router = require("../private_modules/router.js");
 const dbManager = require("../db_manager");
 const jwt_verification = require("../middlewares/jwt_verification");
 
+/**
+ * Sets up the watchlist routes
+ */
 module.exports = () => {
 	const watchlistRoute = router.route("/api/users/{username}/watchlist");
 

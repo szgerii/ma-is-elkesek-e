@@ -3,6 +3,9 @@ const logger = require("../private_modules/logger");
 const dbManager = require("../db_manager");
 const jwt_verification = require("../middlewares/jwt_verification");
 
+/**
+ * Sets up the user routes
+ */
 module.exports = () => {
 	router.route("/api/login").post((req, res) => {
 		dbManager.login(req.body.username, req.body.password).then(token => {
