@@ -238,8 +238,8 @@ function updateScheme() {
 
         case bus: {
 
-            document.documentElement.style.setProperty('--color-box','rgb(20,30,100)');
-            document.documentElement.style.setProperty('--color-box-transparent','rgba(20,30,100,0.5)');
+            document.documentElement.style.setProperty('--color-box','var(--color-bus)');
+            document.documentElement.style.setProperty('--color-box-transparent','var(--color-bus-transparent)');
             document.documentElement.style.setProperty('--color-main','white');
             document.documentElement.style.setProperty('--color-text','black');
             document.documentElement.style.setProperty('--color-navText','white');
@@ -255,8 +255,8 @@ function updateScheme() {
         }
         case tram: {
            
-            document.documentElement.style.setProperty('--color-box','rgb(180,160,0)');
-            document.documentElement.style.setProperty('--color-box-transparent','rgba(180,180,0,0.5)');
+            document.documentElement.style.setProperty('--color-box','var(--color-tram)');
+            document.documentElement.style.setProperty('--color-box-transparent','var(--color-tram-transparent)');
             document.documentElement.style.setProperty('--color-main','white');
             document.documentElement.style.setProperty('--color-text','black');
             document.documentElement.style.setProperty('--color-navText','black');
@@ -272,8 +272,8 @@ function updateScheme() {
         }
         case metro: {
             
-            document.documentElement.style.setProperty('--color-box','rgb(80,80,80)');
-            document.documentElement.style.setProperty('--color-box-transparent','rgba(80,80,80,0.5)');
+            document.documentElement.style.setProperty('--color-box','var(--color-metro)');
+            document.documentElement.style.setProperty('--color-box-transparent','var(--color-metro-transparent)');
             document.documentElement.style.setProperty('--color-main','white');
             document.documentElement.style.setProperty('--color-text','black');
             document.documentElement.style.setProperty('--color-navText','white');
@@ -289,8 +289,8 @@ function updateScheme() {
         }
         case trolley: {
             
-            document.documentElement.style.setProperty('--color-box','rgb(160,0,0)');
-            document.documentElement.style.setProperty('--color-box-transparent','rgba(160,0,0,0.5)');
+            document.documentElement.style.setProperty('--color-box','var(--color-trolley)');
+            document.documentElement.style.setProperty('--color-box-transparent','var(--color-trolley-transparent)');
             document.documentElement.style.setProperty('--color-main','white');
             document.documentElement.style.setProperty('--color-text','black');
             document.documentElement.style.setProperty('--color-navText','white');
@@ -306,8 +306,8 @@ function updateScheme() {
         }
         case hev: {
             
-            document.documentElement.style.setProperty('--color-box','rgb(0,140,0)');
-            document.documentElement.style.setProperty('--color-box-transparent','rgba(0,140,0,0.5)');
+            document.documentElement.style.setProperty('--color-box','var(--color-hev)');
+            document.documentElement.style.setProperty('--color-box-transparent','var(--color-hev-transparent)');
             document.documentElement.style.setProperty('--color-main','white');
             document.documentElement.style.setProperty('--color-text','black');
             document.documentElement.style.setProperty('--color-navText','white');
@@ -323,8 +323,8 @@ function updateScheme() {
         }
         case ship: {
             
-            document.documentElement.style.setProperty('--color-box','rgb(240,240,240)');
-            document.documentElement.style.setProperty('--color-box-transparent','rgba(240,240,240,0.5)');
+            document.documentElement.style.setProperty('--color-box','var(--color-ship)');
+            document.documentElement.style.setProperty('--color-box-transparent','var(--color-ship-transparent)');
             document.documentElement.style.setProperty('--color-main','white');
             document.documentElement.style.setProperty('--color-text','black');
             document.documentElement.style.setProperty('--color-navText','black');

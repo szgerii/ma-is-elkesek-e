@@ -16,13 +16,18 @@
     --color-box: rgb(20, 30, 100); /* Background color of boxes */ /* DYNAMIC */
     --color-box-transparent: rgba(20, 30, 100, 0.5); /*Color of half tranparent boxes */ /* DYNAMIC */
 
-    --color-bus: rgb(20,30,100);
-    --color-tram: rgb(180,180,0);
+    --color-bus: rgb(30,40,100);
+    --color-tram: rgb(180,180,50);
     --color-metro: rgb(80,80,80);
-    --color-trolley: rgb(160,0,0);
-    --color-hev: rgb(0,140,0);
-    --color-ship: rgb(240,240,240);
-    --color-add: rgb(60,220,60);
+    --color-trolley: rgb(185, 50, 50);
+    --color-hev: rgb(35,135,35);
+    --color-ship: rgb(210,210,210);
+    --color-bus-transparent: rgba(30,40,100,0.5);
+    --color-tram-transparent: rgba(180,180,50,0.5);
+    --color-metro-transparent: rgba(80,80,80,0.5);
+    --color-trolley-transparent: rgba(185, 50, 50,0.5);
+    --color-hev-transparent: rgba(35,135,35,0.5);
+    --color-ship-transparent: rgba(210,210,210,0.5);
 
     --background-url: url("assets/images/bg-bus.png"); /* Url of the background image */ /* DYNAMIC */
     --background-positioning-desktop: 0px 0px; /* Positioning of the background on dekstop */ /* DYNAMIC */
@@ -35,7 +40,7 @@ nav {
     position: sticky;
     top: 0px;
     width: 100%;
-    font-size: var(--fontSize-desktop-large);
+    font-size: calc(var(--fontSize-desktop-large) + 0.1em);
     color: var(--color-navText);
     background-color: var(--color-box);
     display: flex;
