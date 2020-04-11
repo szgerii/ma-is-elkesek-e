@@ -58,7 +58,24 @@ function deleteSegment(index) {
         data: JSON.stringify(data),
 
         success: function(r) {
-            window.location.reload();
+            const content = document.querySelector(".content");
+            
+            for (let i = index; i < watchlist.length - 1; i++) {
+                watchlist[i] = watchlist[i + 1];
+                watchlist[i].orderIndex--;
+
+                content.children[i + 1].children[2].children[0].onclick = () => moveUp(i);
+                content.children[i + 1].children[2].children[1].onclick = () => moveDown(i);
+                content.children[i + 1].children[2].children[2].onclick = () => deleteSegment(i);
+            }
+
+            content.children[index].remove();
+
+            watchlist.pop();
+
+            if (watchlist.length === 0) {
+                drawWatchlist(true);
+            }
         },
 
         error: function(r) {
@@ -163,7 +180,7 @@ async function drawWatchlist(skipFetch) {
         infoContainer.id = "info-container";
         const info = document.createElement("p");
         info.id = "empty-info";
-        info.innerText = "Még nincsenek szakaszok a listádon. Új szakaszokat a főoldalról menthetsz el, egy szakasz kiválasztása után.";
+        info.innerText = "Még nincsenek szakaszok a listádon. Új szakaszokat a főoldalról menthetsz el, egy útvonal kiválasztása után.";
         infoContainer.appendChild(info);
         content.appendChild(infoContainer);
         refreshInProgress = false;
@@ -180,7 +197,6 @@ async function drawWatchlist(skipFetch) {
     }
 
     for (let i = 0; i < watchlist.length; i++) {
-
         const type = await getLineType(watchlist[i].line);
 
         const element = document.createElement("div");
@@ -200,65 +216,13 @@ async function drawWatchlist(skipFetch) {
         
         const upArrow = document.createElement("p");
         upArrow.classList.add("watchlist-move");
-        upArrow.addEventListener("click", () => {
-            $.ajax({
-
-                method: "PATCH",
-                url: `/api/users/${username}/watchlist`,
-                dataType: "json",
-                data: {
-                    lineId: watchlist[i].line.id,
-                    stop1Id: watchlist[i].stop1.id,
-                    stop2Id: watchlist[i].stop2.id,
-                    moveUp: true
-                },
-        
-                success: function (r) {
-                    watchlist[i].orderIndex--;
-			        watchlist[i - 1].orderIndex++;
-                    drawWatchlist(true);
-                },
-        
-                error: function (r) {
-                    if (r.status === 500) {
-                        alert("Belső hiba történt a szakasz léptetése során, kérjük próbálkozzon újra később");
-                    }
-                },
-        
-            });
-        });
+        upArrow.onclick = () => moveUp(i);
         upArrow.innerHTML = "&#9650;";
         buttonContainer.appendChild(upArrow);
         
         const downArrow = document.createElement("p");
         downArrow.classList.add("watchlist-move");
-        downArrow.addEventListener("click", () => {
-            $.ajax({
-
-                method: "PATCH",
-                url: `/api/users/${username}/watchlist`,
-                dataType: "json",
-                data: {
-                    lineId: watchlist[i].line.id,
-                    stop1Id: watchlist[i].stop1.id,
-                    stop2Id: watchlist[i].stop2.id,
-                    moveUp: false
-                },
-        
-                success: function (r) {
-                    watchlist[i].orderIndex++;
-			        watchlist[i + 1].orderIndex--;
-                    drawWatchlist(true);
-                },
-        
-                error: function (r) {
-                    if (r.status === 500) {
-                        alert("Belső hiba történt a szakasz léptetése során, kérjük próbálkozzon újra később");
-                    }
-                },
-        
-            });
-        });
+        downArrow.onclick = () => moveDown(i);
         downArrow.innerHTML = "&#9660;";
         buttonContainer.appendChild(downArrow);
 
@@ -275,19 +239,116 @@ async function drawWatchlist(skipFetch) {
     }
 
     updateWatchlist(watchlist);
-    setInterval(function () {updateWatchlist(watchlist);}, 10000);
+    setInterval(() => updateWatchlist(watchlist), 10000);
 
     refreshInProgress = false;
 
 }
 
+function moveUp(i) {
+    if (watchlist[i].orderIndex === 0)
+        return;
+
+    $.ajax({
+
+        method: "PATCH",
+        url: `/api/users/${username}/watchlist`,
+        dataType: "json",
+        data: {
+            lineId: watchlist[i].line.id,
+            stop1Id: watchlist[i].stop1.id,
+            stop2Id: watchlist[i].stop2.id,
+            moveUp: true
+        },
+
+        success: function (r) {
+            const content = document.querySelector(".content");
+
+            watchlist[i].orderIndex--;
+            watchlist[i - 1].orderIndex++;
+
+            let temp = watchlist[i];
+            watchlist[i] = watchlist[i - 1];
+            watchlist[i - 1] = temp;
+            
+            // Swap the elements
+            temp = content.children[i].cloneNode(true);
+            content.children[i].replaceWith(content.children[i - 1].cloneNode(true));
+            content.children[i - 1].replaceWith(temp);
+
+            // Add event listeners to the new move up and move down buttons
+            content.children[i].children[2].children[0].onclick = () => moveUp(i);
+            content.children[i].children[2].children[1].onclick = () => moveDown(i);
+            content.children[i].children[2].children[2].onclick = () => deleteSegment(i);
+            content.children[i - 1].children[2].children[0].onclick = () => moveUp(i - 1);
+            content.children[i - 1].children[2].children[1].onclick = () => moveDown(i - 1);
+            content.children[i - 1].children[2].children[2].onclick = () => deleteSegment(i - 1);
+        },
+
+        error: function (r) {
+            if (r.status === 500) {
+                alert("Belső hiba történt a szakasz léptetése során, kérjük próbálkozzon újra később");
+            }
+        },
+
+    });
+}
+
+function moveDown(i) {
+    if (watchlist[i].orderIndex === watchlist.length - 1)
+        return;
+
+    $.ajax({
+
+        method: "PATCH",
+        url: `/api/users/${username}/watchlist`,
+        dataType: "json",
+        data: {
+            lineId: watchlist[i].line.id,
+            stop1Id: watchlist[i].stop1.id,
+            stop2Id: watchlist[i].stop2.id,
+            moveUp: false
+        },
+
+        success: function (r) {
+            const content = document.querySelector(".content");
+
+            watchlist[i].orderIndex++;
+            watchlist[i + 1].orderIndex--;
+
+            let temp = watchlist[i];
+            watchlist[i] = watchlist[i + 1];
+            watchlist[i + 1] = temp;
+            
+            // Swap the elements
+            temp = content.children[i].cloneNode(true);
+            content.children[i].replaceWith(content.children[i + 1].cloneNode(true));
+            content.children[i + 1].replaceWith(temp);
+
+            // Add event listeners to the new move up and move down buttons
+            content.children[i].children[2].children[0].onclick = () => moveUp(i);
+            content.children[i].children[2].children[1].onclick = () => moveDown(i);
+            content.children[i].children[2].children[2].onclick = () => deleteSegment(i);
+            content.children[i + 1].children[2].children[0].onclick = () => moveUp(i + 1);
+            content.children[i + 1].children[2].children[1].onclick = () => moveDown(i + 1);
+            content.children[i + 1].children[2].children[2].onclick = () => deleteSegment(i + 1);
+        },
+
+        error: function (r) {
+            if (r.status === 500) {
+                alert("Belső hiba történt a szakasz léptetése során, kérjük próbálkozzon újra később");
+            }
+        },
+
+    });
+}
+
 function updateWatchlist(watchlist) {
 
-    //loadPredefinedSegment(watchlist[0].line, watchlist[0].stop1, watchlist[0].stop2, 0);
-    for (let i=0; i<watchlist.length; i++) {
-
-        loadPredefinedSegment(watchlist[i].line, watchlist[i].stop1, watchlist[i].stop2, document.querySelector(".content").childNodes[i+1].childNodes[1]);
-
+    const content = document.querySelector(".content");
+    
+    for (let i = 0; i < content.children.length; i++) {
+        loadPredefinedSegment(watchlist[i].line, watchlist[i].stop1, watchlist[i].stop2, content.children[i].children[1]);
     }
 
 }
