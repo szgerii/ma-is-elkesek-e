@@ -445,7 +445,7 @@ async function loadPredefinedSegment(prefLine, prefStop1, prefStop2, output) {
     }
 
     //Load the segment
-    let trips = await downloadSegment(line, stops, stop1, stop2, isFinalStop, stop2ForFinalStop, 120); // TODO: change time back to 20
+    let trips = await downloadSegment(line, stops, stop1, stop2, isFinalStop, stop2ForFinalStop, 20);
     
     let travelTime = calculateResult(trips);
 
