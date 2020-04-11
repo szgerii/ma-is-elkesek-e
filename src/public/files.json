@@ -178,5 +178,25 @@
 		"url": "/assets/images/icon-add.png",
 		"path": "assets/images/icon-add.png",
 		"type": "image/png"
+	},
+	{
+		"url": "/assets/images/triangle-white.png",
+		"path": "assets/images/triangle-white.png",
+		"type": "image/png"
+	},
+	{
+		"url": "/assets/images/triangle-black.png",
+		"path": "assets/images/triangle-black.png",
+		"type": "image/png"
+	},
+	{
+		"url": "/assets/images/x-white.png",
+		"path": "assets/images/x-white.png",
+		"type": "image/png"
+	},
+	{
+		"url": "/assets/images/x-black.png",
+		"path": "assets/images/x-black.png",
+		"type": "image/png"
 	}
 ]

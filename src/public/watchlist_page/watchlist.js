@@ -209,27 +209,28 @@ async function drawWatchlist(skipFetch) {
 
         const text = document.createElement("div");
         text.classList.add("watchlist-text");
-        text.innerHTML = watchlist[i].line.name+": "+watchlist[i].stop1.name+" - " + watchlist[i].stop2.name+" &#187 ? perc";
+        text.innerHTML = "["+watchlist[i].line.name+"] "+watchlist[i].stop1.name+" - "+watchlist[i].stop2.name+": ? perc";
         
         const buttonContainer = document.createElement("div");
         buttonContainer.classList.add("button-container");
         
-        const upArrow = document.createElement("p");
+        const upArrow = document.createElement("img");
+        upArrow.src = `/assets/images/triangle-${type === "tram" || type === "ship" ? "black" : "white"}.png`;
         upArrow.classList.add("watchlist-move");
         upArrow.onclick = () => moveUp(i);
-        upArrow.innerHTML = "&#9650;";
         buttonContainer.appendChild(upArrow);
         
-        const downArrow = document.createElement("p");
+        const downArrow = document.createElement("img");
+        downArrow.src = `/assets/images/triangle-${type === "tram" || type === "ship" ? "black" : "white"}.png`;
         downArrow.classList.add("watchlist-move");
+        downArrow.classList.add("watchlist-move-down");
         downArrow.onclick = () => moveDown(i);
-        downArrow.innerHTML = "&#9660;";
         buttonContainer.appendChild(downArrow);
 
-        const del = document.createElement("p");
+        const del = document.createElement("img");
+        del.src = `/assets/images/x-${type === "tram" || type === "ship" ? "black" : "white"}.png`;
         del.classList.add("watchlist-delete");
         del.setAttribute("onclick",'deleteSegment('+i+');');
-        del.innerHTML = "&#10005";
         buttonContainer.appendChild(del);
         
         element.appendChild(image);
@@ -491,9 +492,9 @@ async function loadPredefinedSegment(prefLine, prefStop1, prefStop2, output) {
     let travelTime = calculateResult(trips);
 
     if (travelTime==null) {
-        output.innerHTML = line.shortName+": "+stop1.name+" - " + stop2.name+" &#187 nincs adat";
+        output.innerHTML = "[" + line.shortName+"] "+stop1.name+" - " + stop2.name+": nincs adat";
     } else {
-        output.innerHTML = line.shortName+": "+stop1.name+" - " + stop2.name+" &#187 " + travelTime + " perc";
+        output.innerHTML = "[" + line.shortName+"] "+stop1.name+" - " + stop2.name+": " + travelTime + " perc";
     }
 
 }
