@@ -75,8 +75,8 @@
 		"type": "text/javascript"
 	},
 	{
-		"url": "/jQuery.js",
-		"path": "lib/jQuery.js",
+		"url": "/fetch-jsonp.js",
+		"path": "lib/fetch-jsonp.js",
 		"type": "text/javascript"
 	},
 	{

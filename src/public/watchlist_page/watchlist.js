@@ -21,14 +21,6 @@ let refreshInProgress = false; // Indicates whether or not the watchlist is curr
 
 function setup() {
 
-    const logoutLink = document.querySelector("#logout");
-    
-    logoutLink.addEventListener("click", () => {
-        $.post("/logout", () => {
-            window.location.assign("/");
-        });
-    });
-
     username = getUsername();
 
     drawWatchlist();
@@ -49,47 +41,42 @@ function deleteSegment(index) {
         stop2Id: watchlist[index].stop2.id,
     };
 
-    $.ajax({
-
+    fetch(url, {
         method: "DELETE",
-        url: url,
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        data: JSON.stringify(data),
-
-        success: function(r) {
-            const content = document.querySelector(".content");
-            
-            for (let i = index; i < watchlist.length - 1; i++) {
-                watchlist[i] = watchlist[i + 1];
-                watchlist[i].orderIndex--;
-
-                content.children[i + 1].children[2].children[0].onclick = () => moveUp(i);
-                content.children[i + 1].children[2].children[1].onclick = () => moveDown(i);
-                content.children[i + 1].children[2].children[2].onclick = () => deleteSegment(i);
-            }
-
-            content.children[index].remove();
-
-            watchlist.pop();
-
-            if (watchlist.length === 0) {
-                drawWatchlist(true);
-            }
+        headers: {
+            "Content-Type": "application/json"
         },
-
-        error: function(r) {
-
-            if (r.status==401) {
-                window.location.replace("/");
-            } else {
-                alert("Hiba történt a szakasz eltávolítása során. Kérjük próbálkozzon újra később.");
-            }
-
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        if (response.status === 401) {
+            window.location.replace("/");
+        } else if (Math.floor(response.status / 100) !== 2){
+            alert("Hiba történt a szakasz eltávolítása során. Kérjük próbálkozzon újra később.");
+            console.debug("An error occured while deleting a section");
+            console.debug(response);
+            return;
         }
 
-    });
+        const content = document.querySelector(".content");
+            
+        for (let i = index; i < watchlist.length - 1; i++) {
+            watchlist[i] = watchlist[i + 1];
+            watchlist[i].orderIndex--;
 
+            content.children[i + 1].children[2].children[0].onclick = () => moveUp(i);
+            content.children[i + 1].children[2].children[1].onclick = () => moveDown(i);
+            content.children[i + 1].children[2].children[2].onclick = () => deleteSegment(i);
+        }
+
+        content.children[index].remove();
+
+        watchlist.pop();
+
+        if (watchlist.length === 0) {
+            drawWatchlist(true);
+        }
+    })
 }
 
 async function loadWatchlist() {
@@ -97,25 +84,27 @@ async function loadWatchlist() {
     let url = "/api/users/"+username+"/watchlist";
     let result = null;
 
-    await $.ajax({
-
-        method: "GET",
-        url: url,
-        dataType: "json",
-
-        success: function(r) {
-            result = r.data;
-        },
-        error: function(r) {
-
-            if (r.status==401) {
-                window.location.replace("/");
-            } else {
-                alert("Hiba történt a járatlista betöltése során. Kérjük próbálkozzon újra később.");
-                result = null;
-            }
-
+    await fetch(url)
+    .then(async response => {
+        return {
+            json: await response.json(),
+            status: response.status
+        };
+    })
+    .then(res => {
+        if (res.status === 401) {
+            window.location.replace("/");
+        } else if (res.json.status !== "success") {
+            alert("Hiba történt a járatlista betöltése során. Kérjük próbálkozzon újra később.");
+            result = null;
         }
+
+        result = res.json.data;
+    })
+    .catch(err => {
+        alert("Hiba történt a lista betöltése során. Kérjük próbálkozzon újra később.");
+        console.debug("An error occured while loading the user's watchlist");
+        console.debug(err);
     });
 
     return result;
@@ -125,29 +114,17 @@ async function loadWatchlist() {
 async function getLineType(line) {
 
     let typeName = "";
-    await $.ajax({
 
-        method: "GET",
-        url:bkk + "route-details.json",
-        dataType: "jsonp",
-        data: {
-            routeId:line.id,
-        },
-
-        success:function (r) {
-
-            if (r.status == "OK") {
-                typeName = r.data.entry.type;
-            } 
-            
-        },
-
-        error:function (xhr, ajaxOptions, thrownError) {
-
-            console.log("Error in request:");
-            console.log(thrownError);
-
-        },
+    await fetchJsonp(`${bkk}route-details.json?routeId=${line.id}`)
+    .then(response => response.json())
+    .then(json => {
+        if (json.status == "OK") {
+            typeName = json.data.entry.type;
+        }
+    })
+    .catch(err => {
+        console.debug(`An error occured while download the type of the following line: ${line}`);
+        console.debug(err);
     });
 
     switch(typeName) {
@@ -250,48 +227,45 @@ function moveUp(i) {
     if (watchlist[i].orderIndex === 0)
         return;
 
-    $.ajax({
-
+    fetch(`/api/users/${username}/watchlist`, {
         method: "PATCH",
-        url: `/api/users/${username}/watchlist`,
-        dataType: "json",
-        data: {
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
             lineId: watchlist[i].line.id,
             stop1Id: watchlist[i].stop1.id,
             stop2Id: watchlist[i].stop2.id,
             moveUp: true
-        },
+        })
+    })
+    .then(() => {
+        const content = document.querySelector(".content");
 
-        success: function (r) {
-            const content = document.querySelector(".content");
+        watchlist[i].orderIndex--;
+        watchlist[i - 1].orderIndex++;
 
-            watchlist[i].orderIndex--;
-            watchlist[i - 1].orderIndex++;
+        let temp = watchlist[i];
+        watchlist[i] = watchlist[i - 1];
+        watchlist[i - 1] = temp;
+        
+        // Swap the elements
+        temp = content.children[i].cloneNode(true);
+        content.children[i].replaceWith(content.children[i - 1].cloneNode(true));
+        content.children[i - 1].replaceWith(temp);
 
-            let temp = watchlist[i];
-            watchlist[i] = watchlist[i - 1];
-            watchlist[i - 1] = temp;
-            
-            // Swap the elements
-            temp = content.children[i].cloneNode(true);
-            content.children[i].replaceWith(content.children[i - 1].cloneNode(true));
-            content.children[i - 1].replaceWith(temp);
-
-            // Add event listeners to the new move up and move down buttons
-            content.children[i].children[2].children[0].onclick = () => moveUp(i);
-            content.children[i].children[2].children[1].onclick = () => moveDown(i);
-            content.children[i].children[2].children[2].onclick = () => deleteSegment(i);
-            content.children[i - 1].children[2].children[0].onclick = () => moveUp(i - 1);
-            content.children[i - 1].children[2].children[1].onclick = () => moveDown(i - 1);
-            content.children[i - 1].children[2].children[2].onclick = () => deleteSegment(i - 1);
-        },
-
-        error: function (r) {
-            if (r.status === 500) {
-                alert("Belső hiba történt a szakasz léptetése során, kérjük próbálkozzon újra később");
-            }
-        },
-
+        // Add event listeners to the new move up and move down buttons
+        content.children[i].children[2].children[0].onclick = () => moveUp(i);
+        content.children[i].children[2].children[1].onclick = () => moveDown(i);
+        content.children[i].children[2].children[2].onclick = () => deleteSegment(i);
+        content.children[i - 1].children[2].children[0].onclick = () => moveUp(i - 1);
+        content.children[i - 1].children[2].children[1].onclick = () => moveDown(i - 1);
+        content.children[i - 1].children[2].children[2].onclick = () => deleteSegment(i - 1);
+    })
+    .catch(err => {
+        console.debug("An error occured while moving a section");
+        console.debug(err);
+        alert("Ismeretlen hiba történt a szakasz léptetése során, kérjük próbálkozzon újra később");
     });
 }
 
@@ -299,48 +273,45 @@ function moveDown(i) {
     if (watchlist[i].orderIndex === watchlist.length - 1)
         return;
 
-    $.ajax({
-
+    fetch(`/api/users/${username}/watchlist`, {
         method: "PATCH",
-        url: `/api/users/${username}/watchlist`,
-        dataType: "json",
-        data: {
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
             lineId: watchlist[i].line.id,
             stop1Id: watchlist[i].stop1.id,
             stop2Id: watchlist[i].stop2.id,
             moveUp: false
-        },
+        })
+    })
+    .then(() => {
+        const content = document.querySelector(".content");
 
-        success: function (r) {
-            const content = document.querySelector(".content");
+        watchlist[i].orderIndex++;
+        watchlist[i + 1].orderIndex--;
 
-            watchlist[i].orderIndex++;
-            watchlist[i + 1].orderIndex--;
+        let temp = watchlist[i];
+        watchlist[i] = watchlist[i + 1];
+        watchlist[i + 1] = temp;
+        
+        // Swap the elements
+        temp = content.children[i].cloneNode(true);
+        content.children[i].replaceWith(content.children[i + 1].cloneNode(true));
+        content.children[i + 1].replaceWith(temp);
 
-            let temp = watchlist[i];
-            watchlist[i] = watchlist[i + 1];
-            watchlist[i + 1] = temp;
-            
-            // Swap the elements
-            temp = content.children[i].cloneNode(true);
-            content.children[i].replaceWith(content.children[i + 1].cloneNode(true));
-            content.children[i + 1].replaceWith(temp);
-
-            // Add event listeners to the new move up and move down buttons
-            content.children[i].children[2].children[0].onclick = () => moveUp(i);
-            content.children[i].children[2].children[1].onclick = () => moveDown(i);
-            content.children[i].children[2].children[2].onclick = () => deleteSegment(i);
-            content.children[i + 1].children[2].children[0].onclick = () => moveUp(i + 1);
-            content.children[i + 1].children[2].children[1].onclick = () => moveDown(i + 1);
-            content.children[i + 1].children[2].children[2].onclick = () => deleteSegment(i + 1);
-        },
-
-        error: function (r) {
-            if (r.status === 500) {
-                alert("Belső hiba történt a szakasz léptetése során, kérjük próbálkozzon újra később");
-            }
-        },
-
+        // Add event listeners to the new move up and move down buttons
+        content.children[i].children[2].children[0].onclick = () => moveUp(i);
+        content.children[i].children[2].children[1].onclick = () => moveDown(i);
+        content.children[i].children[2].children[2].onclick = () => deleteSegment(i);
+        content.children[i + 1].children[2].children[0].onclick = () => moveUp(i + 1);
+        content.children[i + 1].children[2].children[1].onclick = () => moveDown(i + 1);
+        content.children[i + 1].children[2].children[2].onclick = () => deleteSegment(i + 1);
+    })
+    .catch(err => {
+        console.debug("An error occured while moving a section");
+        console.debug(err);
+        alert("Ismeretlen hiba történt a szakasz léptetése során, kérjük próbálkozzon újra később");
     });
 }
 
@@ -385,10 +356,10 @@ function calculateResult(trips) {
 
     if (isNaN(avgTravelTime) || isNaN(avgLatency)) {
         
-        console.log("An error occured, avg travel time or avg latency came out to be NaN. Trips used for calculations:");
-        console.log(usefulTrips);
-        console.log("All downloaded trips:");
-        console.log(trips);
+        console.debug("An error occured, avg travel time or avg latency came out to be NaN. Trips used for calculations:");
+        console.debug(usefulTrips);
+        console.debug("All downloaded trips:");
+        console.debug(trips);
 
         return null;
 
@@ -411,34 +382,21 @@ async function loadPredefinedSegment(prefLine, prefStop1, prefStop2, output) {
     let stop1 = 0;
     let stop2 = 0;
 
-    await $.ajax({
-
-        method: "GET",
-        url:bkk + "route-details.json",
-        dataType: "jsonp",
-        data: {
-            routeId:line.id,
-        },
-
-        success:function (r) {
-
-            if (r.status == "OK") {
-                stops = r.data.references.stops;
-                variants = r.data.entry.variants;
-            } else {
-                return;
-            }
-            
-        },
-
-        error:function (xhr, ajaxOptions, thrownError) {
-
-            console.log("Error in request:");
-            console.log(thrownError);
-
-        },
-
+    await fetchJsonp(`${bkk}route-details.json?routeId=${line.id}`)
+    .then(response => response.json())
+    .then(json => {
+        if (json.status === "OK") {
+            stops = json.data.references.stops;
+            variants = json.data.entry.variants;
+        }
+    })
+    .catch(err => {
+        console.debug(`An error occured while loading the following segment: ${prefLine}: ${prefStop1} - ${prefStop2}`);
+        console.debug(err);
     });
+
+    if (stops === 0 || variants === 0)
+        return;
 
     let variant1 = new predefinedRouteDirection(variants[0].headsign, variants[0].stopIds, stops);
     let variant2 = new predefinedRouteDirection(variants[1].headsign, variants[1].stopIds, stops);
@@ -487,7 +445,7 @@ async function loadPredefinedSegment(prefLine, prefStop1, prefStop2, output) {
     }
 
     //Load the segment
-    let trips = await downloadSegment(line, stops, stop1, stop2, isFinalStop, stop2ForFinalStop, 20);
+    let trips = await downloadSegment(line, stops, stop1, stop2, isFinalStop, stop2ForFinalStop, 120); // TODO: change time back to 20
     
     let travelTime = calculateResult(trips);
 
@@ -574,32 +532,15 @@ async function downloadSegment(line, stops, stop1, stop2, isFinalStop, stop2ForF
     }
     
     //get the stopTimes
-    await $.ajax({ 
-
-        method: "GET",
-        url: bkk + "arrivals-and-departures-for-stop.json",
-        dataType: "jsonp",
-        data: {
-            stopId:id,
-            minutesBefore:time,
-            minutesAfter:0,
-            includeReferences:false
-        },
-
-        success:function(r){
-
-            //we have some stopTimes, let's check when the associated trips visited the stops
-            departures = r.data.entry.stopTimes;
-
-        },
-
-        error:function (xhr, ajaxOptions, thrownError) {
-
-            console.log("Error in request:");
-            console.log(thrownError);
-
-        }
-
+    await fetchJsonp(`${bkk}arrivals-and-departures-for-stop.json?stopId=${id}&minutesBefore=${time}&minutesAfter=0&includeReferences=false`)
+    .then(response => response.json())
+    .then(json => {
+        //we have some stopTimes, let's check when the associated trips visited the stops
+        departures = json.data.entry.stopTimes;
+    })
+    .catch(err => {
+        console.debug(`An error occured while downloading stopTimes for ${id}`);
+        console.debug(err);
     });
 
     //check stop times
@@ -631,57 +572,42 @@ async function downloadSegment(line, stops, stop1, stop2, isFinalStop, stop2ForF
         trips.push(currentTrip);
         
         //check stop1 time
-        await $.ajax({
+        await fetchJsonp(`${bkk}trip-details.json?tripId=${departures[i].tripId}&includeReferences=false`)
+        .then(response => response.json())
+        .then(json => {
+            let stopTimes = json.data.entry.stopTimes;
 
-            method: "Get",
-            url: bkk + "trip-details.json",
-            dataType: "jsonp",
-            data: {
-                tripId:departures[i].tripId,
-                includeReferences:false
-            },
+            for (let i = 0; i < stopTimes.length; i++) {
+                if (stopTimes[i].stopId==stop1.id) {
 
-            success:function(r) {
-
-                let stopTimes = r.data.entry.stopTimes;
-
-                for (let i=0; i<stopTimes.length; i++) {
-                    if (stopTimes[i].stopId==stop1.id) {
-
-                        if (stopTimes[i].predictedDepartureTime==undefined) {
-                            //no difference between predicted and normal
-                            currentTrip.setOnlyTime1(stopTimes[i].departureTime);
-
-                        } else {
-                            //there is difference between predicted and normal
-                            currentTrip.setTime1(stopTimes[i].predictedDepartureTime, stopTimes[i].departureTime);
-                        }
-
-                        break;
-                    } 
-                }
-
-                if (isFinalStop) {
-                    let arrival = stopTimes[stopTimes.length-1];
-                    if (arrival.predictedArrivalTime==undefined) {
+                    if (stopTimes[i].predictedDepartureTime==undefined) {
                         //no difference between predicted and normal
-                        currentTrip.setOnlyTime2(arrival.arrivalTime);
+                        currentTrip.setOnlyTime1(stopTimes[i].departureTime);
+
                     } else {
                         //there is difference between predicted and normal
-                        currentTrip.setTime2(arrival.predictedArrivalTime, arrival.arrivalTime);
+                        currentTrip.setTime1(stopTimes[i].predictedDepartureTime, stopTimes[i].departureTime);
                     }
-                }
-            },
 
-            error:function (xhr, ajaxOptions, thrownError) {
-
-                console.log("Error in request:");
-                console.log(thrownError);
-    
+                    break;
+                } 
             }
 
+            if (isFinalStop) {
+                let arrival = stopTimes[stopTimes.length-1];
+                if (arrival.predictedArrivalTime==undefined) {
+                    //no difference between predicted and normal
+                    currentTrip.setOnlyTime2(arrival.arrivalTime);
+                } else {
+                    //there is difference between predicted and normal
+                    currentTrip.setTime2(arrival.predictedArrivalTime, arrival.arrivalTime);
+                }
+            }
+        })
+        .catch(err => {
+            console.debug(`An error occured while trying to get trip details for ${departures[i]}`);
+            console.debug(err);
         });
-
     }
     
     return trips;

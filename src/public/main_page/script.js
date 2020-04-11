@@ -35,7 +35,6 @@ function setup() {
     let pickLineText = document.getElementById("pick-line-text");
     let hotSmokeMenu = document.getElementsByClassName("hot-smoke-menu")[0];
     let hotSmokeItems = document.getElementsByClassName("hot-smoke");
-    const logoutLink = document.querySelector("#logout");
 
     hotSmokeMenu.addEventListener("click", () => {
         for(const arrow of document.querySelectorAll(".hotsmokin-arrow")) {
@@ -50,14 +49,6 @@ function setup() {
         if (event.keyCode == 13)
             loadLine();
     });
-
-    if (logoutLink) {
-        logoutLink.addEventListener("click", () => {
-            $.post("/logout", () => {
-                window.location.reload();
-            });
-        });
-    }
 
     slowUpdate();
     setInterval(slowUpdate,10000);
@@ -91,30 +82,37 @@ async function watchlist_add() {
             name: stop2.name
         }
     }
-    $.ajax({
 
-        method:"POST",
-        url: url,
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        data: JSON.stringify(data),
-        
-        success:function() {
-            updateWatchlistButton();
+    fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
         },
-
-        error: function(r) {
-
-            if (r.status==401) {
+        body: JSON.stringify(data)
+    })
+    .then(async response => {
+        return {
+            json: await response.json(),
+            status: response.status
+        };
+    })
+    .then(res => {
+        if (res.json.status === "success") {
+            updateWatchlistButton();
+        } else if (res.json.status === "fail") {
+            if (res.status === 401) {
                 window.location.replace("/");
             } else {
-                console.log("Failed to add segment to user watchloist");
+                console.debug("Failed to add segment to user watchlist");
             }
-
+        } else {
+            alert("Ismeretlen hiba történt, kérjük probálkozzon újra később.");
         }
-
+    })
+    .catch(err => {
+        console.debug(err);
+        alert("Ismeretlen hiba történt, kérjük probálkozzon újra később.");
     });
-
 }
 
 async function watchlist_remove() {
@@ -130,30 +128,36 @@ async function watchlist_remove() {
         stop2Id: stop2.id,
     };
 
-    $.ajax({
-
+    fetch(url, {
         method: "DELETE",
-        url: url,
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        data: JSON.stringify(data),
-
-        success: function(r) {
-            updateWatchlistButton();
+        headers: {
+            "Content-Type": "application/json"
         },
-
-        error: function(r) {
-
-            if (r.status==401) {
+        body: JSON.stringify(data)
+    })
+    .then(async response => {
+        return {
+            json: await response.json(),
+            status: response.status
+        };
+    })
+    .then(res => {
+        if (res.json.status === "success") {
+            updateWatchlistButton();
+        } else if (res.json.status === "fail") {
+            if (res.status === 401) {
                 window.location.replace("/");
             } else {
-                console.log("Failed to remove segment from user watchlist");
+                console.debug("Failed to remove segment from user watchlist");
             }
-
+        } else {
+            alert("Ismeretlen hiba történt, kérjük probálkozzon újra később.");
         }
-
+    })
+    .catch(err => {
+        console.debug(err);
+        alert("Ismeretlen hiba történt, kérjük probálkozzon újra később.");
     });
-
 }
 
 //Function for updating the state of wl-btn
@@ -175,28 +179,29 @@ async function updateWatchlistButton() {
         let url = "/api/users/"+username+"/watchlist";
         let result = null;
 
-        await $.ajax({
-
-            method: "GET",
-            url: url,
-            dataType: "json",
-
-            success: function(r) {
-                result = r.data;
-            },
-            error: function(r) {
-
-                if (r.status==401) {
-                    window.location.replace("/");
-                } else {
-                    result = null;
-                }
-
+        await fetch(url)
+        .then(async response => {
+            return {
+                json: await response.json(),
+                status: response.status
+            };
+        })
+        .then(res => {
+            if (res.json.status === "success") {
+                result = res.json.data;
+            } else if (res.status === 401) {
+                window.location.replace("/");
+            } else {
+                result = null;
             }
+        })
+        .catch(err => {
+            result = null;
         });
 
         if (result==null) {
-            console.log("An error occured while loading user watchlist.");
+            wl_btn.innerText = "Hiba";
+            console.debug("An error occured while loading user watchlist.");
             return;
         }
 
@@ -474,7 +479,7 @@ async function updateTime() {
 //Function for uploading data for hot smokin' statistics
 function uploadHot() {
 
-    let data = JSON.stringify({
+    let data = {
         line: {
             id: line.id,
             name: line.shortName
@@ -487,84 +492,93 @@ function uploadHot() {
             id: stop2.id,
             name: stop2.name
         }
-    });
+    };
 
-    $.ajax({
-        
-        method:"POST",
-        url:hotSmokinUrl,
-        contentType: "application/json; charset=utf-8",
-        dataType:"json",
-        data: data,
-
-        success: function(r) {
-            console.log("Sent data for hot smokin statistics")
+    fetch(hotSmokinUrl, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
         },
-        error: function(r) {
-            console.log("An error occured while uploading hot smokin' data");
-            if (r.responseJSON && r.responseJSON.status === "error") {
-                console.log(r.message);
-            } else {
-                if (r.responseJSON.data.line)
-                    console.log(r.responseJSON.data.line);
-                if (r.responseJSON.data.stop1)
-                    console.log(r.responseJSON.data.stop1);
-                if (r.responseJSON.data.stop2)
-                    console.log(r.responseJSON.data.stop2);
-            }
-        },
-        
-
+        body: JSON.stringify(data)
+    })
+    .then(async response => {
+        return {
+            json: await response.json(),
+            status: response.status
+        };
+    })
+    .then(res => {
+        if (res.json.status === "success") {
+            console.debug("Sent data for hotsmokin statistics");
+        } else if (res.json.status === "fail") {
+            if (res.json.data.line)
+                console.debug(res.json.data.line);
+            if (res.json.data.stop1)
+                console.debug(res.json.data.stop1);
+            if (res.json.data.stop2)
+                console.debug(res.json.data.stop2);
+        } else {
+            console.debug("A server error occured while sending statistics for hotsmokin");
+            console.debug(res.message);
+        }
+    })
+    .catch(err => {
+        console.debug("A server error occured while sending statistics for hotsmokin");
+        console.debug(err);
     });
-
 }
 
-//Function for downloading hot smokin' top 3 and showing them
+//Function for downloading hot smokin' top 4 list and showing it
 async function downloadHot() {
-    await $.ajax({
-
-        method:"GET",
-        url:hotSmokinUrl,
-        dataType:"json",
-
-        success:function(r) {
-
-            if (r.status === "success") {
-                for (let i = 0; i < 4; i++) {
-                    const hotSmokinItem = document.querySelector(`#hot-smoke-${i + 1}`);
-                    if (r.data[i]) {
-                        hotSmokinItem.innerText = `${r.data[i].line.name}: ${r.data[i].stop1.name} - ${r.data[i].stop2.name}`;
-                        hotSmokinItem.title = `${r.data[i].line.name}: ${r.data[i].stop1.name} - ${r.data[i].stop2.name}`;
-                    } else {
-                        hotSmokinItem.innerText = "Nincs elég adat az információ megjelenítéséhez";
-                        hotSmokinItem.title = "Nincs elég adat az információ megjelenítéséhez";
-                    }
+    await fetch(hotSmokinUrl)
+    .then(async response => {
+        return {
+            json: await response.json(),
+            status: response.status
+        };
+    })
+    .then(res => {
+        if (res.json.status === "success") {
+            for (let i = 0; i < 4; i++) {
+                const hotSmokinItem = document.querySelector(`#hot-smoke-${i + 1}`);
+                if (res.json.data[i]) {
+                    hotSmokinItem.innerText = `${res.json.data[i].line.name}: ${res.json.data[i].stop1.name} - ${res.json.data[i].stop2.name}`;
+                    hotSmokinItem.title = `${res.json.data[i].line.name}: ${res.json.data[i].stop1.name} - ${res.json.data[i].stop2.name}`;
+                } else {
+                    hotSmokinItem.innerText = "Nincs elég adat az információ megjelenítéséhez";
+                    hotSmokinItem.title = "Nincs elég adat az információ megjelenítéséhez";
                 }
             }
 
-            currentHot = r.data;
-
-        },
-
-        error:function(r) {
-
-            console.log("An error occured while downloading hot smokin' data");
-            if (r.responseJSON) {
-                console.log(r.responseJSON.message);
+            currentHot = res.json.data;
+        } else {
+            console.debug("An error occured while downloading hot smokin' data");
+            
+            if (res.json.message) {
+                console.debug(res.json.message);
             }
-
+            
             for (let i = 0; i < 4; i++) {
                 const hotsmokinItem = document.getElementById(`hot-smoke-${i + 1}`)
                 hotsmokinItem.innerText = "Hiba történt a betöltés során";
                 hotsmokinItem.title = "Hiba történt a betöltés során";
             }
-
+            
             currentHot = 0;
-        
         }
-
+    })
+    .catch(err => {
+        console.debug("An error occured while downloading hot smokin' data");
+        console.debug(err);
+        
+        for (let i = 0; i < 4; i++) {
+            const hotsmokinItem = document.getElementById(`hot-smoke-${i + 1}`)
+            hotsmokinItem.innerText = "Hiba történt a betöltés során";
+            hotsmokinItem.title = "Hiba történt a betöltés során";
+        }
+    
+        currentHot = 0;
     });
-
 }
 
 //Function for checking the selected stops
@@ -695,34 +709,18 @@ async function downloadSegment() {
     } else {
         id = stop2.id;
     }
-    
+
     //get the stopTimes
-    await $.ajax({ 
-
-        method: "GET",
-        url: bkk + "arrivals-and-departures-for-stop.json",
-        dataType: "jsonp",
-        data: {
-            stopId:id,
-            minutesBefore:time,
-            minutesAfter:0,
-            includeReferences:false
-        },
-
-        success:function(r){
-
-            //we have some stopTimes, let's check when the associated trips visited the stops
-            departures=r.data.entry.stopTimes;
-
-        },
-
-        error:function (xhr, ajaxOptions, thrownError) {
-
-            console.log("Error in request:");
-            console.log(thrownError);
-
-        }
-
+    await fetchJsonp(`${bkk}arrivals-and-departures-for-stop.json?stopId=${id}&minutesBefore=${time}&minutesAfter=0&includeReferences=false`)
+    .then(response => response.json())
+    .then(json => {
+        //we have some stopTimes, let's check when the associated trips visited the stops
+        departures = json.data.entry.stopTimes;
+    })
+    .catch(err => {
+        console.debug(`An error occured while downloading stopTimes for ${id}`);
+        console.debug(err);
+        alert("Ismeretlen hiba történt az utazási idő számítása során. Kérjük próbálkozzon újra később.");
     });
 
     //check stop times
@@ -738,79 +736,66 @@ async function downloadSegment() {
                 //no difference between predicted and normal
                 currentTrip = new CalculatedTrip();
                 currentTrip.setOnlyTime2(departures[i].arrivalTime);
-                console.log("Set stop2 time of a trip based on:");
-                console.log(departures[i]);
+                console.debug("Set stop2 time of a trip based on:");
+                console.debug(departures[i]);
 
             } else {
 
                 //there is difference between predicted and normal
                 currentTrip = new CalculatedTrip();
                 currentTrip.setTime2(departures[i].predictedArrivalTime, departures[i].arrivalTime);
-                console.log("Set stop2 time of a trip based on:");
-                console.log(departures[i]);
+                console.debug("Set stop2 time of a trip based on:");
+                console.debug(departures[i]);
 
             }
 
         } else {
             currentTrip = new CalculatedTrip();
         }
-
+        
         trips.push(currentTrip);
         
         //check stop1 time
-        await $.ajax({
+        await fetchJsonp(`${bkk}trip-details.json?tripId=${departures[i].tripId}&includeReferences=false`)
+        .then(response => response.json())
+        .then(json => {
+            let stopTimes = json.data.entry.stopTimes;
 
-            method: "Get",
-            url: bkk + "trip-details.json",
-            dataType: "jsonp",
-            data: {
-                tripId:departures[i].tripId,
-                includeReferences:false
-            },
+            for (let i = 0; i < stopTimes.length; i++) {
+                if (stopTimes[i].stopId == stop1.id) {
 
-            success:function(r) {
-
-                let stopTimes = r.data.entry.stopTimes;
-
-                for (let i=0; i<stopTimes.length; i++) {
-                    if (stopTimes[i].stopId==stop1.id) {
-
-                        if (stopTimes[i].predictedDepartureTime==undefined) {
-                            //no difference between predicted and normal
-                            currentTrip.setOnlyTime1(stopTimes[i].departureTime);
-                            console.log("Set stop1 time of a trip based on:");
-                            console.log(stopTimes[i]);
-
-                        } else {
-                            //there is difference between predicted and normal
-                            currentTrip.setTime1(stopTimes[i].predictedDepartureTime, stopTimes[i].departureTime);
-                            console.log("Set stop1 time of a trip based on:");
-                            console.log(stopTimes[i]);
-                        }
-
-                        break;
-                    } 
-                }
-
-                if (isFinalStop) {
-                    let arrival = stopTimes[stopTimes.length-1];
-                    if (arrival.predictedArrivalTime==undefined) {
+                    if (stopTimes[i].predictedDepartureTime==undefined) {
                         //no difference between predicted and normal
-                        currentTrip.setOnlyTime2(arrival.arrivalTime);
+                        currentTrip.setOnlyTime1(stopTimes[i].departureTime);
+                        console.debug("Set stop1 time of a trip based on:");
+                        console.debug(stopTimes[i]);
+
                     } else {
                         //there is difference between predicted and normal
-                        currentTrip.setTime2(arrival.predictedArrivalTime, arrival.arrivalTime);
+                        currentTrip.setTime1(stopTimes[i].predictedDepartureTime, stopTimes[i].departureTime);
+                        console.debug("Set stop1 time of a trip based on:");
+                        console.debug(stopTimes[i]);
                     }
-                }
-            },
 
-            error:function (xhr, ajaxOptions, thrownError) {
-
-                console.log("Error in request:");
-                console.log(thrownError);
-    
+                    break;
+                } 
             }
 
+            if (isFinalStop) {
+                let arrival = stopTimes[stopTimes.length-1];
+                if (arrival.predictedArrivalTime==undefined) {
+                    //no difference between predicted and normal
+                    currentTrip.setOnlyTime2(arrival.arrivalTime);
+                } else {
+                    //there is difference between predicted and normal
+                    currentTrip.setTime2(arrival.predictedArrivalTime, arrival.arrivalTime);
+                }
+            }
+        })
+        .catch(err => {
+            console.debug(`An error occured while trying to get trip details for ${departures[i]}`);
+            console.debug(err);
+            alert("Ismeretlen hiba történt az utazási idő számítása során. Kérjük próbálkozzon újra később.");
         });
 
     }
@@ -857,10 +842,10 @@ function showSegmentInformation(trips) {
             document.getElementById("result").innerHTML = "hiba történt!";
         }
         
-        console.log("An error occured, avg travel time or avg latency came out to be NaN. Trips used for calculations:");
-        console.log(usefulTrips);
-        console.log("All downloaded trips:");
-        console.log(trips);
+        console.debug("An error occured, avg travel time or avg latency came out to be NaN. Trips used for calculations:");
+        console.debug(usefulTrips);
+        console.debug("All downloaded trips:");
+        console.debug(trips);
 
     } else {
 
@@ -868,8 +853,8 @@ function showSegmentInformation(trips) {
             avgTravelTime+" perc"
         );
 
-        console.log("Calculation successfull, avg travel time: "+avgTravelTime+", avg gained latency: "+avgLatency+". Trips used:");
-        console.log(usefulTrips);
+        console.debug("Calculation successfull, avg travel time: "+avgTravelTime+", avg gained latency: "+avgLatency+". Trips used:");
+        console.debug(usefulTrips);
         
     }     
     
@@ -1086,37 +1071,24 @@ function clearStops() {
 //Function for downloading the list of stops and variants of the selected line
 async function loadStops() {
 
-    await $.ajax({
+    await fetchJsonp(`${bkk}route-details.json?routeId=${line.id}`)
+    .then(response => response.json())
+    .then(json => {
+        if (json.status === "OK") {
+            stops = json.data.references.stops;
+            variants = json.data.entry.variants;
+        } else {
+            console.debug("Request succeeded but stop loading failed.");
+            resetStops();
+            return;
+        }
 
-        method: "GET",
-        url:bkk + "route-details.json",
-        dataType: "jsonp",
-        data: {
-            routeId:line.id,
-        },
-
-        success:function (r) {
-
-            if (r.status == "OK") {
-                stops = r.data.references.stops;
-                variants = r.data.entry.variants;
-            } else {
-                console.log("Request succeeded but stop loading failed.");
-                resetStops();
-                return;
-            }
-
-            fillVariants();
-            
-        },
-
-        error:function (xhr, ajaxOptions, thrownError) {
-
-            console.log("Error in request:");
-            console.log(thrownError);
-
-        },
-
+        fillVariants();
+    })
+    .catch(err => {
+        console.debug("Error while loading stops");
+        console.debug(err);
+        alert("Ismeretlen hiba történt a megállók betöltése során. Kérjük próbálkozzon újra később.");
     });
 
 }
@@ -1136,73 +1108,59 @@ async function loadLine() {
 
     resetStops();
 
-    await $.ajax({
-
-        method:"GET",
-        url:bkk+"search.json",
-        dataType:"jsonp",
-        data:{
-            query:input,
-        },
-
-        success:function (r) {
-
-            line = r.data.references.routes;
-            let done = false;
+    await fetchJsonp(`${bkk}search.json?query=${input}`)
+    .then(response => response.json())
+    .then(json => {
+        line = json.data.references.routes;
+        let done = false;
+        for (let prop in line) {
+            if (line[prop].shortName.toLowerCase()==input.toLowerCase()) { //same name
+                if (line[prop].type.toLowerCase()==vehicleType.toLowerCase()) { //same type of vehicle
+                    console.debug("Found a route with matching name");
+                    line = line[prop];
+                    done = true;
+                    break;
+                }
+            }
+        }
+        if (!done) {
             for (let prop in line) {
-                if (line[prop].shortName.toLowerCase()==input.toLowerCase()) { //same name
-                    if (line[prop].type.toLowerCase()==vehicleType.toLowerCase()) { //same type of vehicle
-                        console.log("Found a route with matching name");
-                        line = line[prop];
-                        done = true;
-                        break;
-                    }
+                if (line[prop].type.toLowerCase()==vehicleType.toLowerCase()) { //same type of vehicle
+                    console.debug("Found a route based on the input");
+                    line = line[prop];
+                    done = true;
+                    break;
                 }
             }
-            if (!done) {
-                for (let prop in line) {
-                    if (line[prop].type.toLowerCase()==vehicleType.toLowerCase()) { //same type of vehicle
-                        console.log("Found a route based on the input");
-                        line = line[prop];
-                        done = true;
-                        break;
-                    }
-                }
-            }
+        }
 
-            //special cases for daily-changing routes (sweet hard code)
-            let today = new Date().getDay();
-            if (line.id == "BKK_MP53" && (today == 6 || today == 0)) { //normal M3 replacement should be weekend M3 repl at weekends
-                line.id = "BKK_MP533";
-                line.description = "Kőbánya-Kispest M | Lehel tér M";
-            }
-            if (line.id == "BKK_3031") {
-                line.id="BKK_3030";
-                line.description="Mexikói út M | Gubacsi út / Határ út";
-            }
+        //special cases for daily-changing routes (sweet hard code)
+        let today = new Date().getDay();
+        if (line.id == "BKK_MP53" && (today == 6 || today == 0)) { //normal M3 replacement should be weekend M3 repl at weekends
+            line.id = "BKK_MP533";
+            line.description = "Kőbánya-Kispest M | Lehel tér M";
+        }
+        if (line.id == "BKK_3031") {
+            line.id="BKK_3030";
+            line.description="Mexikói út M | Gubacsi út / Határ út";
+        }
 
-            if (!line.id || line.id == "BKK_9999") { //check if the returned line is 9999(object for special lines)
-                alert("Nem találtunk járatot");
-                console.log("No search results based on text \'"+input.toLowerCase()+"\'");
-                line = 0;
-                
-                return;
-            } else {
-                console.log("Loading line stops and variants");
-                colorScheme = vehicleType;
-                updateScheme();
-                loadStops();
-            }
-
-        },
-
-        error:function (xhr, ajaxOptions, thrownError) {
-
-            console.log("Error in request:");
-            console.log(thrownError);
-
-        },
-        
+        if (!line.id || line.id == "BKK_9999") { //check if the returned line is 9999(object for special lines)
+            alert("Nem találtunk járatot");
+            console.debug("No search results based on text \'"+input.toLowerCase()+"\'");
+            line = 0;
+            
+            return;
+        } else {
+            console.debug("Loading line stops and variants");
+            colorScheme = vehicleType;
+            updateScheme();
+            loadStops();
+        }
+    })
+    .catch(err => {
+        alert("Hiba történt a járat keresése során. Kérjük próbálkozzon újra később.");
+        console.debug(err);
     });
 
     if (line == 0)

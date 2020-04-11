@@ -125,34 +125,34 @@ function signup() {
     submitButton.disabled = true;
     submitButton.value = "Kérjük várjon...";
 
-    $.ajax({
-
+    fetch(signupUrl, {
         method: "POST",
-        url: signupUrl,
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        data: JSON.stringify({username: usernameInput.value, password: passwordInput.value, showWatchlistByDefault: isWatchlist}),
-
-        success: function(r) {
-
-            if (r.status=="success") {
-
-                window.location.assign("/");
-
-            } 
-
+        headers: {
+            "Content-Type": "application/json"
         },
-
-        error: function(r) {
-
-            if (r.status==409) {
+        body: JSON.stringify({ username: usernameInput.value, password: passwordInput.value, showWatchlistByDefault: isWatchlist })
+    })
+    .then(async response => {
+        return {
+            json: await response.json(),
+            status: response.status
+        };
+    })
+    .then(res => {
+        submitButton.value = "Regisztráció";
+        submitButton.disabled = false;
+        
+        if (res.json.status === "success") {
+            window.location.assign("/");
+        } else if (res.json.status === "fail") {
+            if (res.status === 409) {
 
                 usernameError.innerText = "A megadott felhasználónév már foglalt.";
                 usernameInput.style.border = ".07em solid rgb(255, 78, 78)";
 
-            } else if (r.status==422) {
+            } else if (res.status === 422) {
 
-                if (r.responseJSON.data.username) {
+                if (res.json.data.username) {
                     usernameError.innerText = "A megadott felhasználónév formátuma nem megfelelő.";
                     usernameInput.style.border = ".07em solid rgb(255, 78, 78)";
                 } else {
@@ -160,19 +160,19 @@ function signup() {
                     passwordInput.style.border = ".07em solid rgb(255, 78, 78)";
                 }
 
-
             } else {
-
                 alert("Hiba történt a regisztráció során, kérjük próbálkozzon újra később.");
-
             }
-
-            submitButton.disabled = false;
-            submitButton.value = "Regisztráció";
-
+        } else {
+            alert("Hiba történt a regisztráció során, kérjük próbálkozzon újra később.");
         }
+    })
+    .catch(err => {
+        submitButton.value = "Bejelentkezés";
+        submitButton.disabled = false;
+        console.debug(err);
+        passwordError.innerText = "Ismeretlen hiba történt a bejelentkezés során, kérjük probálkozzon újra később.";
     });
-
 }
 
 function checkUsernameFormat(username) {

@@ -105,35 +105,32 @@ function login() {
     submitButton.value = "Kérjük várjon...";
     submitButton.disabled = true;
 
-    $.ajax({
-
+    fetch(loginUrl, {
         method: "POST",
-        url: loginUrl,
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        data: JSON.stringify({username: usernameInput.value, password: passwordInput.value}),
-
-        success: function(r) {
-
-            if (r.status=="success") {
-
-                window.location.assign("/");
-
-            } 
-
+        headers: {
+            "Content-Type": "application/json"
         },
+        body: JSON.stringify({ username: usernameInput.value, password: passwordInput.value })
+    })
+    .then(async response => {
+        return {
+            json: await response.json(),
+            status: response.status
+        };
+    })
+    .then(res => {
+        submitButton.value = "Bejelentkezés";
+        submitButton.disabled = false;
 
-        error: function(r) {
+        if (res.json.status === "success") {
+            window.location.assign("/");
+        } else if (res.json.status === "fail") {
+            if (res.status === 401) {
 
-            submitButton.value = "Bejelentkezés";
-            submitButton.disabled = false;
-
-            if (r.status==401) {
-
-                if (r.responseJSON.data.username) {
+                if (res.json.data.username) {
                     usernameError.innerText = "A megadott felhasználónévvel nem található fiók";
                     usernameInput.style.border = ".07em solid rgb(255, 78, 78)";
-                } else if (r.responseJSON.data.password) {
+                } else if (res.json.data.password) {
                     passwordError.innerText = "A megadott jelszó helytelen";
                     passwordInput.style.border = ".07em solid rgb(255, 78, 78)";
                 } else {
@@ -142,14 +139,13 @@ function login() {
                     usernameInput.style.border = ".07em solid rgb(255, 78, 78)";
                     passwordInput.style.border = ".07em solid rgb(255, 78, 78)";
                 }
-                
-                
-            } else if (r.status==422) {
-                
-                if (r.responseJSON.data.username) {
+
+            } else if (res.status === 422) {
+
+                if (res.json.data.username) {
                     usernameError.innerText = "A megadott felhasználónév formátuma nem megfelelő";
                     usernameInput.style.border = ".07em solid rgb(255, 78, 78)";
-                } else if (r.responseJSON.data.password) {
+                } else if (res.json.data.password) {
                     passwordError.innerText = "A megadott jelszó formátuma nem megfelelő";
                     passwordInput.style.border = ".07em solid rgb(255, 78, 78)";
                 } else {
@@ -158,18 +154,18 @@ function login() {
                     usernameInput.style.border = ".07em solid rgb(255, 78, 78)";
                     passwordInput.style.border = ".07em solid rgb(255, 78, 78)";
                 }
- 
-            } else {
 
-                passwordError.innerText = "Ismeretlen hiba történt a bejelentkezés során, kérjük probálkozz újra később.";
-                
             }
-            
-
+        } else {
+            passwordError.innerText = "Ismeretlen hiba történt a bejelentkezés során, kérjük probálkozzon újra később.";
         }
-
+    })
+    .catch(err => {
+        submitButton.value = "Bejelentkezés";
+        submitButton.disabled = false;
+        console.debug(err);
+        passwordError.innerText = "Ismeretlen hiba történt a bejelentkezés során, kérjük probálkozzon újra később.";
     });
-
 }
 
 function checkUsernameFormat(username) {

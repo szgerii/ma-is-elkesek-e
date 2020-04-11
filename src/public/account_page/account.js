@@ -9,13 +9,6 @@ let oldSettings = {
 }
 
 function setup() {
-    const logoutLink = document.querySelector("#logout");
-    
-    logoutLink.addEventListener("click", () => {
-        $.post("/logout", () => {
-            window.location.assign("/");
-        });
-    });
 
     document.querySelector("#input-password").addEventListener("keyup", (event) => {
         if (event.keyCode == 13)
@@ -40,34 +33,33 @@ function loadOldSettings() {
 
     let url = "/api/users/" + currentUsername;
 
-    $.ajax({
-
-        method: "GET",
-        url: url,
-        dataType: "json",
-
-        success: function(r) {
-
-            oldSettings.username = r.data.username;
-            oldSettings.isWatchlist = r.data.showWatchlistByDefault;
-
+    fetch(url)
+    .then(async response => {
+        return {
+            json: await response.json(),
+            status: response.status
+        };
+    })
+    .then(res => {
+        if (res.json.status === "success") {
+            oldSettings.username = res.json.data.username;
+            oldSettings.isWatchlist = res.json.data.showWatchlistByDefault;
+    
             document.querySelector("#input-username").placeholder = oldSettings.username;
-            if (oldSettings.isWatchlist) document.querySelector("#input-dd-watchlist").value = "true";
-            else document.querySelector("#input-dd-watchlist").value="false";
-
+            document.querySelector("#input-dd-watchlist").value = `${oldSettings.isWatchlist}`;
+    
             button.setAttribute("onclick","saveChanges();");
             button.value = "Változtatások mentése";
-
-        }, 
-
-        error: function(r) {
-
-            button.value = "Hiba történt.";
-
+        } else {
+            alert("Ismeretlen hiba történt. Kérjük próbáljon meg újra bejelentkezni, vagy próbálkozzon újra később");
+            window.location.assign("/");
         }
-
+    })
+    .catch(err => {
+        console.debug(err);
+        alert("Ismeretlen hiba történt. Kérjük próbáljon meg újra bejelentkezni, vagy próbálkozzon újra később");
+        window.location.assign("/");
     });
-
 }
 
 function saveChanges() {
@@ -212,51 +204,48 @@ function saveChanges() {
     button.innerText = "Kérjük várjon...";
     let url = "/api/users/" + currentUsername;
 
-    $.ajax({
-
+    fetch(url, {
         method: "PUT",
-        url: url,
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        data: JSON.stringify(data),
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    })
+    .then(async response => {
+        return {
+            json: await response.json(),
+            status: response.status
+        };
+    })
+    .then(res => {
+        if (res.json.status === "success") {
+            window.location.assign("/");
+        } else if (res.json.status === "fail") {
 
-        success: function(r) {
-
-            if (r.status=="success") {
-
-                window.location.assign("/");
-
+            if (res.status === 401) {
+                passwordError.innerText = "A megadott jelszó helytelen";
+                passwordInput.style.border = ".07em solid rgb(255, 78, 78)";
+            } else if (res.status === 403) {
+                passwordError.innerText = "Hiba történt az azonosítás során. Kérjük próbáljon meg kilépni és újra bejelentkezni";
+            } else if (res.status === 409) {
+                usernameError.innerText = "Ez a felhasználónév már foglalt.";
+            } else if (res.status === 422) {
+                passwordError.innerText = "A megadott adatok formátuma helytelen";
+            } else {
+                alert("Hiba történt a mentés során. Kérjük próbálkozzon újra később");
             }
-
-        }, 
-
-        error: function(r) {
-
-            switch (r.status) {
-                case 401:
-                    passwordError.innerText = "A megadott jelszó helytelen";
-                    passwordInput.style.border = ".07em solid rgb(255, 78, 78)";
-                    break;
-
-                case 403:
-                    passwordError.innerText = "Hiba történt az azonosítás során. Kérjük próbáljon meg kilépni és újra bejelentkezni";
-                    break;
-
-                case 422:
-                    passwordError.innerText = "A megadott adatok formátuma helytelen";
-                    break;
             
-                default:
-                    alert("Hiba történt a bejelentkezés során. Kérjük próbálkozzon újra később");
-                    break;
-            }
-
-            button.innerText = "Változtatások mentése";
-
+        } else {
+            alert("Hiba történt a mentés során. Kérjük próbálkozzon újra később");
         }
 
+        button.innerText = "Változtatások mentése";
+    })
+    .catch(err => {
+        button.innerText = "Változtatások mentése";
+        console.debug(err);
+        alert("Ismeretlen hiba történt a bejelentkezés során, kérjük probálkozzon újra később.");
     });
-
 }
 
 function checkUsernameFormat(username) {
