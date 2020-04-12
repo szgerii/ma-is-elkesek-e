@@ -8,7 +8,7 @@
 
 body {
 
-    background: linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.8)), var(--background-url);
+    background: linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.7)), var(--background-url);
     background-size: cover;
     background-attachment: fixed;
     background-position: var(--background-positioning-desktop);
@@ -160,8 +160,8 @@ select {
 
 .wl-btn-add {
 
-    background-color: greenyellow;
-    color: black;
+    background-color: rgb(72, 148, 72);
+    color: white;
 
 }
 

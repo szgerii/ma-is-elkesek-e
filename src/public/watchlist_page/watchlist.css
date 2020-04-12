@@ -138,8 +138,9 @@ body {
 }
 
 #empty-info {
-    color: var(--color-main);
-    font-size: var(--fontSize-desktop-large);
+    color: var(--color-bus);
+    font-size: calc(var(--fontSize-desktop-large) + 0.3em);
+    font-weight: 900;
     text-align: center;
 }
 

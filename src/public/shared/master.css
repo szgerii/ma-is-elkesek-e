@@ -13,26 +13,27 @@
     --color-main: white; /* Color of main text/inputs */ /* DYNAMIC */
     --color-text: black; /*Color of text in inputs */ /* DYNAMIC */
     --color-navText: white; /*Color of text in navBar*/ /*DYNAMIC */
-    --color-box: rgb(20, 30, 100); /* Background color of boxes */ /* DYNAMIC */
-    --color-box-transparent: rgba(20, 30, 100, 0.5); /*Color of half tranparent boxes */ /* DYNAMIC */
+    --color-box: rgb(30, 40, 100); /* Background color of boxes */ /* DYNAMIC */
+    --color-box-transparent: rgba(30, 40, 100, 0.75); /*Color of half tranparent boxes */ /* DYNAMIC */
 
-    --color-bus: rgb(30,40,100);
-    --color-tram: rgb(180,180,50);
-    --color-metro: rgb(80,80,80);
-    --color-trolley: rgb(185, 50, 50);
+    --color-bus: rgb(30, 40, 100);
+    --color-tram: rgb(250, 210, 0);
+    --color-metro: rgb(80, 80, 80);
+    --color-trolley: rgb(225, 0, 0);
     --color-hev: rgb(35,135,35);
-    --color-ship: rgb(210,210,210);
-    --color-bus-transparent: rgba(30,40,100,0.5);
-    --color-tram-transparent: rgba(180,180,50,0.5);
-    --color-metro-transparent: rgba(80,80,80,0.5);
-    --color-trolley-transparent: rgba(185, 50, 50,0.5);
-    --color-hev-transparent: rgba(35,135,35,0.5);
-    --color-ship-transparent: rgba(210,210,210,0.5);
+    --color-ship: rgb(235,235,235);
+    --color-bus-transparent: rgba(30,40,100,0.75);
+    --color-tram-transparent: rgba(250, 210, 0,0.65);
+    --color-metro-transparent: rgba(80,80,80,0.75);
+    --color-trolley-transparent: rgba(225, 0, 0,0.75);
+    --color-hev-transparent: rgba(35,135,35,0.75);
+    --color-ship-transparent: rgba(235, 235, 235, 0.75);
 
     --background-url: url("assets/images/bg-bus.png"); /* Url of the background image */ /* DYNAMIC */
     --background-positioning-desktop: 0px 0px; /* Positioning of the background on dekstop */ /* DYNAMIC */
     --background-positioning-mobile: -700px 0px; /* Positioning of the background on phone */ /* DYNAMIC */
-	--background-gradient: linear-gradient(150deg, rgb(47, 60, 87), rgb(33, 100, 72));
+    /*--background-gradient: linear-gradient(150deg, rgb(47, 60, 87), rgb(33, 100, 72));*/
+    --background-gradient: linear-gradient(150deg, rgb(150, 202, 252), rgb(39, 111, 170));
 }
 
 nav {
