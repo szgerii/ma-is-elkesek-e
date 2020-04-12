@@ -237,7 +237,6 @@ async function updateWatchlistButton() {
 function updateScheme() {
 
     let stopSigns = document.getElementsByClassName("stopSign-img");
-    let stopSignUrl = "";
 
     switch (colorScheme) {
 
@@ -253,7 +252,7 @@ function updateScheme() {
             document.documentElement.style.setProperty('--background-positioning-desktop','0px 0px');
             document.documentElement.style.setProperty('--background-positioning-mobile','-700px 0px');
             
-            stopSignUrl = "assets/images/stopSign-bus.png";
+            stopSigns[0].src = stopSigns[1].src = "assets/images/icon-bus.svg";
 
             break;
 
@@ -270,7 +269,7 @@ function updateScheme() {
             document.documentElement.style.setProperty('--background-positioning-desktop','0px 0px');
             document.documentElement.style.setProperty('--background-positioning-mobile','-640px 0px');
 
-            stopSignUrl = "assets/images/stopSign-tram.png";
+            stopSigns[0].src = stopSigns[1].src = "assets/images/icon-tram.svg";
 
             break;
 
@@ -287,7 +286,7 @@ function updateScheme() {
             document.documentElement.style.setProperty('--background-positioning-desktop','0px 0px');
             document.documentElement.style.setProperty('--background-positioning-mobile','-300px 0px');
             
-            stopSignUrl = "assets/images/stopSign-metro.png";
+            stopSigns[0].src = stopSigns[1].src = "assets/images/icon-metro.svg";
 
             break;
 
@@ -304,7 +303,7 @@ function updateScheme() {
             document.documentElement.style.setProperty('--background-positioning-desktop','0px 0px');
             document.documentElement.style.setProperty('--background-positioning-mobile','-500px 0px');
             
-            stopSignUrl = "assets/images/stopSign-trolley.png";
+            stopSigns[0].src = stopSigns[1].src = "assets/images/icon-trolley.svg";
 
             break;
 
@@ -321,7 +320,7 @@ function updateScheme() {
             document.documentElement.style.setProperty('--background-positioning-desktop','200px 200px');
             document.documentElement.style.setProperty('--background-positioning-mobile','-400px 0px');
             
-            stopSignUrl = "assets/images/stopSign-hev.png";
+            stopSigns[0].src = stopSigns[1].src = "assets/images/icon-hev.svg";
 
             break;
 
@@ -338,20 +337,11 @@ function updateScheme() {
             document.documentElement.style.setProperty('--background-positioning-desktop','0px 0px');
             document.documentElement.style.setProperty('--background-positioning-mobile','-300px 200px');
             
-            stopSignUrl = "assets/images/stopSign-ship.png";
+            stopSigns[0].src = stopSigns[1].src = "assets/images/icon-ship.svg";
 
             break;
 
         }
-
-        
-
-
-    }
-
-    for (let i=0; i<stopSigns.length; i++) {
-
-        stopSigns[i].setAttribute("src", stopSignUrl);
 
     }
 

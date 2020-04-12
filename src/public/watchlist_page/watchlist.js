@@ -182,7 +182,7 @@ async function drawWatchlist(skipFetch) {
 
         const image = document.createElement("img");
         image.classList.add("watchlist-image");
-        image.setAttribute("src","assets/images/icon-"+type+".png");
+        image.setAttribute("src","assets/images/icon-"+type+".svg");
 
         const text = document.createElement("div");
         text.classList.add("watchlist-text");

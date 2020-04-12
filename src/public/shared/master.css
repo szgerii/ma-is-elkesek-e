@@ -32,7 +32,6 @@
     --background-url: url("assets/images/bg-bus.png"); /* Url of the background image */ /* DYNAMIC */
     --background-positioning-desktop: 0px 0px; /* Positioning of the background on dekstop */ /* DYNAMIC */
     --background-positioning-mobile: -700px 0px; /* Positioning of the background on phone */ /* DYNAMIC */
-    /*--background-gradient: linear-gradient(150deg, rgb(47, 60, 87), rgb(33, 100, 72));*/
     --background-gradient: linear-gradient(150deg, rgb(150, 202, 252), rgb(39, 111, 170));
 }
 

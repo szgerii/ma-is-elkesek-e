@@ -345,17 +345,22 @@ select {
 .bottom-row {
 
     width: 70%;
+    height: 12vw;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-self: center;
     align-items: center;
-    margin-top: 50px;
 
 }
 
 .stopSign-img {
     width: 12vw;
+    height: 12vw;
+    padding: 2.5vh 1.5vw;
+    background-color: var(--color-box);
+    border-radius: 15px;
+    box-sizing: border-box;
 }
 
 .segment-line {
@@ -376,13 +381,6 @@ select {
     width: 20%;
     text-align: center;
 
-}
-
-@media (min-height: 600px) {
-    .bottom-row {
-        position: fixed;
-        bottom: 0;
-    }
 }
 
 @media (max-width: 600px) {

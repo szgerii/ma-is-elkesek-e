@@ -115,69 +115,34 @@
 		"type": "image/png"
 	},
 	{
-		"url": "/assets/images/stopSign-bus.png",
-		"path": "assets/images/stopSign-bus.png",
-		"type": "image/png"
+		"url": "/assets/images/icon-bus.svg",
+		"path": "assets/images/icon-bus.svg",
+		"type": "image/svg+xml"
 	},
 	{
-		"url": "/assets/images/stopSign-hev.png",
-		"path": "assets/images/stopSign-hev.png",
-		"type": "image/png"
+		"url": "/assets/images/icon-hev.svg",
+		"path": "assets/images/icon-hev.svg",
+		"type": "image/svg+xml"
 	},
 	{
-		"url": "/assets/images/stopSign-metro.png",
-		"path": "assets/images/stopSign-metro.png",
-		"type": "image/png"
+		"url": "/assets/images/icon-metro.svg",
+		"path": "assets/images/icon-metro.svg",
+		"type": "image/svg+xml"
 	},
 	{
-		"url": "/assets/images/stopSign-ship.png",
-		"path": "assets/images/stopSign-ship.png",
-		"type": "image/png"
+		"url": "/assets/images/icon-ship.svg",
+		"path": "assets/images/icon-ship.svg",
+		"type": "image/svg+xml"
 	},
 	{
-		"url": "/assets/images/stopSign-tram.png",
-		"path": "assets/images/stopSign-tram.png",
-		"type": "image/png"
+		"url": "/assets/images/icon-tram.svg",
+		"path": "assets/images/icon-tram.svg",
+		"type": "image/svg+xml"
 	},
 	{
-		"url": "/assets/images/stopSign-trolley.png",
-		"path": "assets/images/stopSign-trolley.png",
-		"type": "image/png"
-	},
-	{
-		"url": "/assets/images/icon-bus.png",
-		"path": "assets/images/icon-bus.png",
-		"type": "image/png"
-	},
-	{
-		"url": "/assets/images/icon-hev.png",
-		"path": "assets/images/icon-hev.png",
-		"type": "image/png"
-	},
-	{
-		"url": "/assets/images/icon-metro.png",
-		"path": "assets/images/icon-metro.png",
-		"type": "image/png"
-	},
-	{
-		"url": "/assets/images/icon-ship.png",
-		"path": "assets/images/icon-ship.png",
-		"type": "image/png"
-	},
-	{
-		"url": "/assets/images/icon-tram.png",
-		"path": "assets/images/icon-tram.png",
-		"type": "image/png"
-	},
-	{
-		"url": "/assets/images/icon-trolley.png",
-		"path": "assets/images/icon-trolley.png",
-		"type": "image/png"
-	},
-	{
-		"url": "/assets/images/icon-add.png",
-		"path": "assets/images/icon-add.png",
-		"type": "image/png"
+		"url": "/assets/images/icon-trolley.svg",
+		"path": "assets/images/icon-trolley.svg",
+		"type": "image/svg+xml"
 	},
 	{
 		"url": "/assets/images/triangle-white.png",
