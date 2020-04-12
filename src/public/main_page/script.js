@@ -584,7 +584,7 @@ function checkSegment() {
             document.getElementById("result").innerHTML = "Nincs járat!";
             return 0;
         } else {
-            document.getElementById("result").innerHTML = "Nincsenek kiválasztva megállók!!";
+            document.getElementById("result").innerHTML = "Nincsenek kiválasztva megállók!";
             return 0;
         }
         

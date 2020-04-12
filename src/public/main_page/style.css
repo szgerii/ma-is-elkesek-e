@@ -192,6 +192,11 @@ select {
 
 }
 
+.hotSmoke-box h2 {
+    color: var(--color-navText);
+    text-transform: uppercase;
+}
+
 .hot-smoke {
 
     background-color: var(--color-main);
@@ -315,6 +320,10 @@ select {
 
     }
 
+    .hotSmoke-box h2 {
+        display: none;
+    }
+
     .hot-smoke {
 
         margin: 0.4em;
@@ -351,6 +360,7 @@ select {
     justify-content: space-between;
     align-self: center;
     align-items: center;
+    margin-top: 5vh;
 
 }
 
