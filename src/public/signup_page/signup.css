@@ -38,6 +38,7 @@ body {
     width: 55%;
     padding: 4vh 0;
     background-color: var(--color-box);
+    border-radius: 1.6em;
 
 }
 

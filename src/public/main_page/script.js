@@ -219,7 +219,7 @@ async function updateWatchlistButton() {
 
             wl_btn.setAttribute("class","wl-btn-remove");
             wl_btn.setAttribute("onclick","watchlist_remove()");
-            wl_btn.innerText = "Listából eltávolítás";
+            wl_btn.innerText = "Listából törlés";
 
         } else {
 
@@ -372,21 +372,25 @@ async function loadPredefinedSegment(prefLine, prefStop1, prefStop2) {
     //load stops(and variants) and wait till it finishes loading
     await loadStops();
 
-    //Determine which variant is used in the predefined segment by searching for stop1 in variant1(skip user input)
-    let isVariant1Ok = false;
-    for (let i=0; i<variant1.stops.length; i++) {
+    let variant1ContainsStop1 = false, variant1ContainsStop2 = false;
 
-        if (variant1.stops[i].id==prefStop1.id) {
-
-            isVariant1Ok = true;
-            break;
-
+    //Determine which variant is used in the predefined segment by searching for stop1 in variant1
+    for (let i = 0; i < variant1.stops.length; i++) {
+        
+        if (variant1.stops[i].id === prefStop1.id) {
+            variant1ContainsStop1 = true;    
         }
 
+        if (variant1.stops[i].id === prefStop2.id) {
+            variant1ContainsStop2 = true;
+        }
+        
     }
     
-    if (isVariant1Ok) currentVariant = variant1;    
-    else currentVariant = variant2;
+    if (variant1ContainsStop1 && variant1ContainsStop2)
+        currentVariant = variant1;    
+    else
+        currentVariant = variant2;
 
     let dropdown = document.getElementById("dropdown-heading");
     dropdown.value = currentVariant.name;

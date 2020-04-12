@@ -401,21 +401,25 @@ async function loadPredefinedSegment(prefLine, prefStop1, prefStop2, output) {
     let variant1 = new predefinedRouteDirection(variants[0].headsign, variants[0].stopIds, stops);
     let variant2 = new predefinedRouteDirection(variants[1].headsign, variants[1].stopIds, stops);
     let currentVariant = variant1;
+    let variant1ContainsStop1 = false, variant1ContainsStop2 = false;
 
     //Determine which variant is used in the predefined segment by searching for stop1 in variant1
-    let isVariant1Ok = false;
-    for (let i=0; i<variant1.stops.length; i++) {
-
-        if (variant1.stops[i].id==prefStop1.id) {
-
-            isVariant1Ok = true;
-            break;
-
+    for (let i = 0; i < variant1.stops.length; i++) {
+        
+        if (variant1.stops[i].id === prefStop1.id) {
+            variant1ContainsStop1 = true;    
         }
 
+        if (variant1.stops[i].id === prefStop2.id) {
+            variant1ContainsStop2 = true;
+        }
+        
     }
-    if (isVariant1Ok) currentVariant = variant1;    
-    else currentVariant = variant2;
+    
+    if (variant1ContainsStop1 && variant1ContainsStop2)
+        currentVariant = variant1;    
+    else
+        currentVariant = variant2;
 
     //Find the used stops
     for (let i=0; i<currentVariant.stops.length; i++) {
