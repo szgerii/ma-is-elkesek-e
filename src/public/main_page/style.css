@@ -129,7 +129,7 @@ select {
 }
 
 #time-label {
-    color: var(--color-main);
+    color: var(--color-navText);
     font-size: var(--fontSize-desktop-medium);
     display: inline-block;
     margin-bottom: 1.2vh;

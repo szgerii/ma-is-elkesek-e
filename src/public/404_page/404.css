@@ -24,7 +24,7 @@ body {
 }
 
 #content-container h1,p {
-	color: var(--color-main);
+	color: var(--color-bus);
 	text-align: center;
 	margin-bottom: 5vh;
 }

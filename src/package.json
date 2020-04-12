@@ -5,7 +5,8 @@
   "repository": "github:hentesoposszum/ma-is-elkesek-e",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js -xv"
+    "start": "node server.js",
+    "dev": "nodemon -q server.js -xv"
   },
   "author": "rav",
   "license": "ISC",
