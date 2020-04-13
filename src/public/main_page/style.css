@@ -399,6 +399,7 @@ select {
 
         position: relative;
         width:100%;
+        height: auto;
         margin-top: 0.5em;
 
     }
