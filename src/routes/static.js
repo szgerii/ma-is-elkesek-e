@@ -53,34 +53,37 @@ module.exports = () => {
 			for (const file of fileList) {
 				router.route(file.url).get((req, res) => {
 					res.writeHead(200, {"Content-Type": file.type});
-					//res.end(file.content);
-					res.end(fs.readFileSync(path.resolve(__dirname, "../public", file.path))); // TODO: Replace this line with the previous one (this is only here so the server doesn't need a restart for showing changes in static files)
+					res.end(file.content);
 				});
 			}
 
 			// -- Special cases --
+
+			// Webpages
+			const guestMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_guest.html"));
+			const userMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_user.html"));
+			const notFoundPage = fs.readFileSync(path.resolve(__dirname, "../public/404_page/404.html"));
+			const accountSettingsPage = fs.readFileSync(path.resolve(__dirname, "../public/account_page/account.html"));
+			const watchlistPage = fs.readFileSync(path.resolve(__dirname, "../public/watchlist_page/watchlist.html"));
+			const guestAboutPage = fs.readFileSync(path.resolve(__dirname, "../public/about_page/about_guest.html"));
+			const userAboutPage = fs.readFileSync(path.resolve(__dirname, "../public/about_page/about_user.html"));
 			
 			// 404
-			// TODO: move notfoundpage declaration back here
 			router.setFallback((req, res) => {
-				const notFoundPage = fs.readFileSync(path.resolve(__dirname, "../public/404_page/404.html"));
 				res.writeHead(404, {"Content-Type": "text/html"});
 				res.end(notFoundPage);
 			});
 
 			// Landing page
-			// TODO: move webpage loading outside of the handler functions (development only)
 			router.route("/").getSplitter(loginSplitter,
 			// User isn't logged in
 			(req, res) => {
-				const guestMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_guest.html"));
 				res.writeHead(200, {"Content-Type": "text/html"});
 				res.end(guestMainPage);
 			},
 			// User is logged in
 			async (req, res) => {
 				if (!req.showWatchlistByDefault) {
-					const loggedInMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_user.html"));
 					res.writeHead(200, {"Content-Type": "text/html"});
 					res.end(loggedInMainPage);
 				} else {
@@ -88,41 +91,46 @@ module.exports = () => {
 				}
 			});
 
+			
 			router.route("/home").getSplitter(loginSplitter,
 			// User isn't logged in
 			(req, res) => {
-				const guestMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_guest.html"));
 				res.writeHead(200, {"Content-Type": "text/html"});
 				res.end(guestMainPage);
 			},
 			// User is logged in
 			(req, res) => {
-				const loggedInMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_user.html"));
 				res.writeHead(200, {"Content-Type": "text/html"});
-				res.end(loggedInMainPage);
+				res.end(userMainPage);
 			});
 
 			// Account settings page
 			router.route("/account").getSplitter(loginSplitter, (req, res) => {
 				res.redirect("/login");
 			}, (req, res) => {
-				// TODO: move page read outside this function
-				const accountSettingsPage = fs.readFileSync(path.resolve(__dirname, "../public/account_page/account.html"));
 				res.writeHead(200, {"Content-Type": "text/html"});
 				res.end(accountSettingsPage);
 			});
 			
-			// Watchlist settings page
+			// Watchlist page
 			router.route("/watchlist").getSplitter(loginSplitter,
 			(req, res) => {
 				res.redirect("/login");
 			}, (req, res) => {
-				// TODO: move page read outside this function
-				const watchlistPage = fs.readFileSync(path.resolve(__dirname, "../public/watchlist_page/watchlist.html"));
 				res.writeHead(200, {"Content-Type": "text/html"});
 				res.end(watchlistPage);
 			});
-
+			
+			// About page
+			router.route("/about").getSplitter(loginSplitter,
+			(req, res) => {
+				res.writeHead(200, {"Content-Type": "text/html"});
+				res.end(guestAboutPage);
+			}, (req, res) => {
+				res.writeHead(200, {"Content-Type": "text/html"});
+				res.end(userAboutPage);
+			});
+			
 			// Logout
 			router.route("/logout").post((req, res) => {
 				res.writeHead(200, [
@@ -141,7 +149,6 @@ module.exports = () => {
 						sameSite: "Strict"
 					})],
 				]);
-				const guestMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_guest.html"));
 				res.end(guestMainPage);
 			});	
 
