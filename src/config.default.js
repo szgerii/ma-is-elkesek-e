@@ -1,11 +1,11 @@
-const dbHost = "ma-is-elkesek-e-ejiov.mongodb.net";
+const dbHost = "<DATABASE HOSTNAME COMES HERE>";
 const dbUsername = "<DATABASE USERNAME COMES HERE>";
 const dbPassword = "<DATABASE PASSWORD COMES HERE>";
-const dbName = "live";
+const dbName = "<DATABASE NAME COMES HERE>";
 
 module.exports = {
 	databaseUrl: `mongodb+srv://${dbUsername}:${dbPassword}@${dbHost}/${dbName}?retryWrites=true&w=majority`,
 	jwtKey: "<JWT KEY COMES HERE>",
 	authTokenMaxAge: 30 * 24 * 60 * 60,
-	domain: "ma-is-elkesek-e.hu"
+	domain: "<DOMAIN URL FOR COOKIES COMES HERE>"
 };
