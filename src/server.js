@@ -11,13 +11,10 @@ const hotsmokinRoute = require("./routes/hotsmokin");
 const usersRoute = require("./routes/users");
 const watchlistRoute = require("./routes/watchlist");
 
-const userModel = require("./models/user");
-const sectionModel = require("./models/section");
-
 // Fill up process.env with the config file's values
 let config;
-if (fs.existsSync("./config.js")) {
-	config = require("./config");
+if (fs.existsSync(__dirname + "/config.js")) {
+	config = require(__dirname + "/config");
 
 	// The url that is used to connect to the database
 	if (config.databaseUrl) {
