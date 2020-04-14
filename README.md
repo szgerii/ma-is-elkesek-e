@@ -16,30 +16,30 @@ Pistike: "Jajj de hülye voltam, hogy nem néztem rá  a *ma-is-elkesek-e.hu*-ra
 
 ## Használat
 
-A szerver futtatásához szükséges a Node program. Indításhoz navigáljunk a projekt könyvtárán belül a *src* mappába egy parancssorban és írjuk be a következőt: 
+### config.js
+
+A szerver a futáshoz szükséges adatok a *src/config.js* fájlból olvassa ki. Ez a fájl viszont nem része a letöltött projektnek.
+
+Ahhoz, hogy rendesen működjön a szerver másoljuk a *src/config.default.js* fájl tartalmát a *src/config.js* fájlba és cseréljük ki benne a < és > szimbólumok közé tett értékeket a saját (működő) adatainkra.
+
+**MEGJEGYZÉS:** Ez a fájl része a git által ignorált fájloknak, így a saját/ideiglenes értékek nem kerülnek fel GitHub-ra.
+
+### Telepítés és indítás
+
+A szerver futtatásához szükséges a Node program. Indításhoz navigáljunk a projekt könyvtárába egy parancssorban és írjuk be a következőt:
 
 ```bash
 npm install
-node server.js -v
+node src/server.js
 ```
 
 Az első sor telepít mindent, amire a szervernek szüksége van (ezt csak egyszer kell futtatni), a második pedig elindítja azt.
+
 A szerver a következő sorrendben választ portot a futásra:
 
 1. PORT környezeti változó (ha van)
 2. PORT változó a config.js fájlban (ha van)
 3. 1104
-
-Ha szeretnénk módosítani hogy a szerver melyik adatbázishoz csatlakozik, vagy azt, hogy milyen kulcsot használ a JWT-k igazolására, akkor azt a *src/config.js* fájlban tehetjük meg a következő formátumban:
-
-```javascript
-module.exports = {
-	databaseUrl: "<DATABASE_CONNECTION_URL>",
-	jwtKey: "<JWT_SIGNING_KEY_>"
-};
-```
-
-Ez a fájl most még ki van töltve működő adatokkal (egy külön, csak fejlesztéshez használt adatbázishoz), de biztonsági okokból a weboldal megjelenése előtt ezek le lesznek cserélve, a GitHub-on található fájl pedig csak helykitöltő értékeket fog tartalmazni.
 
 ### Naplózás
 
