@@ -714,7 +714,6 @@ async function downloadSegment() {
     .catch(err => {
         console.debug(`An error occured while downloading stopTimes for ${id}`);
         console.debug(err);
-        alert("Ismeretlen hiba történt az utazási idő számítása során. Kérjük próbálkozzon újra később.");
     });
 
     //check stop times
@@ -789,7 +788,6 @@ async function downloadSegment() {
         .catch(err => {
             console.debug(`An error occured while trying to get trip details for ${departures[i]}`);
             console.debug(err);
-            alert("Ismeretlen hiba történt az utazási idő számítása során. Kérjük próbálkozzon újra később.");
         });
 
     }
@@ -1082,7 +1080,6 @@ async function loadStops() {
     .catch(err => {
         console.debug("Error while loading stops");
         console.debug(err);
-        alert("Ismeretlen hiba történt a megállók betöltése során. Kérjük próbálkozzon újra később.");
     });
 
 }
