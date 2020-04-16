@@ -56,6 +56,11 @@ body {
     
     width: 4.5%;
     border: 0;
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
 
 }
 
@@ -68,8 +73,15 @@ body {
 }
 
 .button-container img {
+
     padding: 0 1.25%;
     width: calc(1.5vw + 0.5em);
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+    
 }
 
 .watchlist-move {

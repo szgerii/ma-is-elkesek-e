@@ -365,12 +365,19 @@ select {
 }
 
 .stopSign-img {
+
     width: 12vw;
     height: 12vw;
     padding: 2.5vh 1.5vw;
     background-color: var(--color-box);
     border-radius: 15px;
     box-sizing: border-box;
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+
 }
 
 .segment-line {
