@@ -1,4 +1,6 @@
-# Ma is elkések-e? (ma-is-elkesek-e.hu)
+# Ma is elkések-e?
+
+Az oldal a következő címen érhető el: [ma-is-elkesek-e.hu](http://ma-is-elkesek-e.hu)
 
 Vázolom a következő szituációt:
 
@@ -22,7 +24,7 @@ A szerver a futáshoz szükséges adatok a *src/config.js* fájlból olvassa ki.
 
 Ahhoz, hogy rendesen működjön a szerver másoljuk a *src/config.default.js* fájl tartalmát a *src/config.js* fájlba és cseréljük ki benne a < és > szimbólumok közé tett értékeket a saját (működő) adatainkra.
 
-**MEGJEGYZÉS:** Ez a fájl része a git által ignorált fájloknak, így a saját/ideiglenes értékek nem kerülnek fel GitHub-ra.
+**MEGJEGYZÉS:** Ez a fájl része a Git által ignorált fájloknak, így a saját/ideiglenes értékek nem kerülnek fel GitHub-ra.
 
 ### Telepítés és indítás
 
@@ -57,4 +59,4 @@ A belső API (felhasználó kezelés, top 3 lista kezelés, stb.) leírása [itt
 
 - [Bandi1234](https://github.com/Bandi1234 "Bandi1234 GitHub Profilja") - Frontend
 - [hentesoposszum](https://github.com/hentesoposszum/ "hentesoposszum GitHub Profilja") - Backend
-- [Kris030](https://github.com/Kris030 "Kris030 GitHub Profilja") - [Bandi1234](https://github.com/Bandi1234 "Bandi1234 GitHub Profilja") kódjának megtisztítása
+- [Kris030](https://github.com/Kris030 "Kris030 GitHub Profilja") - tesztelés, design tisztítás, Bandi1234 kódjának tisztítása
