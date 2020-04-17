@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node src/server.js -xv",
     "dev": "npx nodemon -q src/server.js -xv",
-    "build": "node bob.js -dp --tcomp .build_config/minify.json --clone .build_config/clone.json"
+    "build": "node bob.js -dp --tcomp .bob_config/minify.json --clone .bob_config/clone.json"
   },
   "author": "rav",
   "license": "ISC",

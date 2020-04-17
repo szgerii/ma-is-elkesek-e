@@ -12,6 +12,7 @@ const imagemin = require("imagemin");
 const imageminPNG = require("imagemin-pngquant");
 const imageminSVG = require("imagemin-svgo");
 
+const PREFIX = "|BOB|";
 const logger = require("./private_modules/logger");
 logger.set("x-verbose", true);
 
@@ -19,7 +20,7 @@ const deleteProdDir = process.argv.includes("--delete-prod-dir") || process.argv
 const ignoreErrors = process.argv.includes("--ignore-errors") || process.argv.includes("-ie");
 const stopOnWarning = process.argv.includes("--stop-on-warning") || process.argv.includes("-sw");
 
-const buildConfigDir = process.argv.includes("--build-config") ? path.resolve(process.argv[process.argv.indexOf("--build-config") + 1]) : path.join(__dirname, ".build_config");
+const buildConfigDir = process.argv.includes("--build-config") ? path.resolve(process.argv[process.argv.indexOf("--build-config") + 1]) : path.join(__dirname, ".bob_config");
 const minifyPath = process.argv.includes("--min") ? path.resolve(process.argv[process.argv.indexOf("--min") + 1]) : path.join(buildConfigDir, "minify.json");
 const compressTextPath = process.argv.includes("--tcomp") ? path.resolve(process.argv[process.argv.indexOf("--tcomp") + 1]) : path.join(buildConfigDir, "compress-text.json");
 const compressImagePath = process.argv.includes("--icomp") ? path.resolve(process.argv[process.argv.indexOf("--icomp") + 1]) : path.join(buildConfigDir, "compress-image.json");
@@ -42,30 +43,30 @@ async function build() {
         });
     }
 
-    logger.log("--BOB-- Starting the build process..." + EOL);
+    logger.log(`${PREFIX} Starting the build process...` + EOL);
 
     if (clonePath) {
-        logger.log("--BOB-- Cloning files..." + EOL);
+        logger.log(`${PREFIX} Cloning files...` + EOL);
         const cloneCount = await cloneFiles();
         console.log();
-        logger.log(`--BOB-- Cloning done. Successfully cloned ${cloneCount} file${cloneCount > 1 ? "s" : ""}.` + EOL);
+        logger.log(`${PREFIX} Cloning done. Successfully cloned ${cloneCount} file${cloneCount > 1 ? "s" : ""}.` + EOL);
     }
     
-    logger.log("--BOB-- Minifying files..." + EOL);
+    logger.log(`${PREFIX} Minifying files...` + EOL);
     const minCount = await minifyFiles();
-    logger.log(`--BOB-- Minification done. Successfully minified ${minCount} file${minCount > 1 ? "s" : ""}.` + EOL);
+    logger.log(`${PREFIX} Minification done. Successfully minified ${minCount} file${minCount > 1 ? "s" : ""}.` + EOL);
     
-    logger.log("--BOB-- Compressing text files..." + EOL);
+    logger.log(`${PREFIX} Compressing text files...` + EOL);
     const textCompCount = await compressTextFiles();
     console.log();
-    logger.log(`--BOB-- Text file compression done. Successfully compressed ${textCompCount} file${textCompCount > 1 ? "s" : ""}.` + EOL);
+    logger.log(`${PREFIX} Text file compression done. Successfully compressed ${textCompCount} file${textCompCount > 1 ? "s" : ""}.` + EOL);
     
-    logger.log("--BOB-- Compressing image files..." + EOL);
+    logger.log(`${PREFIX} Compressing image files...` + EOL);
     const imgCompCount = await compressImageFiles();
     console.log();
-    logger.log(`--BOB-- Image file compression done. Successfully compressed ${imgCompCount} file${imgCompCount > 1 ? "s" : ""}.` + EOL);
+    logger.log(`${PREFIX} Image file compression done. Successfully compressed ${imgCompCount} file${imgCompCount > 1 ? "s" : ""}.` + EOL);
     
-    logger.log(`--BOB-- Build successfully completed in ${(Date.now() - startTime) / 1000} seconds.` + EOL);
+    logger.log(`${PREFIX} Build successfully completed in ${(Date.now() - startTime) / 1000} seconds.` + EOL);
 }
 
 /**
@@ -74,7 +75,7 @@ async function build() {
  */
 async function minifyFiles() {
     if (!fs.existsSync(minifyPath)) {
-        logger.error("--BOB-- Minification config file not found. Shutting down...");
+        logger.error(`${PREFIX} Minification config file not found. Shutting down...`);
         logger.close();
         process.exit(1);
     }
@@ -93,12 +94,12 @@ async function minifyFiles() {
         fs.mkdirSync(dir, {recursive: true});
 
         if (f.endsWith(".html") || f.endsWith(".css")) {
-            logger.log(`--BOB-- Minifying ${f}...`);
+            logger.log(`${PREFIX} Minifying ${f}...`);
             fs.writeFileSync(path.join(prodBase, f), await minify(path.join(devBase, f)));
             minifiedCounter++;
-            logger.log(`--BOB-- Minification status: ${minifiedCounter}/${files.length} (${minifiedCounter / (files.length / 100)}%) done`);
+            logger.log(`${PREFIX} Minification status: ${minifiedCounter}/${files.length} (${minifiedCounter / (files.length / 100)}%) done`);
         } else if (f.endsWith(".js")) {
-            logger.log(`--BOB-- Minifying ${f}...`);
+            logger.log(`${PREFIX} Minifying ${f}...`);
             const minified = terser.minify(fs.readFileSync(path.join(devBase, f)).toString(), {
                 mangle: {
                     toplevel: true
@@ -107,11 +108,11 @@ async function minifyFiles() {
             });
             
             if (minified.error) {
-                logger.log(`--BOB-- An error occured while minifying the following file: ${f}`);
+                logger.log(`${PREFIX} An error occured while minifying the following file: ${f}`);
                 logger.dir(minified.error);
                 
                 if (!ignoreErrors) {
-                    logger.log(`--BOB-- Build failed. Shutting down...${EOL}`);
+                    logger.log(`${PREFIX} Build failed. Shutting down...${EOL}`);
                     logger.close();
                     process.exit(2);
                 }
@@ -119,7 +120,7 @@ async function minifyFiles() {
             
             if (minified.warnings) {
                 console.log();
-                logger.log(`--BOB-- Warning(s) from the following file: ${f}`);
+                logger.log(`${PREFIX} Warning(s) from the following file: ${f}`);
                 
                 for (const warning of minified.warnings) {
                     logger.log(warning);
@@ -127,7 +128,7 @@ async function minifyFiles() {
                 
                 if (stopOnWarning) {
                     console.log();
-                    logger.log(`--BOB-- Build failed. Shutting down...`);
+                    logger.log(`${PREFIX} Build failed. Shutting down...`);
                     logger.close();
                     process.exit(3);
                 }
@@ -135,7 +136,7 @@ async function minifyFiles() {
             
             fs.writeFileSync(path.join(prodBase, f), minified.code);
             minifiedCounter++;
-            logger.log(`--BOB-- Minification status: ${minifiedCounter}/${files.length} (${minifiedCounter / (files.length / 100)}%) done`);
+            logger.log(`${PREFIX} Minification status: ${minifiedCounter}/${files.length} (${minifiedCounter / (files.length / 100)}%) done`);
         }
     }
     
@@ -148,7 +149,7 @@ async function minifyFiles() {
  */
 async function compressTextFiles() {
     if (!fs.existsSync(compressTextPath)) {
-        logger.error("--BOB-- Text compression config file not found. Shutting down...");
+        logger.error(`${PREFIX} Text compression config file not found. Shutting down...`);
         logger.close();
         process.exit(1);
     }
@@ -161,7 +162,7 @@ async function compressTextFiles() {
         if (!f.endsWith(".html") && !f.endsWith(".css") && !f.endsWith(".js"))
             continue;
         
-        logger.log(`--BOB-- Compressing ${f}...`);
+        logger.log(`${PREFIX} Compressing ${f}...`);
 
         let dir = path.join(prodBase, f);
         dir = dir.slice(0, dir.lastIndexOf(path.sep));
@@ -173,7 +174,7 @@ async function compressTextFiles() {
 
         compCounter++;
 
-        logger.log(`--BOB-- Text file compression status: ${compCounter}/${files.length} (${compCounter / (files.length / 100)}%) done`);
+        logger.log(`${PREFIX} Text file compression status: ${compCounter}/${files.length} (${compCounter / (files.length / 100)}%) done`);
     }
 
     return compCounter;
@@ -185,7 +186,7 @@ async function compressTextFiles() {
  */
 async function compressImageFiles() {
     if (!fs.existsSync(compressImagePath)) {
-        logger.error("--BOB-- Image compression config file not found. Shutting down...");
+        logger.error(`${PREFIX} Image compression config file not found. Shutting down...`);
         logger.close();
         process.exit(1);
     }
@@ -198,7 +199,7 @@ async function compressImageFiles() {
         if (!f.endsWith(".png") && !f.endsWith(".svg"))
             continue;
 
-        logger.log(`--BOB-- Compressing ${f}...`);
+        logger.log(`${PREFIX} Compressing ${f}...`);
         
         let dir = path.join(prodBase, f);
         dir = dir.slice(0, dir.lastIndexOf(path.sep));
@@ -218,7 +219,7 @@ async function compressImageFiles() {
         
         compCounter++;
 
-        logger.log(`--BOB-- Image file compression status: ${compCounter}/${files.length} (${compCounter / (files.length / 100)}%) done`);
+        logger.log(`${PREFIX} Image file compression status: ${compCounter}/${files.length} (${compCounter / (files.length / 100)}%) done`);
     }
 
     return compCounter;
@@ -230,8 +231,8 @@ async function compressImageFiles() {
  */
 async function cloneFiles() {
     if (!fs.existsSync(clonePath)) {
-        logger.error("--BOB-- Clone config file not found.");
-        logger.error("--BOB-- This is probably a problem with Bob, the buildtool. Please report it to hentesoposszum.");
+        logger.error(`${PREFIX} Clone config file not found.`);
+        logger.error(`${PREFIX} This is probably a problem with Bob, the buildtool. Please report it to hentesoposszum.`);
         logger.close();
         process.exit(4);
     }
@@ -244,7 +245,7 @@ async function cloneFiles() {
     let clonedCounter = 0;
     
     for (const f of files) {
-        logger.log(`--BOB-- Cloning ${f}...`);
+        logger.log(`${PREFIX} Cloning ${f}...`);
         
         let dir = path.join(prodBase, f);
         dir = dir.slice(0, dir.lastIndexOf(path.sep));
@@ -255,7 +256,7 @@ async function cloneFiles() {
         fs.writeFileSync(path.join(prodBase, f), content);
         
         clonedCounter++;
-        logger.log(`--BOB-- Cloning status: ${clonedCounter}/${files.length} (${clonedCounter / (files.length / 100)}%) done`);
+        logger.log(`${PREFIX} Cloning status: ${clonedCounter}/${files.length} (${clonedCounter / (files.length / 100)}%) done`);
     }
 
     return clonedCounter;
