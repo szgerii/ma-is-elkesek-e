@@ -120,6 +120,7 @@ async function compressFiles() {
 
         fs.mkdirSync(dir, {recursive: true});
 
-        fs.writeFileSync(path.join(prodBase, f), zlib.deflateSync(fs.readFileSync(path.join(devBase, f))));
+        const compressed = zlib.deflateSync(fs.readFileSync(path.join(devBase, f)));
+        fs.writeFileSync(path.join(prodBase, f), compressed);
     }
 }
