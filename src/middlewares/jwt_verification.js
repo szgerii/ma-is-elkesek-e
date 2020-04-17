@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const router = require("../private_modules/router.js");
+const router = require("../../private_modules/router.js");
 const userModel = require("../models/user");
 
 /**

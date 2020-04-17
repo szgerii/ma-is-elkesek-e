@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
-const logger = require("./private_modules/logger");
+const logger = require("../private_modules/logger");
 
 // Mongoose models
 const sectionModel = require("./models/section");

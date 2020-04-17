@@ -6,7 +6,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node src/server.js -xv",
-    "dev": "npx nodemon -q src/server.js -xv"
+    "dev": "npx nodemon -q src/server.js -xv",
+    "build": "node bob.js"
   },
   "author": "rav",
   "license": "ISC",
@@ -14,5 +15,9 @@
     "bcrypt": "^4.0.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.9.7"
+  },
+  "devDependencies": {
+    "minify": "^5.1.1",
+    "terser": "^4.6.11"
   }
 }

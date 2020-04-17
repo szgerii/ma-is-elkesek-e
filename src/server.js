@@ -1,8 +1,8 @@
 // Node modules
 const http = require("http");
 const fs = require("fs");
-const logger = require("./private_modules/logger");
-const router = require("./private_modules/router.js");
+const logger = require("../private_modules/logger");
+const router = require("../private_modules/router.js");
 const dbManager = require("./db_manager");
 
 // Route files

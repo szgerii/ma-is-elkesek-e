@@ -1,6 +1,6 @@
 const router = require("../private_modules/router.js");
 const route = router.route("/api/hotsmokin");
-const logger = require("../private_modules/logger");
+const logger = require("../../private_modules/logger");
 const dbManager = require("../db_manager");
 
 /**

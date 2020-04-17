@@ -1,5 +1,5 @@
-const router = require("../private_modules/router.js");
-const logger = require("../private_modules/logger");
+const router = require("../../private_modules/router.js");
+const logger = require("../../private_modules/logger");
 const dbManager = require("../db_manager");
 const jwt_verification = require("../middlewares/jwt_verification");
 

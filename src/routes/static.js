@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const router = require("../private_modules/router");
+const router = require("../../private_modules/router");
 const loginSplitter = require("../splitters/loginSplitter");
 
 /**
