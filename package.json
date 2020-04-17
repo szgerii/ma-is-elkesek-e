@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node src/server.js -xv",
     "dev": "npx nodemon -q src/server.js -xv",
-    "build": "node bob.js -dp --comp .build_config/minify.json"
+    "build": "node bob.js -dp --tcomp .build_config/minify.json"
   },
   "author": "rav",
   "license": "ISC",
@@ -17,6 +17,9 @@
     "mongoose": "^5.9.7"
   },
   "devDependencies": {
+    "imagemin": "^7.0.1",
+    "imagemin-pngquant": "^8.0.0",
+    "imagemin-svgo": "^7.1.0",
     "minify": "^5.1.1",
     "terser": "^4.6.11",
     "zlib": "^1.0.5"
