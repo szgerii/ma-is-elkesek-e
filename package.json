@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node src/server.js -xv",
     "dev": "npx nodemon -q src/server.js -xv",
-    "build": "node bob.js"
+    "build": "node bob.js -dp --comp .build_config/minify.json"
   },
   "author": "rav",
   "license": "ISC",
@@ -18,6 +18,7 @@
   },
   "devDependencies": {
     "minify": "^5.1.1",
-    "terser": "^4.6.11"
+    "terser": "^4.6.11",
+    "zlib": "^1.0.5"
   }
 }
