@@ -257,7 +257,7 @@ class Route {
  */
 exports.route = (path, createNew) => {
 	for (let i = 0; i < this.routes.length; i++) {
-		if (this.routes[i].url === path)
+		if (this.routes[i].path === path)
 			return this.routes[i];
 	}
 

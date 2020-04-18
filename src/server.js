@@ -1,8 +1,12 @@
 // Node modules
 const http = require("http");
 const fs = require("fs");
+const { join } = require("path");
+
+process.env.projectRoot = join(process.cwd());
+
 const logger = require("../private_modules/logger");
-const router = require("../private_modules/router.js");
+const router = require("../private_modules/router");
 const dbManager = require("./db_manager");
 
 // Route files

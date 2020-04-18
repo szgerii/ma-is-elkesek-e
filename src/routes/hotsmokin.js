@@ -1,7 +1,8 @@
-const router = require("../private_modules/router.js");
-const route = router.route("/api/hotsmokin");
+const router = require("../../private_modules/router.js");
 const logger = require("../../private_modules/logger");
 const dbManager = require("../db_manager");
+
+const route = router.route("/api/hotsmokin");
 
 /**
  * Sets up the hotsmokin routes

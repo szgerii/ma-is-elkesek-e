@@ -7,12 +7,13 @@
   "scripts": {
     "start": "node src/server.js -xv",
     "dev": "npx nodemon -q src/server.js -xv",
-    "build": "node bob.js -dp --tcomp .bob_config/minify.json --clone .bob_config/clone.json"
+    "build": "node bob.js --delete-prod-dir --collect-warnings --tcomp .bob_config/minify.json --clone .bob_config/clone.json"
   },
   "author": "rav",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^4.0.1",
+    "is-gzip": "^2.0.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.9.7"
   },

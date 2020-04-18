@@ -3,6 +3,10 @@ const path = require("path");
 const router = require("../../private_modules/router");
 const loginSplitter = require("../splitters/loginSplitter");
 
+const basePath = path.join(process.env.projectRoot, process.env.PRODUCTION ? "dist" : "src");
+
+const isGzip = require("is-gzip");
+
 /**
  * Represents a file and its handling properties
  */
@@ -30,11 +34,12 @@ class File {
 		 * @example "text/html"
 		 */
 		this.type = type;
+
 		/**
 		 * The content of the file
-		 * @type {String}
+		 * @type {Buffer}
 		 */
-		this.content = fs.readFileSync(path.resolve(__dirname, "../public", filePath));
+		this.content = fs.readFileSync(path.join(basePath, "public", filePath));
 	}
 }
 
@@ -46,30 +51,40 @@ module.exports = () => {
 	return new Promise((resolve, reject) => {
 		try {
 			// Setup routing for files included in files.json
-			const fileList = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../public/files.json"))).map(f => {
+			const fileList = JSON.parse(fs.readFileSync(path.join(basePath, "public", "files.json"))).map(f => {
 				return new File(f.url, f.path, f.type);
 			});
-			
+
 			for (const file of fileList) {
 				router.route(file.url).get((req, res) => {
 					res.writeHead(200, {"Content-Type": file.type});
 					res.end(file.content);
 				});
+
+				if (isGzip(file.content)) {
+					router.route(file.url).addMiddleware((req, res, done) => {
+						res.setHeader("Content-Encoding", "gzip");
+						done();
+					});
+				}
 			}
 
 			// -- Special cases --
 
 			// Webpages
-			const guestMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_guest.html"));
-			const userMainPage = fs.readFileSync(path.resolve(__dirname, "../public/main_page/main_user.html"));
-			const notFoundPage = fs.readFileSync(path.resolve(__dirname, "../public/404_page/404.html"));
-			const accountSettingsPage = fs.readFileSync(path.resolve(__dirname, "../public/account_page/account.html"));
-			const watchlistPage = fs.readFileSync(path.resolve(__dirname, "../public/watchlist_page/watchlist.html"));
-			const guestAboutPage = fs.readFileSync(path.resolve(__dirname, "../public/about_page/about_guest.html"));
-			const userAboutPage = fs.readFileSync(path.resolve(__dirname, "../public/about_page/about_user.html"));
+			const guestMainPage = fs.readFileSync(path.join(basePath, "public/main_page/main_guest.html"));
+			const userMainPage = fs.readFileSync(path.join(basePath, "public/main_page/main_user.html"));
+			const notFoundPage = fs.readFileSync(path.join(basePath, "public/404_page/404.html"));
+			const accountSettingsPage = fs.readFileSync(path.join(basePath, "public/account_page/account.html"));
+			const watchlistPage = fs.readFileSync(path.join(basePath, "public/watchlist_page/watchlist.html"));
+			const guestAboutPage = fs.readFileSync(path.join(basePath, "public/about_page/about_guest.html"));
+			const userAboutPage = fs.readFileSync(path.join(basePath, "public/about_page/about_user.html"));
 			
 			// 404
 			router.setFallback((req, res) => {
+				if (process.env.PRODUCTION)
+					res.setHeader("Content-Encoding", "gzip");
+
 				res.writeHead(404, {"Content-Type": "text/html"});
 				res.end(notFoundPage);
 			});
@@ -78,12 +93,18 @@ module.exports = () => {
 			router.route("/").getSplitter(loginSplitter,
 			// User isn't logged in
 			(req, res) => {
+				if (process.env.PRODUCTION)
+					res.setHeader("Content-Encoding", "gzip");
+
 				res.writeHead(200, {"Content-Type": "text/html"});
 				res.end(guestMainPage);
 			},
 			// User is logged in
 			async (req, res) => {
 				if (!req.showWatchlistByDefault) {
+					if (process.env.PRODUCTION)
+					res.setHeader("Content-Encoding", "gzip");
+
 					res.writeHead(200, {"Content-Type": "text/html"});
 					res.end(loggedInMainPage);
 				} else {
@@ -95,11 +116,17 @@ module.exports = () => {
 			router.route("/home").getSplitter(loginSplitter,
 			// User isn't logged in
 			(req, res) => {
+				if (process.env.PRODUCTION)
+					res.setHeader("Content-Encoding", "gzip");
+
 				res.writeHead(200, {"Content-Type": "text/html"});
 				res.end(guestMainPage);
 			},
 			// User is logged in
 			(req, res) => {
+				if (process.env.PRODUCTION)
+					res.setHeader("Content-Encoding", "gzip");
+
 				res.writeHead(200, {"Content-Type": "text/html"});
 				res.end(userMainPage);
 			});
@@ -108,6 +135,9 @@ module.exports = () => {
 			router.route("/account").getSplitter(loginSplitter, (req, res) => {
 				res.redirect("/login");
 			}, (req, res) => {
+				if (process.env.PRODUCTION)
+					res.setHeader("Content-Encoding", "gzip");
+
 				res.writeHead(200, {"Content-Type": "text/html"});
 				res.end(accountSettingsPage);
 			});
@@ -117,6 +147,9 @@ module.exports = () => {
 			(req, res) => {
 				res.redirect("/login");
 			}, (req, res) => {
+				if (process.env.PRODUCTION)
+					res.setHeader("Content-Encoding", "gzip");
+
 				res.writeHead(200, {"Content-Type": "text/html"});
 				res.end(watchlistPage);
 			});
@@ -124,15 +157,24 @@ module.exports = () => {
 			// About page
 			router.route("/about").getSplitter(loginSplitter,
 			(req, res) => {
+				if (process.env.PRODUCTION)
+					res.setHeader("Content-Encoding", "gzip");
+
 				res.writeHead(200, {"Content-Type": "text/html"});
 				res.end(guestAboutPage);
 			}, (req, res) => {
+				if (process.env.PRODUCTION)
+					res.setHeader("Content-Encoding", "gzip");
+
 				res.writeHead(200, {"Content-Type": "text/html"});
 				res.end(userAboutPage);
 			});
 			
 			// Logout
 			router.route("/logout").post((req, res) => {
+				if (process.env.PRODUCTION)
+					res.setHeader("Content-Encoding", "gzip");
+
 				res.writeHead(200, [
 					["Content-Type", "text/html"],
 					["Set-Cookie", router.genCookie("auth-token", "", {
