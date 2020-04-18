@@ -32,10 +32,18 @@ A szerver futtatásához szükséges a Node program. Indításhoz navigáljunk a
 
 ```bash
 npm install
-node src/server.js
 ```
 
-Az első sor telepít mindent, amire a szervernek szüksége van (ezt csak egyszer kell futtatni), a második pedig elindítja azt.
+Ez telepít mindent, amire a szervernek szüksége van a futáshoz (ezt elég egyszer futtatni).
+
+A szervert a következő parancs egyikével indíthatjuk el (a kettő hatása megegyezik):
+
+```bash
+npm start
+node src/server.js -v
+```
+
+**MEGJEGYZÉS**: A "-v" paraméter a naplózás szintjét állítja. Részletekért lásd a [Naplózás](#naplózás) szekciót.
 
 A szerver a következő sorrendben választ portot a futásra:
 
@@ -50,6 +58,32 @@ Ahhoz, hogy a szerver *beszédes* módban induljon el, adjuk meg a parancssorban
 *Extra beszédes* mód. Ehhez "-xv"-t vagy "--extra-verbose"-t kell a szervernek megadni. Ez minden kapott kérést és elküldött választ naplózni fog, valamint az adatbázis ellenőrzéseket is. Hiba esetén kiírja az egész hiba objektumot.
 
 Ha a naplót fájlba is szeretnénk menteni, akkor azt az "-o [könyvtár név]" paraméterrel tehetjük meg, ahol a könyvtár név megszabja, hogy hova fognak kerülni a napló fájlok. Minden szerver indításnál létre fog hozni egy **server-[időbélyeg].log** fájlt. **Ehhez a fájlhoz a szerver futása alatt nem tanácsos hozzányúlni**, mivel a program folyamatosan nyitva tart a fájllal egy stream-et. A fájlba írás alapból *extra bőbeszédű* módra van állítva, és ezt egyelőre nem lehet megváltoztatni.
+
+### Fejlesztés
+
+Ha szeretnénk, hogy a szerver magától újrainduljon a fájlok módosítása után, használjuk a dev npm scriptet.
+
+```bash
+npm run dev
+```
+
+### Build
+
+Ha az oldalt élőben szeretnénk futtatni, érdemes előtte **Bob, the buildtool** segítségét kérni (bob.js). Ez a program kisebbíti (whitespace kivétel, változó nevek rövidítése, stb.) és tömöríti (szövegeket veszteségmentesen, képeket veszteségesen) a nyilvános fájlokat. Ez gyorsabb válaszidőkhöz vezet a szerver részéről.
+
+Bob a készített fájlokat a *dist* mappába rakja (felülírva a mappa előző verzióját). Ahhoz, hogy a szerver ezeket kezdje használni a PRODUCTION környezeti változónak bármilyen, nem üres értéket kell adni.
+
+Bob futtatása:
+
+```bash
+npm run build
+```
+
+PRODUCTION változó beállítása (Linux):
+
+```bash
+export PRODUCTION=1
+```
 
 ## API leírás
 

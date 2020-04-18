@@ -10,6 +10,12 @@
 		"type": "text/javascript"
 	},
 	{
+		"url": "/home",
+		"path": "main_page/main_{}.html",
+		"type": "text/html",
+		"customHandler": "custom-login"
+	},
+	{
 		"url": "/style.css",
 		"path": "main_page/style.css",
 		"type": "text/css"
@@ -28,6 +34,12 @@
 		"url": "/login",
 		"path": "login_page/login.html",
 		"type": "text/html"
+	},
+	{
+		"url": "/about",
+		"path": "about_page/about_{}.html",
+		"type": "text/html",
+		"customHandler": "custom-login"
 	},
 	{
 		"url": "/about.css",
@@ -60,6 +72,12 @@
 		"type": "text/javascript"
 	},
 	{
+		"url": "/account",
+		"path": "account_page/account.html",
+		"type": "text/html",
+		"customHandler": "login-only"
+	},
+	{
 		"url": "/account.css",
 		"path": "account_page/account.css",
 		"type": "text/css"
@@ -68,6 +86,12 @@
 		"url": "/account.js",
 		"path": "account_page/account.js",
 		"type": "text/javascript"
+	},
+	{
+		"url": "/watchlist",
+		"path": "watchlist_page/watchlist.html",
+		"type": "text/html",
+		"customHandler": "login-only"
 	},
 	{
 		"url": "/watchlist.css",

@@ -7,16 +7,18 @@ const { EOL } = require("os");
 const minify = require("minify"); // HTML and CSS minification
 const terser = require("terser"); // JS minification
 const zlib = require("zlib"); // gzip compression
+const brotli = require("brotli"); // Brotli compression
 
-const imagemin = require("imagemin");
-const imageminPNG = require("imagemin-pngquant");
-const imageminSVG = require("imagemin-svgo");
+const imagemin = require("imagemin"); // Image compression
+const imageminPNG = require("imagemin-pngquant"); // PNG compression plugin for imagemin
+const imageminSVG = require("imagemin-svgo"); // SVG compression plugin for imagemin
 
 const PREFIX = "[BOB]";
 
 const deleteProdDir = process.argv.includes("--delete-prod-dir") || process.argv.includes("-dp");
 const ignoreErrors = process.argv.includes("--ignore-errors") || process.argv.includes("-ie");
 const stopOnWarning = process.argv.includes("--stop-on-warning") || process.argv.includes("-sw");
+const keepMinified = process.argv.includes("--keep-minified") || process.argv.includes("-km");
 const collectWarnings = process.argv.includes("--collect-warnings") || process.argv.includes("-cw");
 const warnings = [];
 
@@ -110,7 +112,7 @@ async function minifyFiles() {
             console.log(`${PREFIX} Minifying ${f}...`);
             const minified = terser.minify(fs.readFileSync(path.join(devBase, f)).toString(), {
                 mangle: {
-                    toplevel: true
+                    toplevel: false
                 },
                 warnings: true
             });
@@ -179,10 +181,46 @@ async function compressTextFiles() {
 
         fs.mkdirSync(dir, {recursive: true});
 
-        const inp = fs.createReadStream(path.join(devBase, f));
-        const out = fs.createWriteStream(path.join(prodBase, f));
         
-        inp.pipe(zlib.createGzip()).pipe(out);
+        if (fs.existsSync(path.join(prodBase, f))) {                        
+            const brotliCompressed = brotli.compress(fs.readFileSync(path.join(prodBase, f)), {
+                mode: 1,
+                quality: 11
+            });
+
+            fs.writeFileSync(path.join(prodBase, f + ".br"), brotliCompressed);
+            
+            const inp = fs.createReadStream(path.join(prodBase, f));
+            const out = fs.createWriteStream(path.join(prodBase, f + ".gz"));
+            const gzip = zlib.createGzip();
+            
+            await pipeSync(inp, gzip);
+            await pipeSync(gzip, out);
+
+            inp.close();
+            gzip.close();
+            out.close();
+            
+            if (!keepMinified)
+                fs.unlinkSync(path.join(prodBase, f));
+        } else {
+            const brotliCompressed = brotli.compress(fs.readFileSync(path.join(devBase, f)), {
+                mode: 1,
+                quality: 11
+            });
+
+            fs.writeFileSync(path.join(prodBase, f + ".br"), brotliCompressed);
+
+            const inp = fs.createReadStream(path.join(devBase, f));
+            const out = fs.createWriteStream(path.join(prodBase, f + ".gz"));
+            const gzip = zlib.createGzip();
+
+            inp.pipe(gzip).pipe(out);
+          
+            inp.close();
+            gzip.close();
+            out.close();
+        }
 
         compCounter++;
 
@@ -221,7 +259,7 @@ async function compressImageFiles() {
         const compressed = await imagemin([path.join(devBase, f)], {
             plugins: [
                 imageminPNG({
-                    quality: [0.6, 0.75]
+                    quality: [0.65, 0.8]
                 }),
                 imageminSVG()
             ]
@@ -272,4 +310,14 @@ async function cloneFiles() {
     }
 
     return clonedCounter;
+}
+
+/**
+ * @param {Stream} readable - the source stream
+ * @param {Stream} writable - the destination stream
+ */
+async function pipeSync(readable, writable) {
+    return new Promise((resolve, reject) => {
+        readable.pipe(writable).on("unpipe", resolve);
+    });
 }

@@ -16,12 +16,14 @@ const getUsername = () => {
 function setup() {
 	const navbarMenu = document.querySelector(".navbar-menu");
 	const logoutLink = document.querySelector("#logout");
-    
-	navbarMenu.addEventListener("click", ()=> {
-		document.querySelector(".navbar-list").classList.toggle("navbar-active");
-
-		navbarMenu.innerHTML = navbarMenu.innerHTML.charCodeAt(0) === 9776 ? "&#10005" : "&#9776";
-	});
+	
+	if (navbarMenu) {
+		navbarMenu.addEventListener("click", ()=> {
+			document.querySelector(".navbar-list").classList.toggle("navbar-active");
+	
+			navbarMenu.innerHTML = navbarMenu.innerHTML.charCodeAt(0) === 9776 ? "&#10005" : "&#9776";
+		});		
+	}
 
 	if (logoutLink) {
 		logoutLink.addEventListener("click", () => {
