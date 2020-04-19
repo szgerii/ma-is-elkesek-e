@@ -149,8 +149,8 @@ class CustomLoginFileHandler extends FileHandler {
 		if (process.env.PRODUCTION && ["text/html", "text/css", "text/javascript"].includes(this.type)) {
 			if (fs.existsSync(this.userPath + ".gz"))
 				this.userContentGzip = fs.readFileSync(this.userPath + ".gz");
-			if (fs.existsSync(this.userPath + ".gz"))
-				this.userContentGzip = fs.readFileSync(this.guestPath + ".gz");
+			if (fs.existsSync(this.guestPath + ".gz"))
+				this.guestContentGzip = fs.readFileSync(this.guestPath + ".gz");
 			
 			if (fs.existsSync(this.userPath + ".br"))
 				this.userContentBrotli = fs.readFileSync(this.userPath + ".br");
@@ -175,17 +175,7 @@ class CustomLoginFileHandler extends FileHandler {
 
 		if (split === 0) {
 			if (process.env.PRODUCTION) {
-				res.setHeader("Cache-Control", `public, max-age=${STATIC_CACHE_TIMEOUT}`);
-				res.setHeader("ETag", this.guestContentHash);
-
-				if (this.type === "text/html")
-					res.setHeader("Cache-Control", "no-cache");
-				
-				if (req.headers["if-none-match"] === this.guestContentHash) {
-					res.writeHead(304);
-					res.end();
-					return;
-				}
+				res.setHeader("Cache-Control", `no-store`);
 			}
 
 			if (req.headers["accept-encoding"].indexOf("br") !== -1 && this.guestContentBrotli) {
@@ -206,17 +196,7 @@ class CustomLoginFileHandler extends FileHandler {
 			}
 		} else {
 			if (process.env.PRODUCTION) {
-				res.setHeader("Cache-Control", `public, max-age=${STATIC_CACHE_TIMEOUT}`);
-				res.setHeader("ETag", this.userContentHash);
-
-				if (this.type === "text/html")
-					res.setHeader("Cache-Control", "no-cache");
-				
-				if (req.headers["if-none-match"] === this.userContentHash) {
-					res.writeHead(304);
-					res.end();
-					return;
-				}
+				res.setHeader("Cache-Control", `no-store`);
 			}
 
 			if (req.headers["accept-encoding"].indexOf("br") !== -1 && this.userContentBrotli) {
