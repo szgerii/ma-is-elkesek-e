@@ -10,7 +10,7 @@ const devPath = path.join(process.env.projectRoot, "src")
 const prodPath = path.join(process.env.projectRoot, "dist")
 const basePath = process.env.PRODUCTION ? prodPath : devPath;
 
-const STATIC_CACHE_TIMEOUT = 24 * 3600; // in seconds
+const STATIC_CACHE_TIMEOUT = 30 * 24 * 3600; // in seconds
 
 /**
  * @abstract
