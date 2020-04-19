@@ -5,6 +5,7 @@ const { join } = require("path");
 
 process.env.projectRoot = join(process.cwd());
 
+const Scheduler = require("../private_modules/scheduler");
 const logger = require("../private_modules/logger");
 const router = require("../private_modules/router");
 const dbManager = require("./db_manager");
@@ -115,11 +116,57 @@ async function start() {
 		});
 		logger.log("SERVER RUNNING IN PRODUCTION MODE");
 	}
+
+	process.env.requestCount = 0;
+	process.env.dailyRequestCount = 0;
+	process.env.weeklyRequestCount = 0;
+	process.env.monthlyRequestCount = 0;
 	
 	// Start the server
 	server = http.createServer(router.requestHandler);
 	server.listen(PORT);
 	logger.log(`Server listening on port ${PORT}`);
+
+	if (!fs.existsSync(join(process.env.projectRoot, "reports")))
+		fs.mkdirSync(join(process.env.projectRoot, "reports"));
+
+	const allTimeReportPath = join(process.env.projectRoot, "reports", "all-time.txt");
+
+	if (fs.existsSync(allTimeReportPath))
+		process.env.requestCount = Number(fs.readFileSync(allTimeReportPath));
+
+	const dailyReportPath = join(process.env.projectRoot, "reports", "daily");
+	const weeklyReportPath = join(process.env.projectRoot, "reports", "weekly");
+	const monthlyReportPath = join(process.env.projectRoot, "reports", "monthly");
+
+	if (!fs.existsSync(dailyReportPath))
+		fs.mkdirSync(dailyReportPath);
+
+	if (!fs.existsSync(weeklyReportPath))
+		fs.mkdirSync(weeklyReportPath);
+	
+	if (!fs.existsSync(monthlyReportPath))
+		fs.mkdirSync(monthlyReportPath);
+
+	const dailyReport = new Scheduler(23, 59, 59, 86400, () => {
+		const dt = new Date();
+		const datestamp = dt.toLocaleDateString("hu").replace(/\./g, "").replace(/\ /g, "-");
+		
+		if (dt.getDay() === 0) {
+			fs.writeFileSync(join(weeklyReportPath, `${datestamp}.txt`), process.env.weeklyRequestCount);
+			process.env.weeklyRequestCount = 0;
+		}
+		
+		if (dt.getDate() === 30 || (dt.getMonth() === 1 && dt.getDate() === 28)) {
+			fs.writeFileSync(join(monthlyReportPath, `${datestamp}.txt`), process.env.monthlyRequestCount);
+			process.env.monthlyRequestCount = 0;
+		}
+		
+		fs.writeFileSync(join(dailyReportPath, `${datestamp}.txt`), process.env.dailyRequestCount);
+		process.env.dailyRequestCount = 0;
+		
+		fs.writeFileSync(allTimeReportPath, process.env.requestCount);
+	});
 }
 
 start();
