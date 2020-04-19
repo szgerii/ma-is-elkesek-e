@@ -36,7 +36,7 @@ npm install
 
 Ez telepít mindent, amire a szervernek szüksége van a futáshoz (ezt elég egyszer futtatni).
 
-A szervert a következő parancs egyikével indíthatjuk el (a kettő hatása megegyezik):
+A szervert a következő parancsok egyikével indíthatjuk el (a kettő hatása megegyezik):
 
 ```bash
 npm start
@@ -61,10 +61,16 @@ Ha a naplót fájlba is szeretnénk menteni, akkor azt az "-o [könyvtár név]"
 
 ### Fejlesztés
 
-Ha szeretnénk, hogy a szerver magától újrainduljon a fájlok módosítása után, használjuk a dev npm scriptet.
+Ha szeretnénk, hogy a szerver magától újrainduljon a fájlok módosítása után, használjuk a "dev" nevű npm scriptet.
 
 ```bash
 npm run dev
+```
+
+Ez megegyezik a következő futtatásával:
+
+```bash
+npx nodemon -q src/server.js -xv
 ```
 
 ### Build

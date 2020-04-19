@@ -32,16 +32,24 @@ module.exports = async (req, res, done) => {
 		const user = await userModel.findOne({ username: decoded.sub });
 		
 		if (!user) {
-			res.writeHead(401, {
-				"Content-Type": "application/json",
-				"WWW-Authenticate": `Bearer realm="Access to ${req.baseUrl}"`,
-				"Set-Cookie": router.genCookie("auth-token", "", {
+			res.setHeader("Set-Cookie", [
+				router.genCookie("auth-token", "", {
 					domain: process.env.domain,
 					path: "/",
 					expires: "Thu, 01 Jan 1970 00:00:00 GMT",
 					sameSite: "Strict",
 					httpOnly: true
+				}),
+				router.genCookie("username", "", {
+					domain: process.env.domain,
+					path: "/",
+					expires: "Thu, 01 Jan 1970 00:00:00 GMT",
+					sameSite: "Strict"
 				})
+			]);
+			res.writeHead(401, {
+				"Content-Type": "application/json",
+				"WWW-Authenticate": `Bearer realm="Access to ${req.baseUrl}"`
 			});
 			res.end(router.genResponse("fail", {
 				"auth-token": "The username inside the auth-token cookie is invalid or the user has been deleted"
@@ -52,16 +60,24 @@ module.exports = async (req, res, done) => {
 		req.username = user.username;
 		done();
 	} catch (err) {
-		res.writeHead(401, {
-			"Content-Type": "application/json",
-			"WWW-Authenticate": `Bearer realm="Access to ${req.baseUrl}"`,
-			"Set-Cookie": router.genCookie("auth-token", "", {
+		res.setHeader("Set-Cookie", [
+			router.genCookie("auth-token", "", {
 				domain: process.env.domain,
 				path: "/",
 				expires: "Thu, 01 Jan 1970 00:00:00 GMT",
 				sameSite: "Strict",
 				httpOnly: true
+			}),
+			router.genCookie("username", "", {
+				domain: process.env.domain,
+				path: "/",
+				expires: "Thu, 01 Jan 1970 00:00:00 GMT",
+				sameSite: "Strict"
 			})
+		]);
+		res.writeHead(401, {
+			"Content-Type": "application/json",
+			"WWW-Authenticate": `Bearer realm="Access to ${req.baseUrl}"`
 		});
 		res.end(router.genResponse("fail", {
 			"auth-token": "The value of the auth-token cookie was invalid/expired"

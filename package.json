@@ -7,13 +7,14 @@
   "scripts": {
     "start": "node src/server.js -v",
     "dev": "npx nodemon -q src/server.js -xv",
-    "build": "node bob.js --delete-prod-dir --collect-warnings --keep-minified --tcomp .bob_config/minify.json --clone .bob_config/clone.json"
+    "build": "node bob.js --delete-prod-dir --collect-warnings --keep-minified --tcomp .bob_config/minify.json --clone .bob_config/clone.json --text-replace 'localhost:1104' 'ma-is-elkesek-e.hu'"
   },
   "author": "rav",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^4.0.1",
     "jsonwebtoken": "^8.5.1",
+    "md5": "^2.2.1",
     "mongoose": "^5.9.7"
   },
   "devDependencies": {

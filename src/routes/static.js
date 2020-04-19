@@ -1,11 +1,16 @@
 const fs = require("fs");
 const path = require("path");
+
+const md5 = require("md5");
+
 const router = require("../../private_modules/router");
 const loginSplitter = require("../splitters/loginSplitter");
 
 const devPath = path.join(process.env.projectRoot, "src")
 const prodPath = path.join(process.env.projectRoot, "dist")
 const basePath = process.env.PRODUCTION ? prodPath : devPath;
+
+const STATIC_CACHE_TIMEOUT = 24 * 3600; // in seconds
 
 /**
  * @abstract
@@ -60,9 +65,26 @@ class StaticFileHandler extends FileHandler {
 		} else {
 			this.content = fs.readFileSync(path.join(basePath, "public", filePath));
 		}
+
+		if (process.env.PRODUCTION)
+			this.contentHash = md5(this.content);
 	}
 
 	serve(req, res) {
+		if (process.env.PRODUCTION) {
+			res.setHeader("Cache-Control", `public, max-age=${STATIC_CACHE_TIMEOUT}`);
+			res.setHeader("ETag", this.contentHash);
+			
+			if (this.type === "text/html")
+				res.setHeader("Cache-Control", "no-cache");
+			
+			if (req.headers["if-none-match"] === this.contentHash) {
+				res.writeHead(304);
+				res.end();
+				return;
+			}
+		}
+
 		if (req.headers["accept-encoding"].indexOf("br") !== -1 && this.contentBrotli) {
 			res.writeHead(200, {
 				"Content-Type": this.type,
@@ -141,12 +163,31 @@ class CustomLoginFileHandler extends FileHandler {
 			this.userContent = fs.readFileSync(this.userPath);
 			this.guestContent = fs.readFileSync(this.guestPath);
 		}
+
+		if (process.env.PRODUCTION) {
+			this.userContentHash = md5(this.userContent);
+			this.guestContentHash = md5(this.guestContent);
+		}
 	}
 
 	async serve(req, res) {
 		const split = await loginSplitter(req, res); // 0 if guest, 1 if user
 
 		if (split === 0) {
+			if (process.env.PRODUCTION) {
+				res.setHeader("Cache-Control", `public, max-age=${STATIC_CACHE_TIMEOUT}`);
+				res.setHeader("ETag", this.guestContentHash);
+
+				if (this.type === "text/html")
+					res.setHeader("Cache-Control", "no-cache");
+				
+				if (req.headers["if-none-match"] === this.guestContentHash) {
+					res.writeHead(304);
+					res.end();
+					return;
+				}
+			}
+
 			if (req.headers["accept-encoding"].indexOf("br") !== -1 && this.guestContentBrotli) {
 				res.writeHead(200, {
 					"Content-Type": this.type,
@@ -164,6 +205,20 @@ class CustomLoginFileHandler extends FileHandler {
 				res.end(this.guestContent);
 			}
 		} else {
+			if (process.env.PRODUCTION) {
+				res.setHeader("Cache-Control", `public, max-age=${STATIC_CACHE_TIMEOUT}`);
+				res.setHeader("ETag", this.userContentHash);
+
+				if (this.type === "text/html")
+					res.setHeader("Cache-Control", "no-cache");
+				
+				if (req.headers["if-none-match"] === this.userContentHash) {
+					res.writeHead(304);
+					res.end();
+					return;
+				}
+			}
+
 			if (req.headers["accept-encoding"].indexOf("br") !== -1 && this.userContentBrotli) {
 				res.writeHead(200, {
 					"Content-Type": this.type,
@@ -214,9 +269,8 @@ module.exports = () => {
 
 			// -- Special cases --
 
-			// Webpages
+			// 404
 			const notFoundPagePath = path.join(basePath, "public/404_page/404.html");
-
 			const notFoundPage = fs.readFileSync(notFoundPagePath);
 			let notFoundPageGzip, notFoundPageBrotli;
 
@@ -226,7 +280,6 @@ module.exports = () => {
 			if (fs.existsSync(notFoundPagePath + ".br"))
 				notFoundPageBrotli = fs.readFileSync(notFoundPagePath + ".br")
 
-			// 404
 			router.setFallback((req, res) => {
 				if (req.headers["accept-encoding"].indexOf("br") !== -1 && notFoundPageBrotli) {
 					res.writeHead(404, {
@@ -263,22 +316,23 @@ module.exports = () => {
 			
 			// Logout
 			router.route("/logout").post((req, res) => {
-				res.writeHead(302, [
-					["Location", "/"],
-					["Set-Cookie", router.genCookie("auth-token", "", {
+				res.setHeader("Set-Cookie", [
+					router.genCookie("auth-token", "", {
 						domain: process.env.domain,
 						path: "/",
 						expires: "Thu, 01 Jan 1970 00:00:00 GMT",
 						sameSite: "Strict",
 						httpOnly: true
-					})],
-					["Set-Cookie", router.genCookie("username", "", {
+					}),
+					router.genCookie("username", "", {
 						domain: process.env.domain,
 						path: "/",
 						expires: "Thu, 01 Jan 1970 00:00:00 GMT",
 						sameSite: "Strict"
-					})]
+					})
 				]);
+				
+				res.statusCode = 200;
 				res.end();
 			});	
 

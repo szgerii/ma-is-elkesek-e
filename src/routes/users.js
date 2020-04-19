@@ -9,22 +9,23 @@ const jwt_verification = require("../middlewares/jwt_verification");
 module.exports = () => {
 	router.route("/api/login").post((req, res) => {
 		dbManager.login(req.body.username, req.body.password).then(token => {
-			res.writeHead(200, [
-				["Content-Type", "application/json"],
-				["Set-Cookie", router.genCookie("username", req.body.username, {
-					domain: process.env.domain,
-					path: "/",
-					maxAge: process.env.authTokenMaxAge,
-					sameSite: "Strict"
-				})],
-				["Set-Cookie", router.genCookie("auth-token", token, {
+			res.setHeader("Set-Cookie", [
+				router.genCookie("auth-token", token, {
 					domain: process.env.domain,
 					path: "/",
 					maxAge: process.env.authTokenMaxAge,
 					sameSite: "Strict",
 					httpOnly: true
-				})]
+				}),
+				router.genCookie("username", req.body.username, {
+					domain: process.env.domain,
+					path: "/",
+					maxAge: process.env.authTokenMaxAge,
+					sameSite: "Strict"
+				})
 			]);
+			res.setHeader("Content-Type", "text/html");
+			res.statusCode = 200;
 			res.end(router.genResponse("success", null));
 		}).catch(err => {
 			switch (err.name) {
@@ -71,22 +72,22 @@ module.exports = () => {
 		}).then(async () => {
 			return await dbManager.genToken(req.body.username);
 		}).then(token => {
-			res.writeHead(200, [
-				["Content-Type", "application/json"],
-				["Set-Cookie", router.genCookie("username", req.body.username, {
-					domain: process.env.domain,
-					path: "/",
-					maxAge: process.env.authTokenMaxAge,
-					sameSite: "Strict"
-				})],
-				["Set-Cookie", router.genCookie("auth-token", token, {
+			res.setHeader("Set-Cookie", [
+				router.genCookie("auth-token", token, {
 					domain: process.env.domain,
 					path: "/",
 					maxAge: process.env.authTokenMaxAge,
 					sameSite: "Strict",
 					httpOnly: true
-				})]
+				}),
+				router.genCookie("username", req.body.username, {
+					domain: process.env.domain,
+					path: "/",
+					maxAge: process.env.authTokenMaxAge,
+					sameSite: "Strict"
+				})
 			]);
+			res.writeHead(200, {"Content-Type": "application/json"});
 			res.end(router.genResponse("success", null));
 		}).catch(err => {
 			switch (err.name) {
@@ -204,22 +205,22 @@ module.exports = () => {
 				showWatchlistByDefault: req.body.showWatchlistByDefault
 			}).then(async () => {
 				const token = await dbManager.genToken(req.body.username || req.params.username);
-				res.writeHead(200, [
-					["Content-Type", "application/json"],
-					["Set-Cookie", router.genCookie("auth-token", token, {
+				res.setHeader("Set-Cookie", [
+					router.genCookie("auth-token", token, {
 						domain: process.env.domain,
 						path: "/",
 						maxAge: process.env.authTokenMaxAge,
 						sameSite: "Strict",
 						httpOnly: true
-					})],
-					["Set-Cookie", router.genCookie("username", req.body.username || req.params.username, {
+					}),
+					router.genCookie("username", req.body.username || req.params.username, {
 						domain: process.env.domain,
 						path: "/",
 						maxAge: process.env.authTokenMaxAge,
 						sameSite: "Strict"
-					})]
+					})
 				]);
+				res.writeHead(200, {"Content-Type": "application/json"});
 				res.end(router.genResponse("success", null));
 			}).catch(err => {
 				switch (err.name) {

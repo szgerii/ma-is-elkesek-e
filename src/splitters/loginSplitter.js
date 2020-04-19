@@ -18,13 +18,21 @@ module.exports = async (req, res) => {
 		const user = await userModel.findOne({ username: decoded.sub });
 		
 		if (!user) {
-			res.setHeader("Set-Cookie", router.genCookie("auth-token", "", {
-				domain: process.env.domain,
-				path: "/",
-				expires: "Thu, 01 Jan 1970 00:00:00 GMT",
-				sameSite: "Strict",
-				httpOnly: true
-			}));
+			res.setHeader("Set-Cookie", [
+				router.genCookie("auth-token", "", {
+					domain: process.env.domain,
+					path: "/",
+					expires: "Thu, 01 Jan 1970 00:00:00 GMT",
+					sameSite: "Strict",
+					httpOnly: true
+				}),
+				router.genCookie("username", "", {
+					domain: process.env.domain,
+					path: "/",
+					expires: "Thu, 01 Jan 1970 00:00:00 GMT",
+					sameSite: "Strict"
+				})
+			]);
 			return 0;
 		}
 
@@ -32,13 +40,21 @@ module.exports = async (req, res) => {
 		req.showWatchlistByDefault = user.showWatchlistByDefault;
 		return 1;
 	} catch (err) {
-		res.setHeader("Set-Cookie", router.genCookie("auth-token", "", {
-			domain: process.env.domain,
-			path: "/",
-			expires: "Thu, 01 Jan 1970 00:00:00 GMT",
-			sameSite: "Strict",
-			httpOnly: true
-		}));
+		res.setHeader("Set-Cookie", [
+			router.genCookie("auth-token", "", {
+				domain: process.env.domain,
+				path: "/",
+				expires: "Thu, 01 Jan 1970 00:00:00 GMT",
+				sameSite: "Strict",
+				httpOnly: true
+			}),
+			router.genCookie("username", "", {
+				domain: process.env.domain,
+				path: "/",
+				expires: "Thu, 01 Jan 1970 00:00:00 GMT",
+				sameSite: "Strict"
+			})
+		]);
 		return 0;
 	}
 }

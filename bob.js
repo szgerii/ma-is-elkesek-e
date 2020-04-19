@@ -21,6 +21,9 @@ const stopOnWarning = process.argv.includes("--stop-on-warning") || process.argv
 const keepMinified = process.argv.includes("--keep-minified") || process.argv.includes("-km");
 const collectWarnings = process.argv.includes("--collect-warnings") || process.argv.includes("-cw");
 const warnings = [];
+const textReplace = process.argv.includes("--text-replace");
+const textReplaceOriginal = process.argv[process.argv.indexOf("--text-replace") + 1];
+const textReplaceEdit = process.argv[process.argv.indexOf("--text-replace") + 2];
 
 const buildConfigDir = process.argv.includes("--build-config") ? path.resolve(process.argv[process.argv.indexOf("--build-config") + 1]) : path.join(__dirname, ".bob_config");
 const minifyPath = process.argv.includes("--min") ? path.resolve(process.argv[process.argv.indexOf("--min") + 1]) : path.join(buildConfigDir, "minify.json");
@@ -105,12 +108,31 @@ async function minifyFiles() {
 
         if (f.endsWith(".html") || f.endsWith(".css")) {
             console.log(`${PREFIX} Minifying ${f}...`);
-            fs.writeFileSync(path.join(prodBase, f), await minify(path.join(devBase, f)));
+
+            if (textReplace) {
+                const extension = f.substring(f.lastIndexOf("."));
+
+                let tempPath = path.join(prodBase, Math.floor(Math.random() * 2000) + "-tmp." + extension);
+                while (fs.existsSync(tempPath))
+                    tempPath = path.join(prodBase, Math.floor(Math.random() * 2000) + "-tmp." + extension);
+                
+                fs.writeFileSync(tempPath, textReplacer(fs.readFileSync(path.join(devBase, f)).toString()));
+    
+                fs.writeFileSync(path.join(prodBase, f), await minify(tempPath));
+                
+                fs.unlinkSync(tempPath);
+            } else {
+                fs.writeFileSync(path.join(prodBase, f), await minify(path.join(devBase, f)));
+            }
+
             minifiedCounter++;
-            console.log(`${PREFIX} Minification status: ${minifiedCounter}/${files.length} (${minifiedCounter / (files.length / 100)}%) done`);
+            console.log(`${PREFIX} Minification status: ${minifiedCounter}/${files.length} (${(minifiedCounter / (files.length / 100)).toFixed(2)}%) done`);
         } else if (f.endsWith(".js")) {
             console.log(`${PREFIX} Minifying ${f}...`);
-            const minified = terser.minify(fs.readFileSync(path.join(devBase, f)).toString(), {
+            
+            const content = textReplace ? textReplacer(fs.readFileSync(path.join(devBase, f)).toString()) : fs.readFileSync(path.join(devBase, f)).toString();
+
+            const minified = terser.minify(content, {
                 mangle: {
                     toplevel: false
                 },
@@ -122,7 +144,7 @@ async function minifyFiles() {
                 console.log(minified.error);
                 
                 if (!ignoreErrors) {
-                    console.log(`${PREFIX} Build failed. Shutting down...${EOL}`);
+                    console.log(`${EOL}${PREFIX} Build failed. Shutting down...${EOL}`);
                     
                     process.exit(2);
                 }
@@ -148,7 +170,7 @@ async function minifyFiles() {
             
             fs.writeFileSync(path.join(prodBase, f), minified.code);
             minifiedCounter++;
-            console.log(`${PREFIX} Minification status: ${minifiedCounter}/${files.length} (${minifiedCounter / (files.length / 100)}%) done`);
+            console.log(`${PREFIX} Minification status: ${minifiedCounter}/${files.length} (${(minifiedCounter / (files.length / 100)).toFixed(2)}%) done`);
         }
     }
     
@@ -224,7 +246,7 @@ async function compressTextFiles() {
 
         compCounter++;
 
-        console.log(`${PREFIX} Text file compression status: ${compCounter}/${files.length} (${compCounter / (files.length / 100)}%) done`);
+        console.log(`${PREFIX} Text file compression status: ${compCounter}/${files.length} (${(compCounter / (files.length / 100)).toFixed(2)}%) done`);
     }
 
     return compCounter;
@@ -269,7 +291,7 @@ async function compressImageFiles() {
         
         compCounter++;
 
-        console.log(`${PREFIX} Image file compression status: ${compCounter}/${files.length} (${compCounter / (files.length / 100)}%) done`);
+        console.log(`${PREFIX} Image file compression status: ${compCounter}/${files.length} (${(compCounter / (files.length / 100)).toFixed(2)}%) done`);
     }
 
     return compCounter;
@@ -306,10 +328,24 @@ async function cloneFiles() {
         fs.writeFileSync(path.join(prodBase, f), content);
         
         clonedCounter++;
-        console.log(`${PREFIX} Cloning status: ${clonedCounter}/${files.length} (${clonedCounter / (files.length / 100)}%) done`);
+        console.log(`${PREFIX} Cloning status: ${clonedCounter}/${files.length} (${(clonedCounter / (files.length / 100)).toFixed(2)}%) done`);
     }
 
     return clonedCounter;
+}
+
+/**
+ * Replaces the text specified by textReplaceOriginal with textReplaceEdit in a string
+ * @param {String} data - the string that is processed
+ */
+function textReplacer(data) {
+    if (!textReplaceOriginal || !textReplaceEdit) {
+        console.error(`${PREFIX} --text-replace takes two arguments. The original text and the edited text. Shutting down...`);
+        
+        process.exit(5);
+    }
+
+    return data.replace(textReplaceOriginal, textReplaceEdit);
 }
 
 /**

@@ -108,8 +108,13 @@ async function start() {
 	usersRoute();
 	watchlistRoute();
 
-	if (process.env.PRODUCTION)
+	if (process.env.PRODUCTION) {
+		router.addMiddleware((req, res, done) => {
+			res.setHeader("Cache-Control", "no-store");
+			done();
+		});
 		logger.log("SERVER RUNNING IN PRODUCTION MODE");
+	}
 	
 	// Start the server
 	server = http.createServer(router.requestHandler);
