@@ -14,7 +14,7 @@ module.exports = () => {
 					domain: process.env.domain,
 					path: "/",
 					maxAge: process.env.authTokenMaxAge,
-					sameSite: "Strict",
+					sameSite: "Lax",
 					httpOnly: true
 				}),
 				router.genCookie("username", req.body.username, {
@@ -77,7 +77,7 @@ module.exports = () => {
 					domain: process.env.domain,
 					path: "/",
 					maxAge: process.env.authTokenMaxAge,
-					sameSite: "Strict",
+					sameSite: "Lax",
 					httpOnly: true
 				}),
 				router.genCookie("username", req.body.username, {
@@ -210,7 +210,7 @@ module.exports = () => {
 						domain: process.env.domain,
 						path: "/",
 						maxAge: process.env.authTokenMaxAge,
-						sameSite: "Strict",
+						sameSite: "Lax",
 						httpOnly: true
 					}),
 					router.genCookie("username", req.body.username || req.params.username, {

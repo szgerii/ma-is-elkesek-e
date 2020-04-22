@@ -37,7 +37,7 @@ module.exports = async (req, res, done) => {
 					domain: process.env.domain,
 					path: "/",
 					expires: "Thu, 01 Jan 1970 00:00:00 GMT",
-					sameSite: "Strict",
+					sameSite: "Lax",
 					httpOnly: true
 				}),
 				router.genCookie("username", "", {
@@ -65,7 +65,7 @@ module.exports = async (req, res, done) => {
 				domain: process.env.domain,
 				path: "/",
 				expires: "Thu, 01 Jan 1970 00:00:00 GMT",
-				sameSite: "Strict",
+				sameSite: "Lax",
 				httpOnly: true
 			}),
 			router.genCookie("username", "", {
