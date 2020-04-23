@@ -104,6 +104,21 @@ class StaticFileHandler extends FileHandler {
 	}
 }
 
+class GuestOnlyFileHandler extends StaticFileHandler {
+	constructor(url, type, path) {
+		super(url, type, path);
+	}
+
+	async serve(req, res) {
+		const split = await loginSplitter(req, res); // 0 if guest, 1 if user
+
+		if (split === 0)
+			super.serve(req, res);
+		else
+			res.redirect("/");
+	}
+}
+
 class UserOnlyFileHandler extends StaticFileHandler {
 	constructor(url, type, path) {
 		super(url, type, path);
@@ -234,6 +249,9 @@ module.exports = () => {
 				switch (f.customHandler) {
 					case "login-only":
 						return new UserOnlyFileHandler(f.url, f.type, f.path);
+					
+					case "guest-only":
+						return new GuestOnlyFileHandler(f.url, f.type, f.path);
 					
 					case "custom-login":
 						return new CustomLoginFileHandler(f.url, f.type, f.path);

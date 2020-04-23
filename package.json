@@ -1,6 +1,6 @@
 {
   "name": "ma-is-elkesek-e",
-  "version": "1.0.0",
+  "version": "1.1.2",
   "description": "BKK járatok átlag késését számoló weboldal.",
   "repository": "github:hentesoposszum/ma-is-elkesek-e",
   "main": "server.js",

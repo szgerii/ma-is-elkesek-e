@@ -31,11 +31,6 @@
 		"type": "text/css"
 	},
 	{
-		"url": "/login",
-		"path": "login_page/login.html",
-		"type": "text/html"
-	},
-	{
 		"url": "/about",
 		"path": "about_page/about_{}.html",
 		"type": "text/html",
@@ -45,6 +40,12 @@
 		"url": "/about.css",
 		"path": "about_page/about.css",
 		"type": "text/css"
+	},
+	{
+		"url": "/login",
+		"path": "login_page/login.html",
+		"type": "text/html",
+		"customHandler": "guest-only"
 	},
 	{
 		"url": "/login.css",
@@ -59,7 +60,8 @@
 	{
 		"url": "/signup",
 		"path": "signup_page/signup.html",
-		"type": "text/html"
+		"type": "text/html",
+		"customHandler": "guest-only"
 	},
 	{
 		"url": "/signup.css",
