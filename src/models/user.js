@@ -55,6 +55,14 @@ const userSchema = new mongoose.Schema({
 		type: [watchlistSectionSchema]
 	},
 	/**
+	 * The number of minutes that will be used for watchlist average calculations
+	 */
+	watchlistLatency: {
+		type: Number,
+		required: true,
+		default: 20
+	},
+	/**
 	 * This indicates whether or not the watchlist should be showed to user after login
 	 */
 	showWatchlistByDefault: {
