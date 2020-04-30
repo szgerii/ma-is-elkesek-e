@@ -245,21 +245,21 @@ exports.createUser = userData => {
 			return;
 		}
 
-		if (userData.watchlistLatency === undefined) {
-			userData.watchlistLatency = 20;
-		} else if (typeof userData.watchlistLatency !== "number") {
+		if (userData.watchlistTime === undefined) {
+			userData.watchlistTime = 20;
+		} else if (typeof userData.watchlistTime !== "number") {
 			const err = new Error("A field in the request body had invalid value");
 			err.name = "ValidationError";
 			err.data = {
-				"watchlistLatency": `Invalid type: ${typeof userData.watchlistLatency}, expected: number`
+				"watchlistTime": `Invalid type: ${typeof userData.watchlistTime}, expected: number`
 			};
 			reject(err);
 			return;
-		} else if (userData.watchlistLatency < 10 || userData.watchlistLatency > 120) {
+		} else if (userData.watchlistTime < 10 || userData.watchlistTime > 120) {
 			const err = new Error("A field in the request body had invalid value");
 			err.name = "ValidationError";
 			err.data = {
-				"watchlistLatency": "Watchlist latency has to be an integer between 10 and 120"
+				"watchlistTime": "Watchlist time has to be an integer between 10 and 120"
 			};
 			reject(err);
 			return;
@@ -277,7 +277,7 @@ exports.createUser = userData => {
 		user.email = userData.email;
 		user.password = userData.password;
 		user.showWatchlistByDefault = userData.showWatchlistByDefault;
-		user.watchlistLatency = userData.watchlistLatency;
+		user.watchlistTime = userData.watchlistTime;
 		user.hash = true;
 		user.save().then(() => {
 			resolve();
@@ -411,7 +411,7 @@ exports.getUserSettings = username => {
 		resolve({
 			username: user.username,
 			showWatchlistByDefault: user.showWatchlistByDefault,
-			watchlistLatency: user.watchlistLatency
+			watchlistTime: user.watchlistTime
 		});
 	});
 };
@@ -455,16 +455,16 @@ exports.modifyUser = (username, modifications) => {
 		else if (modifications.showWatchlistByDefault !== undefined)
 			dataCheck.showWatchlistByDefault = `Invalid showWatchlistByDefault value: ${modifications.showWatchlistByDefault}`;
 
-		if (typeof modifications.watchlistLatency === "number") {
-			if (modifications.watchlistLatency < 10 || modifications.watchlistLatency > 120)
-				dataCheck.watchlistLatency = "Watchlist latency has to be an integer between 10 and 120";
+		if (typeof modifications.watchlistTime === "number") {
+			if (modifications.watchlistTime < 10 || modifications.watchlistTime > 120)
+				dataCheck.watchlistTime = "Watchlist time has to be an integer between 10 and 120";
 			else
-				user.watchlistLatency = modifications.watchlistLatency;
-		} else if (modifications.watchlistLatency !== undefined) {
-			dataCheck.watchlistLatency = `Invalid watchlistLatency value: ${modifications.watchlistLatency}`;
+				user.watchlistTime = modifications.watchlistTime;
+		} else if (modifications.watchlistTime !== undefined) {
+			dataCheck.watchlistTime = `Invalid watchlistTime value: ${modifications.watchlistTime}`;
 		}
 
-		if (dataCheck.username || dataCheck.password || dataCheck.showWatchlistByDefault || dataCheck.watchlistLatency) {
+		if (dataCheck.username || dataCheck.password || dataCheck.showWatchlistByDefault || dataCheck.watchlistTime) {
 			const err = new Error("A field from the request body had invalid formatting");
 			err.name = "ValidationError";
 			err.data = dataCheck;
@@ -529,7 +529,7 @@ exports.getWatchlist = username => {
 			});
 
 			resolve({
-				latency: user.watchlistLatency,
+				time: user.watchlistTime,
 				list: watchlist
 			});
 		}).catch(err => {

@@ -69,7 +69,7 @@ module.exports = () => {
 			username: req.body.username,
 			password: req.body.password,
 			showWatchlistByDefault: req.body.showWatchlistByDefault,
-			watchlistLatency: req.body.watchlistLatency
+			watchlistTime: req.body.watchlistTime
 		}).then(async () => {
 			return await dbManager.genToken(req.body.username);
 		}).then(token => {
@@ -212,7 +212,7 @@ module.exports = () => {
 				username: req.body.username,
 				password: req.body.newPassword,
 				showWatchlistByDefault: req.body.showWatchlistByDefault,
-				watchlistLatency: req.body.watchlistLatency
+				watchlistTime: req.body.watchlistTime
 			}).then(async () => {
 				const token = await dbManager.genToken(req.body.username || req.params.username);
 				res.setHeader("Set-Cookie", [

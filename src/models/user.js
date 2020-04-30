@@ -57,7 +57,7 @@ const userSchema = new mongoose.Schema({
 	/**
 	 * The number of minutes that will be used for watchlist average calculations
 	 */
-	watchlistLatency: {
+	watchlistTime: {
 		type: Number,
 		required: true,
 		default: 20

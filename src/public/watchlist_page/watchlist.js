@@ -18,7 +18,7 @@ let currentVariant = variant1; //Global variable of the chosen variant
 
 let watchlist = 0;
 let refreshInProgress = false; // Indicates whether or not the watchlist is currently being redrawn to the screen
-let watchlistLatency;
+let watchlistTime;
 
 function setup() {
 
@@ -101,7 +101,7 @@ async function loadWatchlist() {
         }
 
         result = res.json.data.list;
-        watchlistLatency = res.json.data.latency;
+        watchlistTime = res.json.data.time;
     })
     .catch(err => {
         alert("Hiba történt a lista betöltése során. Kérjük próbálkozzon újra később.");
@@ -451,7 +451,7 @@ async function loadPredefinedSegment(prefLine, prefStop1, prefStop2, output) {
     }
 
     //Load the segment
-    let trips = await downloadSegment(line, stops, stop1, stop2, isFinalStop, stop2ForFinalStop, watchlistLatency);
+    let trips = await downloadSegment(line, stops, stop1, stop2, isFinalStop, stop2ForFinalStop, watchlistTime);
     
     let travelTime = calculateResult(trips);
 

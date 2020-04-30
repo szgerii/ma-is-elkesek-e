@@ -5,7 +5,7 @@ let oldSettings = {
 
     username: null,
     isWatchlist: null,
-    latency: null
+    time: null
 
 }
 
@@ -45,11 +45,11 @@ function loadOldSettings() {
         if (res.json.status === "success") {
             oldSettings.username = res.json.data.username;
             oldSettings.isWatchlist = res.json.data.showWatchlistByDefault;
-            oldSettings.latency = res.json.data.watchlistLatency;
+            oldSettings.time = res.json.data.watchlistTime;
     
             document.querySelector("#input-username").placeholder = oldSettings.username;
             document.querySelector("#input-dd-watchlist").value = `${oldSettings.isWatchlist}`;
-            document.querySelector("#input-watchlistLatency").placeholder = oldSettings.latency;
+            document.querySelector("#input-watchlistTime").placeholder = oldSettings.time;
     
             button.setAttribute("onclick","saveChanges();");
             button.value = "Változtatások mentése";
@@ -73,19 +73,19 @@ function saveChanges() {
     const newPasswordInput = document.querySelector("#input-newPassword");
     const newPassword2Input = document.querySelector("#input-newPassword2");
     const isWatchlist = (document.querySelector("#input-dd-watchlist").value=="true");
-    const watchlistLatency = Number(document.querySelector("#input-watchlistLatency").value);
+    const watchlistTime = Number(document.querySelector("#input-watchlistTime").value);
 
     const usernameError = document.querySelector("#username-error");
     const passwordError = document.querySelector("#password-error");
     const newPasswordError = document.querySelector("#new-password-error");
     const newPasswordAgainError = document.querySelector("#new-password-again-error");
-    const watchlistLatencyError = document.querySelector("#watchlistLatency-error");
+    const watchlistTimeError = document.querySelector("#watchlistTime-error");
     
     usernameError.innerText = "";
     passwordError.innerText = "";
     newPasswordError.innerText = "";
     newPasswordAgainError.innerText = "";
-    watchlistLatencyError.innerText = "";
+    watchlistTimeError.innerText = "";
 
     usernameInput.style.border = "";
     passwordInput.style.border = "";
@@ -96,10 +96,10 @@ function saveChanges() {
     let usernameChanged = (usernameInput.value !== "" && usernameInput.value !== oldSettings.username);
     let watchlistChanged = (isWatchlist !== oldSettings.isWatchlist);
     let passwordChanged = (newPasswordInput.value !== "");
-    let latencyChanged = (watchlistLatency !== 0 && watchlistLatency !== oldSettings.latency);
+    let timeChanged = (watchlistTime !== 0 && watchlistTime !== oldSettings.time);
 
     //Quit if none of them were changed.
-    if (!usernameChanged && !watchlistChanged && !passwordChanged && !latencyChanged) {
+    if (!usernameChanged && !watchlistChanged && !passwordChanged && !timeChanged) {
 
         passwordError.innerText = "Egyik beállítás sem lett megváltoztatva";
         return;
@@ -187,23 +187,23 @@ function saveChanges() {
         data.showWatchlistByDefault = isWatchlist;
     }
 
-    //Check watchlist latency format and add it to the data
-    if (latencyChanged) {
+    //Check watchlist time format and add it to the data
+    if (timeChanged) {
 
         let hasError = true;
 
-        switch(checkLatencyFormat(watchlistLatency)) {
+        switch(checkTimeFormat(watchlistTime)) {
 
             case "nan": 
-                watchlistLatencyError.innerText = "A megadott vizsgálandó időnek számnak kell lennie.";
+                watchlistTimeError.innerText = "A megadott vizsgálandó időnek számnak kell lennie.";
                 break;
 
             case "small":
-                watchlistLatencyError.innerText = "A vizsgálandó időnek legalább 10 percnek kell lennie.";
+                watchlistTimeError.innerText = "A vizsgálandó időnek legalább 10 percnek kell lennie.";
                 break;
             
             case "big":
-                watchlistLatencyError.innerText = "A vizsgálandó idő nem lehet 120 percnél nagyobb.";
+                watchlistTimeError.innerText = "A vizsgálandó idő nem lehet 120 percnél nagyobb.";
                 break;
             
             case "correct":
@@ -219,7 +219,7 @@ function saveChanges() {
             return;
         }
 
-        data.watchlistLatency = watchlistLatency;
+        data.watchlistTime = watchlistTime;
 
     }
 
@@ -319,13 +319,13 @@ function checkPasswordFormat(password) {
 
 }
 
-function checkLatencyFormat(latency) {
+function checkTimeFormat(time) {
 
-    if (isNaN(latency)) {
+    if (isNaN(time)) {
         return "nan";
-    } else if (latency<10) {
+    } else if (time<10) {
         return "small";
-    } else if (latency>120) {
+    } else if (time>120) {
         return "big";
     } else {
         return "correct";
