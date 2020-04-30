@@ -255,6 +255,14 @@ exports.createUser = userData => {
 			};
 			reject(err);
 			return;
+		} else if (userData.watchlistLatency < 10 || userData.watchlistLatency > 120) {
+			const err = new Error("A field in the request body had invalid value");
+			err.name = "ValidationError";
+			err.data = {
+				"watchlistLatency": "Watchlist latency has to be an integer between 10 and 120"
+			};
+			reject(err);
+			return;
 		}
 
 		if (await userModel.findOne({ username: userData.username })) {
@@ -447,12 +455,16 @@ exports.modifyUser = (username, modifications) => {
 		else if (modifications.showWatchlistByDefault !== undefined)
 			dataCheck.showWatchlistByDefault = `Invalid showWatchlistByDefault value: ${modifications.showWatchlistByDefault}`;
 
-		if (typeof modifications.watchlistLatency === "number")
-			user.watchlistLatency = modifications.watchlistLatency;
-		else if (modifications.watchlistLatency !== undefined)
+		if (typeof modifications.watchlistLatency === "number") {
+			if (modifications.watchlistLatency < 10 || modifications.watchlistLatency > 120)
+				dataCheck.watchlistLatency = "Watchlist latency has to be an integer between 10 and 120";
+			else
+				user.watchlistLatency = modifications.watchlistLatency;
+		} else if (modifications.watchlistLatency !== undefined) {
 			dataCheck.watchlistLatency = `Invalid watchlistLatency value: ${modifications.watchlistLatency}`;
+		}
 
-		if (dataCheck.username || dataCheck.password || dataCheck.showWatchlistByDefault) {
+		if (dataCheck.username || dataCheck.password || dataCheck.showWatchlistByDefault || dataCheck.watchlistLatency) {
 			const err = new Error("A field from the request body had invalid formatting");
 			err.name = "ValidationError";
 			err.data = dataCheck;
