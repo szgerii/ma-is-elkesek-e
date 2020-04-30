@@ -233,8 +233,29 @@ exports.createUser = userData => {
 			return;
 		}
 
-		if (userData.showWatchlistByDefault === undefined)
+		if (userData.showWatchlistByDefault === undefined) {
 			userData.showWatchlistByDefault = true;
+		} else if (typeof userData.showWatchlistByDefault !== "boolean") {
+			const err = new Error("A field in the request body had invalid value");
+			err.name = "ValidationError";
+			err.data = {
+				"showWatchlistByDefault": `Invalid type: ${typeof userData.showWatchlistByDefault}, expected: boolean`
+			};
+			reject(err);
+			return;
+		}
+
+		if (userData.watchlistLatency === undefined) {
+			userData.watchlistLatency = 20;
+		} else if (typeof userData.watchlistLatency !== "number") {
+			const err = new Error("A field in the request body had invalid value");
+			err.name = "ValidationError";
+			err.data = {
+				"watchlistLatency": `Invalid type: ${typeof userData.watchlistLatency}, expected: number`
+			};
+			reject(err);
+			return;
+		}
 
 		if (await userModel.findOne({ username: userData.username })) {
 			const err = new Error(`A user already exists with the following username: ${userData.username}`);
@@ -248,6 +269,7 @@ exports.createUser = userData => {
 		user.email = userData.email;
 		user.password = userData.password;
 		user.showWatchlistByDefault = userData.showWatchlistByDefault;
+		user.watchlistLatency = userData.watchlistLatency;
 		user.hash = true;
 		user.save().then(() => {
 			resolve();
@@ -380,7 +402,8 @@ exports.getUserSettings = username => {
 
 		resolve({
 			username: user.username,
-			showWatchlistByDefault: user.showWatchlistByDefault
+			showWatchlistByDefault: user.showWatchlistByDefault,
+			watchlistLatency: user.watchlistLatency
 		});
 	});
 };
@@ -423,6 +446,11 @@ exports.modifyUser = (username, modifications) => {
 			user.showWatchlistByDefault = modifications.showWatchlistByDefault;
 		else if (modifications.showWatchlistByDefault !== undefined)
 			dataCheck.showWatchlistByDefault = `Invalid showWatchlistByDefault value: ${modifications.showWatchlistByDefault}`;
+
+		if (typeof modifications.watchlistLatency === "number")
+			user.watchlistLatency = modifications.watchlistLatency;
+		else if (modifications.watchlistLatency !== undefined)
+			dataCheck.watchlistLatency = `Invalid watchlistLatency value: ${modifications.watchlistLatency}`;
 
 		if (dataCheck.username || dataCheck.password || dataCheck.showWatchlistByDefault) {
 			const err = new Error("A field from the request body had invalid formatting");
@@ -469,7 +497,7 @@ exports.getWatchlist = username => {
 		}
 
 		sectionModel.populate(user.watchlist, "section").then(populatedList => {
-			resolve(populatedList.map(item => {
+			const watchlist = populatedList.map(item => {
 				const sec = item.section;
 				return {
 					line: {
@@ -486,7 +514,12 @@ exports.getWatchlist = username => {
 					},
 					orderIndex: item.orderIndex
 				};
-			}));
+			});
+
+			resolve({
+				latency: user.watchlistLatency,
+				list: watchlist
+			});
 		}).catch(err => {
 			logger.error("Couldn't get user from the database");
 			logger.xlog(err);

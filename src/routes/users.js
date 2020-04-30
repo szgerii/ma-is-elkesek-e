@@ -68,7 +68,8 @@ module.exports = () => {
 		dbManager.createUser({
 			username: req.body.username,
 			password: req.body.password,
-			showWatchlistByDefault: req.body.showWatchlistByDefault
+			showWatchlistByDefault: req.body.showWatchlistByDefault,
+			watchlistLatency: req.body.watchlistLatency
 		}).then(async () => {
 			return await dbManager.genToken(req.body.username);
 		}).then(token => {
@@ -187,6 +188,14 @@ module.exports = () => {
 			return;
 		}
 
+		if (!req.body.password) {
+			res.writeHead(422, {"Content-Type": "application/json"});
+			res.end(router.genResponse("fail", {
+				"password": "The current password of the user is required to make any change to their account."
+			}));
+			return;
+		}
+
 		dbManager.checkPassword(req.params.username, req.body.password).then(isPasswordCorrect => {
 			if (!isPasswordCorrect) {
 				res.writeHead(401, {
@@ -202,7 +211,8 @@ module.exports = () => {
 			dbManager.modifyUser(req.params.username, {
 				username: req.body.username,
 				password: req.body.newPassword,
-				showWatchlistByDefault: req.body.showWatchlistByDefault
+				showWatchlistByDefault: req.body.showWatchlistByDefault,
+				watchlistLatency: req.body.watchlistLatency
 			}).then(async () => {
 				const token = await dbManager.genToken(req.body.username || req.params.username);
 				res.setHeader("Set-Cookie", [
