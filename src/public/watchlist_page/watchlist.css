@@ -156,6 +156,13 @@ body {
     text-align: center;
 }
 
+#loading-info {
+    color: var(--color-bus);
+    font-size: calc(var(--fontSize-desktop-large) + 0.3em);
+    font-weight: 900;
+    text-align: center;
+}
+
 
 @media (max-width: 992px) {
     .content {
@@ -234,5 +241,15 @@ body {
     #empty-info {
         font-size: var(--fontSize-phone-large);
     }
+
+    #loading-info {
+        font-size: var(--fontSize-phone-large);
+    }
+
+}
+
+.watchlist-loading {
+
+    display: none;
 
 }

@@ -175,12 +175,21 @@ async function drawWatchlist(skipFetch) {
         content.children[i].remove();
     }
 
+    const infoContainer = document.createElement("div");
+    infoContainer.id = "info-container";
+    const info = document.createElement("p");
+    info.id = "loading-info";
+    info.innerText = "Járatlista betöltése...";
+    infoContainer.appendChild(info);
+    content.appendChild(infoContainer);
+
     for (let i = 0; i < watchlist.length; i++) {
         const type = await getLineType(watchlist[i].line);
 
         const element = document.createElement("div");
         element.classList.add("watchlist-element");
         element.classList.add("watchlist-"+type);
+        element.classList.add("watchlist-loading");
 
         const image = document.createElement("img");
         image.classList.add("watchlist-image");
@@ -216,6 +225,12 @@ async function drawWatchlist(skipFetch) {
         element.appendChild(text);
         element.appendChild(buttonContainer);
         content.appendChild(element);
+    }
+
+    content.removeChild(infoContainer);
+
+    for (let i=0; i<content.childNodes.length; i++) {
+        content.childNodes[i].classList.remove("watchlist-loading");
     }
 
     updateWatchlist(watchlist);
