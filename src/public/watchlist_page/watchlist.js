@@ -149,19 +149,27 @@ async function drawWatchlist(skipFetch) {
 
     refreshInProgress = true;
 
+    const content = document.querySelector(".content");
+    const loadingInfoContainer = document.createElement("div");
+    loadingInfoContainer.classList.add("info-container");
+    const loadingInfo = document.createElement("p");
+    loadingInfo.classList.add("info");
+    loadingInfo.innerText = "Járatlista betöltése...";
+    loadingInfoContainer.appendChild(loadingInfo);
+    content.appendChild(loadingInfoContainer);
+
     if (!skipFetch)
         watchlist = await loadWatchlist();
 
-    const content = document.querySelector(".content");
-
     if (watchlist.length === 0) {
-        const infoContainer = document.createElement("div");
-        infoContainer.id = "info-container";
-        const info = document.createElement("p");
-        info.id = "empty-info";
-        info.innerText = "Még nincsenek szakaszok a listádon. Új szakaszokat a főoldalról menthetsz el, egy útvonal kiválasztása után.";
-        infoContainer.appendChild(info);
-        content.appendChild(infoContainer);
+        content.removeChild(loadingInfoContainer);
+        const emptyInfoContainer = document.createElement("div");
+        emptyInfoContainer.classList.add("info-container");
+        const emptyInfo = document.createElement("p");
+        emptyInfo.classList.add("info");
+        emptyInfo.innerText = "Még nincsenek szakaszok a listádon. Új szakaszokat a főoldalról menthetsz el, egy útvonal kiválasztása után.";
+        emptyInfoContainer.appendChild(emptyInfo);
+        content.appendChild(emptyInfoContainer);
         refreshInProgress = false;
         return;
     }
@@ -172,16 +180,9 @@ async function drawWatchlist(skipFetch) {
     );
 
     for (let i = content.children.length - 1; i >= 0; i--) {
-        content.children[i].remove();
+        if (content.children[i] !== loadingInfoContainer)
+            content.children[i].remove();
     }
-
-    const infoContainer = document.createElement("div");
-    infoContainer.id = "info-container";
-    const info = document.createElement("p");
-    info.id = "loading-info";
-    info.innerText = "Járatlista betöltése...";
-    infoContainer.appendChild(info);
-    content.appendChild(infoContainer);
 
     for (let i = 0; i < watchlist.length; i++) {
         const type = await getLineType(watchlist[i].line);
@@ -227,7 +228,7 @@ async function drawWatchlist(skipFetch) {
         content.appendChild(element);
     }
 
-    content.removeChild(infoContainer);
+    content.removeChild(loadingInfoContainer);
 
     for (let i=0; i<content.childNodes.length; i++) {
         content.childNodes[i].classList.remove("watchlist-loading");

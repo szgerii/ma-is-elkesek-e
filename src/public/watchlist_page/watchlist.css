@@ -141,7 +141,7 @@ body {
 
 }
 
-#info-container {
+.info-container {
     width: 100%;
     height: 100%;
     display: flex;
@@ -149,20 +149,12 @@ body {
     align-items: center;
 }
 
-#empty-info {
+.info {
     color: var(--color-bus);
     font-size: calc(var(--fontSize-desktop-large) + 0.3em);
     font-weight: 900;
     text-align: center;
 }
-
-#loading-info {
-    color: var(--color-bus);
-    font-size: calc(var(--fontSize-desktop-large) + 0.3em);
-    font-weight: 900;
-    text-align: center;
-}
-
 
 @media (max-width: 992px) {
     .content {
@@ -238,11 +230,7 @@ body {
 
     }
 
-    #empty-info {
-        font-size: var(--fontSize-phone-large);
-    }
-
-    #loading-info {
+    .info {
         font-size: var(--fontSize-phone-large);
     }
 
