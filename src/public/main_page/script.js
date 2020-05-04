@@ -874,6 +874,14 @@ function fillStops() {
     let dd1 = document.getElementById("dropdown-stop1");
     let dd2 = document.getElementById("dropdown-stop2");
 
+    if (currentVariant==0) {
+
+        dd1.innerHTML = '<option value="" disabled="" selected="" hidden="">Kérjük válasszon irányt</option>';
+        dd2.innerHTML = '<option value="" disabled="" selected="" hidden="">Kérjük válasszon irányt</option>';
+
+        return;
+    }
+
     let stops = currentVariant.stops;
 
     for (let prop in stops) {
@@ -988,7 +996,7 @@ function updateVariant() {
 
     if (selectedText==variant1.name)
         currentVariant = variant1;
-    else
+    else if (selectedText==variant2.name)
         currentVariant = variant2;
 
     fillStops();
@@ -1015,7 +1023,7 @@ function fillVariants() {
     dropdown.appendChild(o2);
 
     updateVariant();
-
+    
 }
 
 //Function for reseting the stops and variants and clearing the variants from the variant dropdown
