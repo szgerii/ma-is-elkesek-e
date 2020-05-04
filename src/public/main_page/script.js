@@ -900,6 +900,9 @@ function fillStops() {
     	
     }
 
+    dd1.removeChild(dd1.childNodes[dd1.childNodes.length-1]);
+    dd2.removeChild(dd2.childNodes[1]);
+
     updateStops();
 
 }
@@ -949,20 +952,44 @@ async function updateStops() {
 
     let stops = currentVariant.stops;
 
+    for (let i=1; i<dd1.childNodes.length; i++) {
+        let e = dd1.childNodes[i];
+        e.removeAttribute("disabled");
+        e.removeAttribute("hidden");
+    }
+
+    for (let i=1; i<dd2.childNodes.length; i++) {
+        let e = dd2.childNodes[i];
+        e.removeAttribute("disabled");
+        e.removeAttribute("hidden");
+    }
+
     for (let i = 0; i < stops.length; i++)
-        if (stops[i].name==name1) {
-            stop1=stops[i];
+        if (stops[i].name == name1) {
+            stop1 = stops[i];
+            for (let j=0; j<dd2.childNodes.length; j++) {
+                let e = dd2.childNodes[j+1];
+                e.setAttribute("disabled","");
+                e.setAttribute("hidden","");
+                if (i-1<=j) {
+                    break;
+                }
+            }
             break;
         }
 
     for (let i = 0; i < stops.length; i++)
-        if (stops[i].name==name2) {
+        if (stops[i].name == name2) {
            
             stop2 = stops[i];
-            
-            isFinalStop=false;
+            for (let j=i; j<dd1.childNodes.length-1; j++) {
+                let e = dd1.childNodes[j+1];
+                e.setAttribute("disabled","");
+                e.setAttribute("hidden","");
+            }
+            isFinalStop = false;
             stop2ForFinalStop = 0;
-            if (i==stops.length-1) {
+            if (i == stops.length-1) {
                 isFinalStop = true;
                 stop2ForFinalStop = stops[i-1];
             } 
