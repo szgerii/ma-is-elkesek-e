@@ -419,10 +419,46 @@ async function loadPredefinedSegment(prefLine, prefStop1, prefStop2) {
     colorScheme = stop1.type;
     updateScheme();
 
+    //handle dropdowns, filter stops
     let dd1 = document.getElementById("dropdown-stop1");
     let dd2 = document.getElementById("dropdown-stop2");
     dd1.value = stop1.code;
     dd2.value = stop2.code;
+
+    for (let i=1; i<dd1.childNodes.length; i++) {
+        let e = dd1.childNodes[i];
+        e.removeAttribute("disabled");
+        e.removeAttribute("hidden");
+    }
+
+    for (let i=1; i<dd2.childNodes.length; i++) {
+        let e = dd2.childNodes[i];
+        e.removeAttribute("disabled");
+        e.removeAttribute("hidden");
+    }
+
+    for (let i = 0; i < stops.length; i++)
+        if (stops[i] == stop1) {
+            for (let j=0; j<dd2.childNodes.length; j++) {
+                let e = dd2.childNodes[j+1];
+                e.setAttribute("disabled","");
+                e.setAttribute("hidden","");
+                if (i-1<=j) {
+                    break;
+                }
+            }
+            break;
+        }
+
+    for (let i = 0; i < stops.length; i++)
+        if (stops[i] == stop2) {
+            for (let j=i; j<dd1.childNodes.length-1; j++) {
+                let e = dd1.childNodes[j+1];
+                e.setAttribute("disabled","");
+                e.setAttribute("hidden","");
+            }
+            break;
+        }
 
     //Load the segment(skip updateStops())
     if (checkSegment()==1) {
