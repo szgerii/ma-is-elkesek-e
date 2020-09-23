@@ -97,6 +97,7 @@ async function watchlist_add() {
         };
     })
     .then(res => {
+        console.log(res.json);
         if (res.json.status === "success") {
             updateWatchlistButton();
         } else if (res.json.status === "fail") {
@@ -188,7 +189,7 @@ async function updateWatchlistButton() {
         })
         .then(res => {
             if (res.json.status === "success") {
-                result = res.json.data;
+                result = res.json.data.list;
             } else if (res.status === 401) {
                 window.location.replace("/");
             } else {
