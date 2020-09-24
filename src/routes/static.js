@@ -85,7 +85,10 @@ class StaticFileHandler extends FileHandler {
 			}
 		}
 
-		if (req.headers["accept-encoding"].indexOf("br") !== -1 && this.contentBrotli) {
+		if (!req.headers["accept-encoding"]) {
+			res.writeHead(200, {"Content-Type": this.type});
+			res.end(this.content);
+		} else if (req.headers["accept-encoding"].indexOf("br") !== -1 && this.contentBrotli) {
 			res.writeHead(200, {
 				"Content-Type": this.type,
 				"Content-Encoding": "br"
@@ -193,7 +196,10 @@ class CustomLoginFileHandler extends FileHandler {
 				res.setHeader("Cache-Control", `no-store`);
 			}
 
-			if (req.headers["accept-encoding"].indexOf("br") !== -1 && this.guestContentBrotli) {
+			if (!req.headers["accept-encoding"]) {
+				res.writeHead(200, {"Content-Type": this.type});
+				res.end(this.guestContent);
+			} else if (req.headers["accept-encoding"].indexOf("br") !== -1 && this.guestContentBrotli) {
 				res.writeHead(200, {
 					"Content-Type": this.type,
 					"Content-Encoding": "br"
@@ -214,7 +220,10 @@ class CustomLoginFileHandler extends FileHandler {
 				res.setHeader("Cache-Control", `no-store`);
 			}
 
-			if (req.headers["accept-encoding"].indexOf("br") !== -1 && this.userContentBrotli) {
+			if (!req.headers["accept-encoding"]) {
+				res.writeHead(200, {"Content-Type": this.type});
+				res.end(this.userContent);
+			} else if (req.headers["accept-encoding"].indexOf("br") !== -1 && this.userContentBrotli) {
 				res.writeHead(200, {
 					"Content-Type": this.type,
 					"Content-Encoding": "br"
@@ -290,7 +299,10 @@ module.exports = () => {
 				notFoundPageBrotli = fs.readFileSync(notFoundPagePath + ".br")
 
 			router.setFallback((req, res) => {
-				if (req.headers["accept-encoding"].indexOf("br") !== -1 && notFoundPageBrotli) {
+				if (!req.headers["accept-encoding"]) {
+					res.writeHead(404, {"Content-Type": "text/html"});
+					res.end(notFoundPage);
+				} else if (req.headers["accept-encoding"].indexOf("br") !== -1 && notFoundPageBrotli) {
 					res.writeHead(404, {
 						"Content-Type": "text/html",
 						"Content-Encoding": "br"
@@ -305,8 +317,9 @@ module.exports = () => {
 
 					res.end(notFoundPageGzip);
 				} else {
+					console.log(notFoundPage.toString());
 					res.writeHead(404, {"Content-Type": "text/html"});
-					res.end(notFoundPage);
+					res.end(notFoundPage.toString());
 				}
 			});
 

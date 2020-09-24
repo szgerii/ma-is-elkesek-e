@@ -8,6 +8,7 @@ const minify = require("minify"); // HTML and CSS minification
 const terser = require("terser"); // JS minification
 const zlib = require("zlib"); // gzip compression
 const brotli = require("brotli"); // Brotli compression
+const sha1 = require("sha1");
 
 const imagemin = require("imagemin"); // Image compression
 const imageminPNG = require("imagemin-pngquant"); // PNG compression plugin for imagemin
@@ -27,9 +28,12 @@ const textReplaceEdit = process.argv[process.argv.indexOf("--text-replace") + 2]
 
 const buildConfigDir = process.argv.includes("--build-config") ? path.resolve(process.argv[process.argv.indexOf("--build-config") + 1]) : path.join(__dirname, ".bob_config");
 const minifyPath = process.argv.includes("--min") ? path.resolve(process.argv[process.argv.indexOf("--min") + 1]) : path.join(buildConfigDir, "minify.json");
-const compressTextPath = process.argv.includes("--tcomp") ? path.resolve(process.argv[process.argv.indexOf("--tcomp") + 1]) : path.join(buildConfigDir, "compress-text.json");
+//const compressTextPath = process.argv.includes("--tcomp") ? path.resolve(process.argv[process.argv.indexOf("--tcomp") + 1]) : path.join(buildConfigDir, "compress-text.json");
 const compressImagePath = process.argv.includes("--icomp") ? path.resolve(process.argv[process.argv.indexOf("--icomp") + 1]) : path.join(buildConfigDir, "compress-image.json");
 const clonePath = process.argv.includes("--clone") ? path.resolve(process.argv[process.argv.indexOf("--clone") + 1]) : null;
+const uniqueDir = process.argv.includes("--unique") ? process.argv[process.argv.indexOf("--unique") + 1] : null;
+
+const uniqueExclude = process.argv.includes("--unique-exclude") ? process.argv[process.argv.indexOf("--unique-exclude") + 1] : null;
 
 const prodBase = process.argv.includes("--prod-dir") ? path.resolve(process.argv[process.argv.indexOf("--prod-dir") + 1]) : path.resolve("dist");
 const devBase = process.argv.includes("--dev-dir") ? path.resolve(process.argv[process.argv.indexOf("--dev-dir") + 1]) : path.resolve("src");
@@ -59,6 +63,12 @@ async function build() {
     console.log(`${PREFIX} Minifying files...` + EOL);
     const minCount = await minifyFiles();
     console.log(`${EOL}${PREFIX} Minification done. Successfully minified ${minCount} file${minCount > 1 ? "s" : ""}.` + EOL);
+
+    if (uniqueDir) {
+        console.log(`${EOL}${PREFIX} Making file names unique...${EOL}`);
+        const uniqueCount = makeUnique();
+        console.log(`${EOL}${PREFIX} Renaming done. ${uniqueCount} file names were made unique.`);
+    }
     
     console.log(`${PREFIX} Compressing text files...` + EOL);
     const textCompCount = await compressTextFiles();
@@ -116,7 +126,7 @@ async function minifyFiles() {
                 while (fs.existsSync(tempPath))
                     tempPath = path.join(prodBase, Math.floor(Math.random() * 2000) + "-tmp." + extension);
                 
-                fs.writeFileSync(tempPath, textReplacer(fs.readFileSync(path.join(devBase, f)).toString()));
+                fs.writeFileSync(tempPath, replaceText(fs.readFileSync(path.join(devBase, f)).toString()));
     
                 fs.writeFileSync(path.join(prodBase, f), await minify(tempPath));
                 
@@ -130,7 +140,7 @@ async function minifyFiles() {
         } else if (f.endsWith(".js")) {
             console.log(`${PREFIX} Minifying ${f}...`);
             
-            const content = textReplace ? textReplacer(fs.readFileSync(path.join(devBase, f)).toString()) : fs.readFileSync(path.join(devBase, f)).toString();
+            const content = textReplace ? replaceText(fs.readFileSync(path.join(devBase, f)).toString()) : fs.readFileSync(path.join(devBase, f)).toString();
 
             const minified = terser.minify(content, {
                 mangle: {
@@ -182,13 +192,7 @@ async function minifyFiles() {
  * @returns {Number} - the number of files successfully compressed
  */
 async function compressTextFiles() {
-    if (!fs.existsSync(compressTextPath)) {
-        console.error(`${PREFIX} Text compression config file not found. Shutting down...`);
-        
-        process.exit(1);
-    }
-
-    const files = JSON.parse(fs.readFileSync(compressTextPath));
+    const files = getFilePaths(path.join(prodBase, "public"));
 
     let compCounter = 0;
 
@@ -198,22 +202,21 @@ async function compressTextFiles() {
         
         console.log(`${PREFIX} Compressing ${f}...`);
 
-        let dir = path.join(prodBase, f);
-        dir = dir.slice(0, dir.lastIndexOf(path.sep));
+        //let dir = path.join(prodBase, f);
+        const dir = f.slice(0, f.lastIndexOf(path.sep));
 
         fs.mkdirSync(dir, {recursive: true});
-
         
-        if (fs.existsSync(path.join(prodBase, f))) {                        
-            const brotliCompressed = brotli.compress(fs.readFileSync(path.join(prodBase, f)), {
+        if (fs.existsSync(f)) {                        
+            const brotliCompressed = brotli.compress(fs.readFileSync(f), {
                 mode: 1,
                 quality: 11
             });
 
-            fs.writeFileSync(path.join(prodBase, f + ".br"), brotliCompressed);
+            fs.writeFileSync(f + ".br", brotliCompressed);
             
-            const inp = fs.createReadStream(path.join(prodBase, f));
-            const out = fs.createWriteStream(path.join(prodBase, f + ".gz"));
+            const inp = fs.createReadStream(f);
+            const out = fs.createWriteStream(f + ".gz");
             const gzip = zlib.createGzip();
             
             await pipeSync(inp, gzip);
@@ -224,17 +227,17 @@ async function compressTextFiles() {
             out.close();
             
             if (!keepMinified)
-                fs.unlinkSync(path.join(prodBase, f));
+                fs.unlinkSync(f);
         } else {
-            const brotliCompressed = brotli.compress(fs.readFileSync(path.join(devBase, f)), {
+            const brotliCompressed = brotli.compress(fs.readFileSync(f), {
                 mode: 1,
                 quality: 11
             });
 
-            fs.writeFileSync(path.join(prodBase, f + ".br"), brotliCompressed);
+            fs.writeFileSync(f + ".br", brotliCompressed);
 
-            const inp = fs.createReadStream(path.join(devBase, f));
-            const out = fs.createWriteStream(path.join(prodBase, f + ".gz"));
+            const inp = fs.createReadStream(f);
+            const out = fs.createWriteStream(f + ".gz");
             const gzip = zlib.createGzip();
 
             inp.pipe(gzip).pipe(out);
@@ -338,7 +341,7 @@ async function cloneFiles() {
  * Replaces the text specified by textReplaceOriginal with textReplaceEdit in a string
  * @param {String} data - the string that is processed
  */
-function textReplacer(data) {
+function replaceText(data) {
     if (!textReplaceOriginal || !textReplaceEdit) {
         console.error(`${PREFIX} --text-replace takes two arguments. The original text and the edited text. Shutting down...`);
         
@@ -356,4 +359,56 @@ async function pipeSync(readable, writable) {
     return new Promise((resolve, reject) => {
         readable.pipe(writable).on("unpipe", resolve);
     });
+}
+
+/**
+ * Renames files to have unique names in the directory specified by uniqueDir (recursively)
+ * @returns {Number} - the number of files renamed
+ */
+function makeUnique() {
+    let renameCount = 0;
+
+    const fileList = getFilePaths(path.join(prodBase, uniqueDir));
+    const excludeRegExp = new RegExp(uniqueExclude);
+
+    for (let i = 0; i < fileList.length; i++) {
+        if (excludeRegExp.test(fileList[i]) || fileList[i].includes("files.json"))
+            continue;
+
+        const oldFileNameRegExp = new RegExp(fileList[i].split("/").slice(-1)[0], "g");
+        const content = fs.readFileSync(fileList[i]).toString();
+        const newFileName = fileList[i].split("/").slice(-1)[0].split(".").slice(0, -1).join("") + `-${sha1(content).slice(0, 8)}.` + fileList[i].split(".").slice(-1)[0];
+        const newPath = fileList[i].split("/").slice(0, -1).join("/") + "/" + newFileName;
+        
+        console.log(`Renaming ${fileList[i].split("/").slice(-1)[0]} to ${newFileName}...`);
+
+        for (let j = 0; j < fileList.length; j++) {
+            const newContent = fs.readFileSync(fileList[j]).toString().replace(oldFileNameRegExp, newFileName);
+
+            fs.writeFileSync(fileList[j], newContent);
+        }
+
+        fs.renameSync(fileList[i], newPath);
+        fileList[i] = newPath;
+
+        renameCount++;
+    }
+
+    return renameCount;
+}
+
+function getFilePaths(dir) {
+    const fileList = [];
+    const content = fs.readdirSync(dir);
+
+    for (let i = 0; i < content.length; i++) {
+        const f = path.join(dir, content[i]);
+        
+        if (fs.statSync(f).isFile())
+            fileList.push(f);
+        else
+            fileList.push(...getFilePaths(f));
+    }
+
+    return fileList;
 }
