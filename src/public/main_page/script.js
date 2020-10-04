@@ -1199,10 +1199,10 @@ async function loadLine() {
 
         //special cases for daily-changing routes (sweet hard code)
         let today = new Date().getDay();
-        /*if (line.id == "BKK_MP53" && (today == 6 || today == 0)) { //normal M3 replacement should be weekend M3 repl at weekends
+        if (line.id == "BKK_MP53" && (today == 6 || today == 0)) { //normal M3 replacement should be weekend M3 repl at weekends
             line.id = "BKK_MP533";
             line.description = "Kőbánya-Kispest M | Lehel tér M";
-        }*/
+        }
         if (line.id == "BKK_3031") {
             line.id="BKK_3030";
             line.description="Mexikói út M | Gubacsi út / Határ út";
