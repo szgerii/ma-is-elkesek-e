@@ -53,24 +53,26 @@ function setup() {
     });
 
     let username = getUsername();
-    let url = "/api/users/"+username+"/watchlist";
-    fetch(url)
-    .then(async response => {
-        return {
-            json: await response.json(),
-            status: response.status
-        };
-    })
-    .then(res => {
-        if (res.json.status === "success") {
-            watchlist = res.json.data.list;
-        } else if (res.status === 401) {
-            window.location.replace("/");
-        } 
-    })
-    .catch(err => {
-        console.log(err);
-    });
+    if (username) {
+        const url = "/api/users/"+username+"/watchlist";
+        fetch(url)
+        .then(async response => {
+            return {
+                json: await response.json(),
+                status: response.status
+            };
+        })
+        .then(res => {
+            if (res.json.status === "success") {
+                watchlist = res.json.data.list;
+            } else if (res.status === 401) {
+                window.location.replace("/");
+            } 
+        })
+        .catch(err => {
+            console.log(err);
+        });
+    }
 
     slowUpdate();
     setInterval(slowUpdate,10000);
