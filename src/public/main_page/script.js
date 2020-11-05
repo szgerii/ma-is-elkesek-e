@@ -29,6 +29,8 @@ let currentHot = 0; //Global variable of the loaded hot smokin' top 4 segments
 
 let colorScheme = bus;
 
+let watchlist;
+
 //Set up slow and quick update ticks and set eventListeners
 function setup() {
     
@@ -48,6 +50,26 @@ function setup() {
     pickLineText.addEventListener("keyup", (event) => {
         if (event.keyCode == 13)
             loadLine();
+    });
+
+    let username = getUsername();
+    let url = "/api/users/"+username+"/watchlist";
+    fetch(url)
+    .then(async response => {
+        return {
+            json: await response.json(),
+            status: response.status
+        };
+    })
+    .then(res => {
+        if (res.json.status === "success") {
+            watchlist = res.json.data.list;
+        } else if (res.status === 401) {
+            window.location.replace("/");
+        } 
+    })
+    .catch(err => {
+        console.log(err);
     });
 
     slowUpdate();
@@ -99,10 +121,14 @@ async function watchlist_add() {
     .then(res => {
         console.log(res.json);
         if (res.json.status === "success") {
+
             let wl_btn = document.querySelector("#wl-btn");
             wl_btn.setAttribute("class","wl-btn-remove");
             wl_btn.setAttribute("onclick","watchlist_remove()");
             wl_btn.innerText = "Listából törlés";
+
+            watchlist.push(data);
+
         } else if (res.json.status === "fail") {
             if (res.status === 401) {
                 window.location.replace("/");
@@ -147,10 +173,20 @@ async function watchlist_remove() {
     })
     .then(res => {
         if (res.json.status === "success") {
+
             let wl_btn = document.querySelector("#wl-btn");
             wl_btn.setAttribute("class","wl-btn-add");
             wl_btn.setAttribute("onclick","watchlist_add()");
             wl_btn.innerText = "Listához adás";
+
+            let filtered = watchlist.filter((value, index, arr) => {
+                if (value.stop1.id==data.stop1Id&&value.stop2.id==data.stop2Id&&value.line.id==data.lineId) {
+                    return false;
+                } else 
+                    return true;
+            });
+            watchlist = filtered;
+
         } else if (res.json.status === "fail") {
             if (res.status === 401) {
                 window.location.replace("/");
@@ -182,40 +218,17 @@ async function updateWatchlistButton() {
 
     } else {
 
-        let username = getUsername();
-        let url = "/api/users/"+username+"/watchlist";
-        let result = null;
-
-        await fetch(url)
-        .then(async response => {
-            return {
-                json: await response.json(),
-                status: response.status
-            };
-        })
-        .then(res => {
-            if (res.json.status === "success") {
-                result = res.json.data.list;
-            } else if (res.status === 401) {
-                window.location.replace("/");
-            } else {
-                result = null;
-            }
-        })
-        .catch(err => {
-            result = null;
-        });
-
-        if (result==null) {
-            wl_btn.innerText = "Hiba";
-            console.debug("An error occured while loading user watchlist.");
+        if (!watchlist) {
+            wl_btn.setAttribute("class","wl-btn-none");
+            wl_btn.setAttribute("onclick","");
+            wl_btn.innerText = "Járatlista nincs betöltve!";
             return;
         }
 
         let segmentExists = false;
-        for (let i=0; i<result.length; i++) {
+        for (let i=0; i<watchlist.length; i++) {
 
-            if (result[i].line.id==line.id&&result[i].stop1.id==stop1.id&&result[i].stop2.id==stop2.id) {
+            if (watchlist[i].line.id==line.id&&watchlist[i].stop1.id==stop1.id&&watchlist[i].stop2.id==stop2.id) {
                 segmentExists = true;
                 break;
             }
