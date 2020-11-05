@@ -99,7 +99,10 @@ async function watchlist_add() {
     .then(res => {
         console.log(res.json);
         if (res.json.status === "success") {
-            updateWatchlistButton();
+            let wl_btn = document.querySelector("#wl-btn");
+            wl_btn.setAttribute("class","wl-btn-remove");
+            wl_btn.setAttribute("onclick","watchlist_remove()");
+            wl_btn.innerText = "Listából törlés";
         } else if (res.json.status === "fail") {
             if (res.status === 401) {
                 window.location.replace("/");
@@ -144,7 +147,10 @@ async function watchlist_remove() {
     })
     .then(res => {
         if (res.json.status === "success") {
-            updateWatchlistButton();
+            let wl_btn = document.querySelector("#wl-btn");
+            wl_btn.setAttribute("class","wl-btn-add");
+            wl_btn.setAttribute("onclick","watchlist_add()");
+            wl_btn.innerText = "Listához adás";
         } else if (res.json.status === "fail") {
             if (res.status === 401) {
                 window.location.replace("/");

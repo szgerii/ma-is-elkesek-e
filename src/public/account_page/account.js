@@ -332,3 +332,52 @@ function checkTimeFormat(time) {
     }
 
 }
+
+function deleteUser() {
+
+    const button = document.querySelector("#input-deleteBtn");
+    button.innerText = "Kérjük várjon...";
+    let url = "/api/users/" + currentUsername;
+
+    if (!confirm("Biztos benne, hogy törölni szeretné fiókját?")) {
+        return;
+    }
+    
+    fetch(url, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({})
+    })
+    .then(async response => {
+        return {
+            json: await response.json(),
+            status: response.status
+        };
+    })
+    .then(res => {
+        if (res.json.status === "success") {
+            fetch("/logout", { method: "POST" }).then(res => {
+                window.location.assign("/home");
+            });
+        } else if (res.json.status === "fail") {
+
+            if (res.status === 403) {
+                passwordError.innerText = "Hiba történt az azonosítás során. Kérjük próbáljon meg kilépni és újra bejelentkezni";
+            } else {
+                alert("Hiba történt a törlés során. Kérjük próbálkozzon újra később");
+            }
+            
+        } else {
+            alert("Hiba történt a törlés során. Kérjük próbálkozzon újra később");
+        }
+        
+    })
+    .catch(err => {
+        button.innerText = "Fiók törlése";
+        console.debug(err);
+        alert("Ismeretlen hiba történt a törlés során, kérjük probálkozzon újra később.");
+    });
+
+}
