@@ -90,6 +90,11 @@ body {
 
 }
 
+#recaptcha-error {
+    text-align: center;
+    margin-bottom: 2vh;
+}
+
 #button-wrapper {
     width: 100%;
     text-align: center;

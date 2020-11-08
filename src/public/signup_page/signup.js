@@ -58,11 +58,13 @@ function signup() {
     const usernameError = document.querySelector("#username-error");
     const passwordError = document.querySelector("#password-error");
     const passwordAgainError = document.querySelector("#password-again-error");
+    const recaptchaError = document.querySelector("#recaptcha-error");
     let hasFormattingError = false;
     
     usernameError.innerText = "";
     passwordError.innerText = "";
     passwordAgainError.innerText = "";
+    recaptchaError.innerText = "";
     usernameInput.style.border = "";
     passwordInput.style.border = "";
     passwordAgainInput.style.border = "";
@@ -119,9 +121,16 @@ function signup() {
         passwordAgainInput.style.border = ".07em solid rgb(255, 78, 78)";
     }
 
+    const recaptchaResponse = grecaptcha.getResponse();
+
+    if (recaptchaResponse === "") {
+        recaptchaError.innerText = "Ki kell töltenie a reCAPTCHA tesztet mielőtt regisztrálhat";
+        return;
+    }
+
     if (hasFormattingError)
         return;
-
+    
     submitButton.disabled = true;
     submitButton.value = "Kérjük várjon...";
 
@@ -130,7 +139,12 @@ function signup() {
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({ username: usernameInput.value, password: passwordInput.value, showWatchlistByDefault: isWatchlist })
+        body: JSON.stringify({
+            username: usernameInput.value,
+            password: passwordInput.value,
+            showWatchlistByDefault: isWatchlist,
+            recaptchaResponseToken: recaptchaResponse
+        })
     })
     .then(async response => {
         return {

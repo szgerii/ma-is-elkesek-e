@@ -15,6 +15,8 @@
         <meta name="viewport" content="width=device-width,initial-scale=1.0" />
         <meta charset="UTF-8" />
 
+        <script src="https://www.google.com/recaptcha/api.js?hl=hu" async defer></script>
+
     </head>
     <body>
 
@@ -61,7 +63,7 @@
                     <input type="password" id="input-password2" placeholder="Jelszó újra"  class="signup-input"/>
                     <p id="password-again-error" class="error"></p>
                 </div>
-
+                
                 <div class="input-box">
                     <span class="input-label">Alapértelmezett oldal</span>
                     <select id="input-dd-watchlist" class="signup-input">
@@ -69,6 +71,9 @@
                         <option value="false">Főoldal</option>
                     </select>
                 </div>
+
+                <div class="g-recaptcha" data-sitekey="6LdSq98ZAAAAAAzrgCUcBBP8u77vJQPQlcYqyXnr" data-theme="dark"></div>
+                <p id="recaptcha-error" class="error"></p>
 
                 <span id="button-wrapper">
                     <input type="button" id="input-submitBtn" value="Regisztráció" class="signup-input" disabled/>

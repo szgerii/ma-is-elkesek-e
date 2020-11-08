@@ -52,6 +52,14 @@ if (fs.existsSync(__dirname + "/config.js")) {
 		logger.error("Missing property 'domain' in config.js. Shutting down...");
 		process.exit(3);
 	}
+	
+	// The secret key for reCAPTCHA validations
+	if (config.recaptchaSecretKey !== undefined) {
+		process.env.recaptchaSecretKey = config.recaptchaSecretKey;
+	} else {
+		logger.error("Missing property 'recaptchaSecretKey' in config.js. Shutting down...");
+		process.exit(3);
+	}
 } else {
 	logger.error("Couldn't find config.js file. Shutting down...");
 	process.exit(3);

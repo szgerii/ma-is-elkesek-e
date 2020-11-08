@@ -1,7 +1,47 @@
+const https = require("https");
+
 const router = require("../../private_modules/router.js");
 const logger = require("../../private_modules/logger");
 const dbManager = require("../db_manager");
 const jwt_verification = require("../middlewares/jwt_verification");
+
+function verifyCaptcha(responseToken) {
+	return new Promise((resolve, reject) => {
+		const data = `response=${responseToken}&secret=${process.env.recaptchaSecretKey}`;
+
+		const options = {
+			hostname: "google.com",
+			path: "/recaptcha/api/siteverify",
+			method: "POST",
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded",
+				"Content-Length": data.length
+			}
+		};
+
+		let recaptchaResponse = "";
+		const recaptchaRequest = https.request(options, response => {
+			response.on("data", d => {
+				recaptchaResponse += d;
+			});
+
+			response.on("end", () => {
+				resolve(JSON.parse(recaptchaResponse).success);
+			});
+		});
+
+		recaptchaRequest.on('error', error => {
+			logger.error(error);
+
+			res.writeHead(500, { "Content-Type": "application/json" });
+			res.end(router.genResponse("error", "Error while validating reCAPTCHA"));
+
+			reject();
+		});
+
+		recaptchaRequest.end(data);
+	});
+}
 
 /**
  * Sets up the user routes
@@ -64,7 +104,28 @@ module.exports = () => {
 		});
 	});
 
-	router.route("/api/users").post((req, res) => {
+	router.route("/api/users").post(async (req, res) => {
+		if (typeof req.body.recaptchaResponseToken !== "string" || req.body.recaptchaResponseToken === "") {
+			res.writeHead(422, {"Content-Type": "application/json"});
+			res.end(router.genResponse("fail", {
+				recaptchaResponseToken: "Missing field from request body: recaptchaResponseToken"
+			}));
+			return;
+		}
+
+		const captchaResult = await verifyCaptcha(req.body.recaptchaResponseToken).catch(err => {
+			logger.error(err);
+
+			res.writeHead(500, { "Content-Type": "application/json" });
+			res.end(router.genResponse("error", "Error while validating reCAPTCHA"));
+		});
+
+		if (captchaResult !== true) {
+			res.writeHead(500, { "Content-Type": "application/json" });
+			res.end(router.genResponse("error", "Error while validating reCAPTCHA"));
+			return;
+		}
+
 		dbManager.createUser({
 			username: req.body.username,
 			password: req.body.password,
