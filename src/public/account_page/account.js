@@ -334,7 +334,8 @@ function checkTimeFormat(time) {
 }
 
 function deleteUser() {
-
+    const passwordInput = document.querySelector("#input-password");
+    const passwordError = document.querySelector("#password-error");
     const updateButton = document.querySelector("#input-submitBtn");
     const deleteButton = document.querySelector("#input-deleteBtn");
 
@@ -353,6 +354,29 @@ function deleteUser() {
 
     toggleInputs(false);
 
+    switch(checkPasswordFormat(passwordInput.value)) {
+
+        case "empty":
+            toggleInputs(true);
+            passwordError.innerText = "Kérjük adja meg a jelenlegi jelszavát az igazoláshoz!";
+            passwordInput.style.border = ".07em solid rgb(255, 78, 78)";
+            return;
+            
+        case "short":
+            toggleInputs(true);    
+            passwordError.innerText = "A megadott jelszó rövidebb, mint 6 karakter.";
+            passwordInput.style.border = ".07em solid rgb(255, 78, 78)";
+            return;
+
+        case "correct":
+            break;
+
+        default:
+            toggleInputs(true);
+            return;
+
+    }
+
     const url = "/api/users/" + currentUsername;
 
     if (!confirm("Biztos benne, hogy törölni szeretné fiókját?")) {
@@ -360,8 +384,17 @@ function deleteUser() {
         return;
     }
     
+    const body = JSON.stringify({
+        password: passwordInput.value
+    });
+
     fetch(url, {
-        method: "DELETE"
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+            "Content-Length": body.length
+        },
+        body
     })
     .then(async response => {
         return {
@@ -375,13 +408,20 @@ function deleteUser() {
                 window.location.assign("/home");
             });
         } else if (res.json.status === "fail") {
-            if (res.status === 403) {
-                passwordError.innerText = "Hiba történt az azonosítás során. Kérjük próbáljon meg kilépni és újra bejelentkezni";
-                toggleInputs(true);
-            } else {
-                alert("Hiba történt a törlés során. Kérjük próbálkozzon újra később");
-                toggleInputs(true);
+            switch (res.status) {
+                case 401:
+                    passwordError.innerText = "A megadott jelszó nem egyezik a felhasználó jelenlegi jelszavával";
+                    break;
+                
+                case 403:
+                    passwordError.innerText = "Hiba történt az azonosítás során. Kérjük próbáljon meg kilépni és újra bejelentkezni";
+                    break;
+            
+                default:
+                    alert("Hiba történt a törlés során. Kérjük próbálkozzon újra később");
+                    break;
             }
+            toggleInputs(true);
         } else {
             alert("Hiba történt a törlés során. Kérjük próbálkozzon újra később");
             toggleInputs(true);

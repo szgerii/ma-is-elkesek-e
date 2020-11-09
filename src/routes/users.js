@@ -48,6 +48,22 @@ function verifyCaptcha(responseToken) {
  */
 module.exports = () => {
 	router.route("/api/login").post((req, res) => {
+		if (!req.body.username) {
+			res.writeHead(422, {"Content-Type": "application/json"});
+			res.end(router.genResponse("fail", {
+				username: "A username property is required to log in"
+			}));
+			return;
+		}
+
+		if (!req.body.password) {
+			res.writeHead(422, {"Content-Type": "application/json"});
+			res.end(router.genResponse("fail", {
+				"password": "A password property is required to log in"
+			}));
+			return;
+		}
+
 		dbManager.login(req.body.username, req.body.password).then(token => {
 			res.setHeader("Set-Cookie", [
 				router.genCookie("auth-token", token, {
@@ -77,7 +93,7 @@ module.exports = () => {
 				case "InvalidUsernameError":
 					res.writeHead(401, {
 						"Content-Type": "application/json",
-						"WWW-Authenticate": `Bearer realm="Access to ${req.baseUrl}"`
+						"WWW-Authenticate": `Bearer realm="Access to ${req.method} ${req.url}"`
 					});
 					res.end(router.genResponse("fail", {
 						username: `No user was found with the following username: ${req.body.username}`
@@ -87,7 +103,7 @@ module.exports = () => {
 				case "InvalidPasswordError":
 					res.writeHead(401, {
 						"Content-Type": "application/json",
-						"WWW-Authenticate": `Bearer realm="Access to ${req.baseUrl}"`
+						"WWW-Authenticate": `Bearer realm="Access to ${req.method} ${req.url}"`
 					});
 					res.end(router.genResponse("fail", {
 						password: `Incorrect password`
@@ -211,11 +227,31 @@ module.exports = () => {
 		});
 	}, jwt_verification);
 
-	userRoute.delete((req, res) => {
+	userRoute.delete(async (req, res) => {
 		if (req.username !== req.params.username) {
 			res.writeHead(403, {"Content-Type": "application/json"});
 			res.end(router.genResponse("fail", {
 				username: `The following user doesn't have access to this resource: ${req.username}`
+			}));
+			return;
+		}
+
+		if (!req.body.password) {
+			res.writeHead(422, {"Content-Type": "application/json"});
+			res.end(router.genResponse("fail", {
+				"password": "The current password of the user is required to delete their account."
+			}));
+			return;
+		}
+
+		const passwordCorrect = await dbManager.checkPassword(req.username, req.body.password);
+		if (!passwordCorrect) {
+			res.writeHead(401, {
+				"Content-Type": "application/json",
+				"WWW-Authenticate": `Bearer realm="Access to ${req.method} ${req.url}"`
+			});
+			res.end(router.genResponse("fail", {
+				password: "The specified verification password is incorrect"
 			}));
 			return;
 		}
@@ -261,7 +297,7 @@ module.exports = () => {
 			if (!isPasswordCorrect) {
 				res.writeHead(401, {
 					"Content-Type": "application/json",
-					"WWW-Authenticate": `Bearer realm="Access to ${req.baseUrl}"`
+					"WWW-Authenticate": `Bearer realm="Access to ${req.method} ${req.url}"`
 				});
 				res.end(router.genResponse("fail", {
 					password: "The specified verification password is incorrect"

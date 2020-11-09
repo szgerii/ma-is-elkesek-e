@@ -19,7 +19,7 @@ module.exports = async (req, res, done) => {
 	if (!token) {
 		res.writeHead(401, {
 			"Content-Type": "application/json",
-			"WWW-Authenticate": `Bearer realm="Access to ${req.baseUrl}"`
+			"WWW-Authenticate": `Bearer realm="Access to ${req.method} ${req.url}"`
 		});
 		res.end(router.genResponse("fail", {
 			"auth-token": "The request was missing the auth-token cookie required for authentication"
@@ -49,7 +49,7 @@ module.exports = async (req, res, done) => {
 			]);
 			res.writeHead(401, {
 				"Content-Type": "application/json",
-				"WWW-Authenticate": `Bearer realm="Access to ${req.baseUrl}"`
+				"WWW-Authenticate": `Bearer realm="Access to ${req.method} ${req.url}"`
 			});
 			res.end(router.genResponse("fail", {
 				"auth-token": "The username inside the auth-token cookie is invalid or the user has been deleted"
@@ -77,7 +77,7 @@ module.exports = async (req, res, done) => {
 		]);
 		res.writeHead(401, {
 			"Content-Type": "application/json",
-			"WWW-Authenticate": `Bearer realm="Access to ${req.baseUrl}"`
+			"WWW-Authenticate": `Bearer realm="Access to ${req.method} ${req.url}"`
 		});
 		res.end(router.genResponse("fail", {
 			"auth-token": "The value of the auth-token cookie was invalid/expired"

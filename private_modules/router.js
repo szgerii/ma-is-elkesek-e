@@ -404,6 +404,7 @@ exports.bodyParser = (req, res, done) => {
 	const data = [];
 
 	if (!req.headers["content-type"]) {
+		req.body = {};
 		done();
 		return;
 	}
@@ -436,7 +437,6 @@ exports.bodyParser = (req, res, done) => {
 			
 			case undefined:
 			case null:
-				req.body = {};
 				break;
 		
 			default:
@@ -444,6 +444,9 @@ exports.bodyParser = (req, res, done) => {
 				res.end("415 Nem támogatott média típus: a szerver nem tudja feldolgozni a Content-Type fejlécben megadott típusú üzeneteket");
 				return;
 		}
+
+		if (!req.body)
+			req.body = {};
 
 		done();
 	});
