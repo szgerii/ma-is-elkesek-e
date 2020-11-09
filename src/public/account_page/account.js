@@ -335,20 +335,33 @@ function checkTimeFormat(time) {
 
 function deleteUser() {
 
-    const button = document.querySelector("#input-deleteBtn");
-    button.innerText = "Kérjük várjon...";
-    let url = "/api/users/" + currentUsername;
+    const updateButton = document.querySelector("#input-submitBtn");
+    const deleteButton = document.querySelector("#input-deleteBtn");
+
+    function toggleInputs(enabled) {
+        if (enabled) {
+            updateButton.value = "Változtatások mentése";
+            deleteButton.value = "Fiók törlése";
+        } else {
+            updateButton.value = "Kérjük várjon...";
+            deleteButton.value = "Kérjük várjon...";
+        }
+
+        updateButton.disabled = !enabled;
+        deleteButton.disabled = !enabled;
+    }
+
+    toggleInputs(false);
+
+    const url = "/api/users/" + currentUsername;
 
     if (!confirm("Biztos benne, hogy törölni szeretné fiókját?")) {
+        toggleInputs(true);
         return;
     }
     
     fetch(url, {
-        method: "DELETE",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({})
+        method: "DELETE"
     })
     .then(async response => {
         return {
@@ -362,22 +375,22 @@ function deleteUser() {
                 window.location.assign("/home");
             });
         } else if (res.json.status === "fail") {
-
             if (res.status === 403) {
                 passwordError.innerText = "Hiba történt az azonosítás során. Kérjük próbáljon meg kilépni és újra bejelentkezni";
+                toggleInputs(true);
             } else {
                 alert("Hiba történt a törlés során. Kérjük próbálkozzon újra később");
+                toggleInputs(true);
             }
-            
         } else {
             alert("Hiba történt a törlés során. Kérjük próbálkozzon újra később");
+            toggleInputs(true);
         }
-        
     })
     .catch(err => {
-        button.innerText = "Fiók törlése";
         console.debug(err);
         alert("Ismeretlen hiba történt a törlés során, kérjük probálkozzon újra később.");
+        toggleInputs(true);
     });
 
 }
