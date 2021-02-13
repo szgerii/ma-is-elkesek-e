@@ -272,17 +272,6 @@ module.exports = () => {
 
 			for (const fileHandler of fileHandlerList) {
 				router.route(fileHandler.url).get((req, res) => fileHandler.serve(req, res));
-				
-				if (fileHandler.type === "text/html") {
-					router.route(fileHandler.url).addMiddlewareToMethod("GET", (req, res, done) => {
-						process.env.requestCount++;
-						process.env.dailyRequestCount++;
-						process.env.weeklyRequestCount++;
-						process.env.monthlyRequestCount++;
-
-						done();
-					})
-				}
 			}
 
 			// -- Special cases --

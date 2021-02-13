@@ -1,11 +1,11 @@
 // Node modules
 const http = require("http");
+const https = require("https");
 const fs = require("fs");
 const { join } = require("path");
 
 process.env.projectRoot = join(process.cwd());
 
-const Scheduler = require("../private_modules/scheduler");
 const logger = require("../private_modules/logger");
 const router = require("../private_modules/router");
 const dbManager = require("./db_manager");
@@ -63,6 +63,15 @@ if (fs.existsSync(__dirname + "/config.js")) {
 } else {
 	logger.error("Couldn't find config.js file. Shutting down...");
 	process.exit(3);
+}
+
+if (process.env.PRODUCTION &&
+		(!fs.existsSync(join(process.env.projectRoot, "certs/ca_bundle.crt")) ||
+		!fs.existsSync(join(process.env.projectRoot, "certs/certificate.crt")) ||
+		!fs.existsSync(join(process.env.projectRoot, "certs/private.key")))) {
+
+	console.error("A certificate file is missing from 'certs/'. Shutting down...");
+	process.exit(4);
 }
 
 // Constants
@@ -124,57 +133,29 @@ async function start() {
 		});
 		logger.log("SERVER RUNNING IN PRODUCTION MODE");
 	}
-
-	process.env.requestCount = 0;
-	process.env.dailyRequestCount = 0;
-	process.env.weeklyRequestCount = 0;
-	process.env.monthlyRequestCount = 0;
 	
 	// Start the server
-	server = http.createServer(router.requestHandler);
-	server.listen(PORT);
-	logger.log(`Server listening on port ${PORT}`);
+	if (process.env.PRODUCTION) {
+		server = https.createServer({
+			key: fs.readFileSync(join(process.env.projectRoot, "certs/private.key")),
+			cert: fs.readFileSync(join(process.env.projectRoot, "certs/certificate.crt")),
+			ca: fs.readFileSync(join(process.env.projectRoot, "certs/ca_bundle.crt"))
+		}, router.requestHandler);
+		server.listen(443);
 
-	if (!fs.existsSync(join(process.env.projectRoot, "reports")))
-		fs.mkdirSync(join(process.env.projectRoot, "reports"));
+		// HTTP -> HTTPS redirect
+		http.createServer((req, res) => {
+			res.writeHead(303, { "Location": "https://" + req.headers.host + req.url });
+			res.end();
+		}).listen(80);
 
-	const allTimeReportPath = join(process.env.projectRoot, "reports", "all-time.txt");
-
-	if (fs.existsSync(allTimeReportPath))
-		process.env.requestCount = Number(fs.readFileSync(allTimeReportPath));
-
-	const dailyReportPath = join(process.env.projectRoot, "reports", "daily");
-	const weeklyReportPath = join(process.env.projectRoot, "reports", "weekly");
-	const monthlyReportPath = join(process.env.projectRoot, "reports", "monthly");
-
-	if (!fs.existsSync(dailyReportPath))
-		fs.mkdirSync(dailyReportPath);
-
-	if (!fs.existsSync(weeklyReportPath))
-		fs.mkdirSync(weeklyReportPath);
-	
-	if (!fs.existsSync(monthlyReportPath))
-		fs.mkdirSync(monthlyReportPath);
-
-	const dailyReport = new Scheduler(23, 59, 59, 86400, () => {
-		const dt = new Date();
-		const datestamp = dt.toLocaleDateString("hu").replace(/\./g, "").replace(/\ /g, "-");
-		
-		if (dt.getDay() === 0) {
-			fs.writeFileSync(join(weeklyReportPath, `${datestamp}.txt`), process.env.weeklyRequestCount);
-			process.env.weeklyRequestCount = 0;
-		}
-		
-		if (dt.getDate() === 30 || (dt.getMonth() === 1 && dt.getDate() === 28)) {
-			fs.writeFileSync(join(monthlyReportPath, `${datestamp}.txt`), process.env.monthlyRequestCount);
-			process.env.monthlyRequestCount = 0;
-		}
-		
-		fs.writeFileSync(join(dailyReportPath, `${datestamp}.txt`), process.env.dailyRequestCount);
-		process.env.dailyRequestCount = 0;
-		
-		fs.writeFileSync(allTimeReportPath, process.env.requestCount);
-	});
+		logger.log(`HTTP server listening on port 80`);
+		logger.log(`HTTPS server listening on port 443`);
+	} else {
+		server = http.createServer(router.requestHandler);
+		server.listen(PORT);
+		logger.log(`Server listening on port ${PORT}`);
+	}
 }
 
 start();
