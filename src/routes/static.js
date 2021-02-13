@@ -333,13 +333,15 @@ module.exports = () => {
 						path: "/",
 						expires: "Thu, 01 Jan 1970 00:00:00 GMT",
 						sameSite: "Lax",
-						httpOnly: true
+						httpOnly: true,
+						secure: true
 					}),
 					router.genCookie("username", "", {
 						domain: process.env.domain,
 						path: "/",
 						expires: "Thu, 01 Jan 1970 00:00:00 GMT",
-						sameSite: "Strict"
+						sameSite: "Strict",
+						secure: true
 					})
 				]);
 				

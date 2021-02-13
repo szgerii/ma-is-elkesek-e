@@ -38,13 +38,15 @@ module.exports = async (req, res, done) => {
 					path: "/",
 					expires: "Thu, 01 Jan 1970 00:00:00 GMT",
 					sameSite: "Lax",
+					secure: true,
 					httpOnly: true
 				}),
 				router.genCookie("username", "", {
 					domain: process.env.domain,
 					path: "/",
 					expires: "Thu, 01 Jan 1970 00:00:00 GMT",
-					sameSite: "Strict"
+					sameSite: "Strict",
+					secure: true
 				})
 			]);
 			res.writeHead(401, {
@@ -66,13 +68,15 @@ module.exports = async (req, res, done) => {
 				path: "/",
 				expires: "Thu, 01 Jan 1970 00:00:00 GMT",
 				sameSite: "Lax",
-				httpOnly: true
+				httpOnly: true,
+				secure: true
 			}),
 			router.genCookie("username", "", {
 				domain: process.env.domain,
 				path: "/",
 				expires: "Thu, 01 Jan 1970 00:00:00 GMT",
-				sameSite: "Strict"
+				sameSite: "Strict",
+				secure: true
 			})
 		]);
 		res.writeHead(401, {

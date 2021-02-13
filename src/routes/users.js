@@ -71,13 +71,15 @@ module.exports = () => {
 					path: "/",
 					maxAge: process.env.authTokenMaxAge,
 					sameSite: "Lax",
-					httpOnly: true
+					httpOnly: true,
+					secure: true
 				}),
 				router.genCookie("username", req.body.username, {
 					domain: process.env.domain,
 					path: "/",
 					maxAge: process.env.authTokenMaxAge,
-					sameSite: "Strict"
+					sameSite: "Strict",
+					secure: true
 				})
 			]);
 			res.setHeader("Content-Type", "text/html");
@@ -156,13 +158,15 @@ module.exports = () => {
 					path: "/",
 					maxAge: process.env.authTokenMaxAge,
 					sameSite: "Lax",
-					httpOnly: true
+					httpOnly: true,
+					secure: true
 				}),
 				router.genCookie("username", req.body.username, {
 					domain: process.env.domain,
 					path: "/",
 					maxAge: process.env.authTokenMaxAge,
-					sameSite: "Strict"
+					sameSite: "Strict",
+					secure: true
 				})
 			]);
 			res.writeHead(200, {"Content-Type": "application/json"});
@@ -318,13 +322,15 @@ module.exports = () => {
 						path: "/",
 						maxAge: process.env.authTokenMaxAge,
 						sameSite: "Lax",
-						httpOnly: true
+						httpOnly: true,
+						secure: true
 					}),
 					router.genCookie("username", req.body.username || req.params.username, {
 						domain: process.env.domain,
 						path: "/",
 						maxAge: process.env.authTokenMaxAge,
-						sameSite: "Strict"
+						sameSite: "Strict",
+						secure: true
 					})
 				]);
 				res.writeHead(200, {"Content-Type": "application/json"});
