@@ -194,10 +194,5 @@
 		"url": "/assets/images/x-black.png",
 		"path": "assets/images/x-black.png",
 		"type": "image/png"
-	},
-	{
-		"url": "/robots.txt",
-		"path": "robots.txt",
-		"type": "text/plain"
 	}
 ]

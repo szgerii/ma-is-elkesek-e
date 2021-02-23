@@ -372,7 +372,7 @@ function makeUnique() {
     const excludeRegExp = new RegExp(uniqueExclude);
 
     for (let i = 0; i < fileList.length; i++) {
-        if (excludeRegExp.test(fileList[i]) || fileList[i].includes("files.json"))
+        if (excludeRegExp.test(fileList[i]) || fileList[i].includes("files.json") || fileList[i].includes("robots.txt"))
             continue;
 
         const oldFileNameRegExp = new RegExp(fileList[i].split("/").slice(-1)[0], "g");
