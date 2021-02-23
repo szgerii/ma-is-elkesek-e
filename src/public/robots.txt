@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /watchlist
+Disallow: /account
+Disallow: /about
+Disallow: /login
+Disallow: /signup
+Disallow: /assets/
+Disallow: /shared/

@@ -306,10 +306,16 @@ module.exports = () => {
 
 					res.end(notFoundPageGzip);
 				} else {
-					console.log(notFoundPage.toString());
 					res.writeHead(404, {"Content-Type": "text/html"});
 					res.end(notFoundPage.toString());
 				}
+			});
+
+			// Robots.txt
+			const robotsTxt = fs.readFileSync(path.join(basePath, "public/robots.txt"));
+			router.route("/robots.txt").get((req, res) => {
+				res.writeHead(200, { "Content-Type": "text/html" });
+				res.end(robotsTxt);
 			});
 
 			// Landing page
