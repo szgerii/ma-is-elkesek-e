@@ -314,7 +314,7 @@ module.exports = () => {
 			// Robots.txt
 			const robotsTxt = fs.readFileSync(path.join(basePath, "public/robots.txt"));
 			router.route("/robots.txt").get((req, res) => {
-				res.writeHead(200, { "Content-Type": "text/html" });
+				res.writeHead(200, { "Content-Type": "text/plain" });
 				res.end(robotsTxt);
 			});
 
