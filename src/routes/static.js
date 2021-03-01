@@ -318,6 +318,13 @@ module.exports = () => {
 				res.end(robotsTxt);
 			});
 
+			// Sitemap
+			const sitemap = fs.readFileSync(path.join(basePath, "public/sitemap.xml"));
+			router.route("/sitemap.xml").get((req, res) => {
+				res.writeHead(200, { "Content-Type": "application/xml" });
+				res.end(sitemap);
+			});
+
 			// Landing page
 			router.route("/").getSplitter(loginSplitter,
 			// User isn't logged in
