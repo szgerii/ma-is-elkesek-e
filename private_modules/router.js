@@ -532,6 +532,8 @@ exports.cookieParser = (req, res, done) => {
  * @param {function} done - the callback function the middleware calls once it's finished processing the request
  */
 exports.queryParser = (req, res, done) => {
+	req.query = {};
+
 	const separatorIndex = req.url.indexOf("?");
 	if (separatorIndex === -1) {
 		done();
@@ -547,7 +549,7 @@ exports.queryParser = (req, res, done) => {
 		return;
 	}
 
-	req.query = query;
+	req.query = query || {};
 	done();
 }
 

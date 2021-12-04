@@ -15,6 +15,7 @@ const staticRoute = require("./routes/static");
 const hotsmokinRoute = require("./routes/hotsmokin");
 const usersRoute = require("./routes/users");
 const watchlistRoute = require("./routes/watchlist");
+const proxyRoute = require("./routes/proxy");
 
 // Fill up process.env with the config file's values
 let config;
@@ -125,6 +126,7 @@ async function start() {
 	hotsmokinRoute();
 	usersRoute();
 	watchlistRoute();
+	proxyRoute();
 
 	if (process.env.PRODUCTION) {
 		router.addMiddleware((req, res, done) => {

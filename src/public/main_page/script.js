@@ -1,4 +1,4 @@
-const bkk = "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/";
+const bkkApi = "/api/proxy/";
 const hotSmokinUrl = "/api/hotsmokin";
 
 const bus = "BUS";
@@ -121,7 +121,6 @@ async function watchlist_add() {
         };
     })
     .then(res => {
-        console.log(res.json);
         if (res.json.status === "success") {
 
             let wl_btn = document.querySelector("#wl-btn");
@@ -763,7 +762,7 @@ async function downloadSegment() {
     }
 
     //get the stopTimes
-    await fetchJsonp(`${bkk}arrivals-and-departures-for-stop.json?stopId=${id}&minutesBefore=${time}&minutesAfter=0&includeReferences=false`)
+    await fetch(`${bkkApi}arrivals-and-departures-for-stop.json?stopId=${id}&minutesBefore=${time}`)
     .then(response => response.json())
     .then(json => {
         //we have some stopTimes, let's check when the associated trips visited the stops
@@ -782,11 +781,11 @@ async function downloadSegment() {
         //check stop2 time
         if (!isFinalStop) {
 
-            if (departures[i].predictedArrivalTime==undefined) {
+            if (departures[i].predictedDepartureTime==undefined) {
 
                 //no difference between predicted and normal
                 currentTrip = new CalculatedTrip();
-                currentTrip.setOnlyTime2(departures[i].arrivalTime);
+                currentTrip.setOnlyTime2(departures[i].departureTime);
                 console.debug("Set stop2 time of a trip based on:");
                 console.debug(departures[i]);
 
@@ -794,7 +793,7 @@ async function downloadSegment() {
 
                 //there is difference between predicted and normal
                 currentTrip = new CalculatedTrip();
-                currentTrip.setTime2(departures[i].predictedArrivalTime, departures[i].arrivalTime);
+                currentTrip.setTime2(departures[i].predictedDepartureTime, departures[i].departureTime);
                 console.debug("Set stop2 time of a trip based on:");
                 console.debug(departures[i]);
 
@@ -807,7 +806,7 @@ async function downloadSegment() {
         trips.push(currentTrip);
         
         //check stop1 time
-        await fetchJsonp(`${bkk}trip-details.json?tripId=${departures[i].tripId}&includeReferences=false`)
+        await fetch(`${bkkApi}trip-details.json?tripId=${departures[i].tripId}`)
         .then(response => response.json())
         .then(json => {
             let stopTimes = json.data.entry.stopTimes;
@@ -834,12 +833,12 @@ async function downloadSegment() {
 
             if (isFinalStop) {
                 let arrival = stopTimes[stopTimes.length-1];
-                if (arrival.predictedArrivalTime==undefined) {
+                if (arrival.predictedDepartureTime==undefined) {
                     //no difference between predicted and normal
-                    currentTrip.setOnlyTime2(arrival.arrivalTime);
+                    currentTrip.setOnlyTime2(arrival.departureTime);
                 } else {
                     //there is difference between predicted and normal
-                    currentTrip.setTime2(arrival.predictedArrivalTime, arrival.arrivalTime);
+                    currentTrip.setTime2(arrival.predictedDepartureTime, arrival.departureTime);
                 }
             }
         })
@@ -859,21 +858,21 @@ async function downloadSegment() {
 function showSegmentInformation(trips) {
 
     let usefulTrips = [];
-
+    
     for (let i=0; i<trips.length; i++) {
-
+        
         if (trips[i].time1 != 0 && trips[i].time2 != 0) {
-
+            
             if (trips[i].time1 != undefined && trips[i].time2 != undefined) {
-
+                
                 usefulTrips.push(trips[i]);
-
+                
             }
             
-
+            
         }
     }
-
+    
     let travelTimesTotal = 0;
     let latencyTotal = 0;
 
@@ -1156,7 +1155,7 @@ function clearStops() {
 //Function for downloading the list of stops and variants of the selected line
 async function loadStops() {
 
-    await fetchJsonp(`${bkk}route-details.json?routeId=${line.id}`)
+    await fetch(`${bkkApi}route-details.json?routeId=${line.id}`)
     .then(response => response.json())
     .then(json => {
         if (json.status === "OK") {
@@ -1192,7 +1191,7 @@ async function loadLine() {
 
     resetStops();
 
-    await fetchJsonp(`${bkk}search.json?query=${input}`)
+    await fetch(`${bkkApi}search.json?query=${input}`)
     .then(response => response.json())
     .then(json => {
         line = json.data.references.routes;

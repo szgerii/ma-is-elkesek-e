@@ -1,4 +1,4 @@
-const bkk = "https://futar.bkk.hu/api/query/v1/ws/otp/api/where/";
+const bkk = "api/proxy/";
 
 let username = null;
 
@@ -117,7 +117,7 @@ async function getLineType(line) {
 
     let typeName = "";
 
-    await fetchJsonp(`${bkk}route-details.json?routeId=${line.id}`)
+    await fetch(`${bkk}route-details.json?routeId=${line.id}`)
     .then(response => response.json())
     .then(json => {
         if (json.status == "OK") {
@@ -134,7 +134,7 @@ async function getLineType(line) {
         case "TRAM": typeName = "tram"; break;
         case "SUBWAY": typeName = "metro"; break;
         case "FERRY": typeName = "ship"; break;
-        case "RAIL": typeName = "hev"; break;
+        case "SUBURBAN_RAILWAY": typeName = "hev"; break;
         case "TROLLEYBUS": typeName = "trolley"; break;
     }
 
@@ -400,7 +400,7 @@ async function loadPredefinedSegment(prefLine, prefStop1, prefStop2, output) {
     let stop1 = 0;
     let stop2 = 0;
 
-    await fetchJsonp(`${bkk}route-details.json?routeId=${line.id}`)
+    await fetch(`${bkk}route-details.json?routeId=${line.id}`)
     .then(response => response.json())
     .then(json => {
         if (json.status === "OK") {
@@ -554,7 +554,7 @@ async function downloadSegment(line, stops, stop1, stop2, isFinalStop, stop2ForF
     }
     
     //get the stopTimes
-    await fetchJsonp(`${bkk}arrivals-and-departures-for-stop.json?stopId=${id}&minutesBefore=${time}&minutesAfter=0&includeReferences=false`)
+    await fetch(`${bkk}arrivals-and-departures-for-stop.json?stopId=${id}&minutesBefore=${time}`)
     .then(response => response.json())
     .then(json => {
         //we have some stopTimes, let's check when the associated trips visited the stops
@@ -573,17 +573,17 @@ async function downloadSegment(line, stops, stop1, stop2, isFinalStop, stop2ForF
         //check stop2 time
         if (!isFinalStop) {
 
-            if (departures[i].predictedArrivalTime==undefined) {
+            if (departures[i].predictedDepartureTime==undefined) {
 
                 //no difference between predicted and normal
                 currentTrip = new CalculatedTrip();
-                currentTrip.setOnlyTime2(departures[i].arrivalTime);
+                currentTrip.setOnlyTime2(departures[i].departureTime);
 
             } else {
 
                 //there is difference between predicted and normal
                 currentTrip = new CalculatedTrip();
-                currentTrip.setTime2(departures[i].predictedArrivalTime, departures[i].arrivalTime);
+                currentTrip.setTime2(departures[i].predictedDepartureTime, departures[i].departureTime);
 
             }
 
@@ -594,7 +594,7 @@ async function downloadSegment(line, stops, stop1, stop2, isFinalStop, stop2ForF
         trips.push(currentTrip);
         
         //check stop1 time
-        await fetchJsonp(`${bkk}trip-details.json?tripId=${departures[i].tripId}&includeReferences=false`)
+        await fetch(`${bkk}trip-details.json?tripId=${departures[i].tripId}`)
         .then(response => response.json())
         .then(json => {
             let stopTimes = json.data.entry.stopTimes;
@@ -617,12 +617,12 @@ async function downloadSegment(line, stops, stop1, stop2, isFinalStop, stop2ForF
 
             if (isFinalStop) {
                 let arrival = stopTimes[stopTimes.length-1];
-                if (arrival.predictedArrivalTime==undefined) {
+                if (arrival.predictedDepartureTime==undefined) {
                     //no difference between predicted and normal
-                    currentTrip.setOnlyTime2(arrival.arrivalTime);
+                    currentTrip.setOnlyTime2(arrival.departureTime);
                 } else {
                     //there is difference between predicted and normal
-                    currentTrip.setTime2(arrival.predictedArrivalTime, arrival.arrivalTime);
+                    currentTrip.setTime2(arrival.predictedDepartureTime, arrival.departureTime);
                 }
             }
         })
